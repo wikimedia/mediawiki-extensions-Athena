@@ -1,0 +1,22 @@
+{
+  "name": "Athena",
+  "version": "0.0.1",
+  "author": [
+    "Richard Cook"
+  ],
+  "url": "https://www.mediawiki.org/wiki/Extension:Athena",
+  "descriptionmsg": "athena-desc",
+  "type": "antispam",
+  "manifest_version": 1,
+  "AutoloadClasses": {
+    "AthenaHooks": "AthenaHooks.php",
+    "AthenaFilters": "AthenaFilters.php",
+    "Classifier": "libs/PHP-Language-Detection/classifier.php",
+    "NGramProfiles": "libs/PHP-Language-Detection/classifier.php"
+  },
+  "Hooks": {
+    "EditFilter": [
+      "AthenaHooks::editFilter"
+    ]
+  }
+}
