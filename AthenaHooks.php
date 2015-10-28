@@ -26,17 +26,12 @@ class AthenaHooks {
                     "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                     "</div>\n" .
                     "<br clear='all' />\n";*/
-                $var1 = AthenaFilters::sameLanguage($text);
-                if( $var1 === null )
-                    $var = "null";
-                else if ( $var1 )
-                    $var = "true";
-                else
-                    $var = "false";
+                $var1 = AthenaFilters::brokenSpamBot($text);
+
 
                 $error =
                     "<div class='errorbox'>" .
-                     $var .
+                     $var1 .
                     "</div>\n" .
                     "<br clear='all' />\n";
             }

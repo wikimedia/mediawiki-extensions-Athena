@@ -100,6 +100,7 @@ class AthenaFilters {
      * Compares the language of the site with the language of the edit
      * Returns true if the same, and false if different or null if error
      *
+     * @param $text string
      * @return bool|null
      */
     public static function sameLanguage($text) {
@@ -121,6 +122,21 @@ class AthenaFilters {
             return false;
         }
         return null;
+    }
+
+    /**
+     * Checks for broken spambot code
+     * Determined based off of {blah|blah|blah} syntax and occurrences of #file_links<>
+     *
+     * @param $text string
+     * @return int
+     */
+    public static function brokenSpamBot($text) {
+        // Word choices
+        $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
+        // Link count
+        $count += preg_match_all("/#file_links<>/", $text);
+        return $count;
     }
 
     /**
