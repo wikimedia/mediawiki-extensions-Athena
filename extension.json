@@ -10,9 +10,7 @@
   "manifest_version": 1,
   "AutoloadClasses": {
     "AthenaHooks": "AthenaHooks.php",
-    "AthenaFilters": "AthenaFilters.php",
-    "Classifier": "libs/PHP-Language-Detection/classifier.php",
-    "NGramProfiles": "libs/PHP-Language-Detection/classifier.php"
+    "AthenaFilters": "AthenaFilters.php"
   },
   "Hooks": {
     "EditFilter": [

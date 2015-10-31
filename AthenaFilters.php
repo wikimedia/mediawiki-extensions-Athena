@@ -107,8 +107,11 @@ class AthenaFilters {
         global $wgLanguageCode;
 
         $classifier = AthenaFilters::getClassifier();
-
-        $language = $classifier->predict($text);
+        try {
+            $language = $classifier->detectSimple($text);
+        } catch (Text_LanguageDetect_Exception $e) {
+            return null;
+        }
 
         // Remove any region specialities from wiki's language code (e.g. en-gb becomes en)
         $arr = preg_split("/-/", $wgLanguageCode);
@@ -121,6 +124,7 @@ class AthenaFilters {
             }
             return false;
         }
+
         return null;
     }
 
@@ -140,29 +144,17 @@ class AthenaFilters {
     }
 
     /**
-     * Creates or loads the language classifier
-     * @return NGramProfiles
-     * @throws Exception
+     * Loads the language classifier
+     * @return Text_LanguageDetect
      */
     static function getClassifier() {
         global $IP;
-        $folder = $IP . "/extensions/Athena/libs/PHP-Language-Detection/";
-        $classifier = new NGramProfiles($folder . 'etc/classifiers/ngrams.dat');
-        if( !$classifier->exists() ) {
-            $classifier->train('en', $folder . 'etc/data/english.raw');
-            $classifier->train('nl', $folder . 'etc/data/dutch.raw');
-            $classifier->train('fr', $folder . 'etc/data/french.raw');
-            $classifier->train('de', $folder . 'etc/data/german.raw');
-            $classifier->train('id', $folder . 'etc/data/indonesian.raw');
-            $classifier->train('ja', $folder . 'etc/data/japanese.raw');
-            $classifier->train('pt', $folder . 'etc/data/portugese.raw');
-            $classifier->train('es', $folder . 'etc/data/spanish.raw');
 
-            $classifier->save();
-        } else {
-            $classifier->load();
-        }
-
+        // Code for Text-LanguageDetect
+        require_once $IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php';
+        $classifier = new Text_LanguageDetect;
+        // Set it to return ISO 639-1 (same format as MediaWiki)
+        $classifier->setNameMode(2);
         return $classifier;
     }
 
