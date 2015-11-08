@@ -2,6 +2,7 @@
 
 /**
  * Filters used by Athena
+ * TODO: Naming consistency
  */
 class AthenaFilters {
 
@@ -140,6 +141,55 @@ class AthenaFilters {
         $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
         // Link count
         $count += preg_match_all("/#file_links<>/", $text);
+        return $count;
+    }
+
+    /**
+     * Returns the length of the page title
+     *
+     * @param $title Title
+     * @return int
+     */
+    public static function titleLength($title) {
+        return strlen($title->getText());
+    }
+
+    /**
+     * Returns the namespace of the article
+     *
+     * @param $title Title
+     * @return int
+     */
+    public static function getNamespace($title) {
+        return $title->getNamespace();
+    }
+
+    /**
+     * Checks if a page is wanted and if so, how many times
+     *
+     * @param $title Title
+     * @return int
+     */
+    public static function isWanted($title) {
+        $dbr = wfGetDB( DB_SLAVE );
+        $res = $dbr->select(
+            'pagelinks',                                  // $table
+            array( 'count' => 'COUNT(*)' ),            // $vars (columns of the table)
+            array('pl_title' => $title->getText(),
+                  'pl_namespace' => $title->getNamespace()),         // $conds
+            __METHOD__,                                   // $fname = 'Database::select',
+            null        // $options = array()
+        );
+
+        // hacky approach is hacky
+        $count = 0;
+        foreach( $res as $row ) {
+            $count = $row->count;
+            break;
+        }
+
+
+
         return $count;
     }
 
