@@ -175,7 +175,7 @@ class AthenaFilters {
         $res = $dbr->select(
             'pagelinks',                                  // $table
             array( 'count' => 'COUNT(*)' ),            // $vars (columns of the table)
-            array('pl_title' => $title->getText(),
+            array('pl_title' => $title->getDBkey(),
                   'pl_namespace' => $title->getNamespace()),         // $conds
             __METHOD__,                                   // $fname = 'Database::select',
             null        // $options = array()
@@ -188,7 +188,33 @@ class AthenaFilters {
             break;
         }
 
+        return $count;
+    }
 
+    /**
+     * Checks if a page has been deleted and if so, how many times
+     *
+     * @param $title Title
+     * @return int
+     */
+    public static function isDeleted($title) {
+        $dbr = wfGetDB( DB_SLAVE );
+        $res = $dbr->select(
+            'archive',                                  // $table
+            array( 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ),            // $vars (columns of the table)
+            array('ar_title' => $title->getDBkey(),
+                'ar_namespace' => $title->getNamespace()),
+             null,      // $conds
+            __METHOD__,                                   // $fname = 'Database::select',
+            null        // $options = array()
+        );
+
+        // hacky approach is hacky
+        $count = 0;
+        foreach( $res as $row ) {
+            $count = $row->count;
+            break;
+        }
 
         return $count;
     }

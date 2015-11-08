@@ -26,7 +26,7 @@ class AthenaHooks {
                     "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                     "</div>\n" .
                     "<br clear='all' />\n";*/
-                $var1 = AthenaFilters::isWanted($editPage->getTitle());
+                $var1 = AthenaFilters::isDeleted($editPage->getTitle());
                 /*if( $var1 === null ) {
                     $var1 = "null";
                 } else if( $var1 === true) {
