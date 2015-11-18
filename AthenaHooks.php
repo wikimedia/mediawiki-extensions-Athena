@@ -43,4 +43,17 @@ class AthenaHooks {
         }
         return true;
     }
+
+    /**
+     * Updates the database with the new Athena tabled
+     * Called when the update.php maintenance script is run.
+     *
+     * @param DatabaseUpdater $updater
+     * @return bool
+     */
+    static function createTables( $updater ) {
+        $updater->addExtensionTable( 'athena_probability',
+            __DIR__ . '/sql/athena_probability.sql' );
+        return true;
+    }
 }

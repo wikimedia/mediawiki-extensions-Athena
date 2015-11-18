@@ -15,6 +15,9 @@
   "Hooks": {
     "EditFilter": [
       "AthenaHooks::editFilter"
+    ],
+    "LoadExtensionSchemaUpdates": [
+      "AthenaHooks::createTables"
     ]
   }
 }
