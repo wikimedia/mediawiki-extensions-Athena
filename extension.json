@@ -19,5 +19,8 @@
     "LoadExtensionSchemaUpdates": [
       "AthenaHooks::createTables"
     ]
+  },
+  "config": {
+    "AthenaSpamThreshold": 0.02
   }
 }

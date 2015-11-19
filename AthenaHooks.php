@@ -13,7 +13,7 @@ class AthenaHooks {
      * @return bool
      */
     static function editFilter( $editPage, $text, $section, &$error, $summary ) {
-
+        global $wgAthenaSpamThreshold;
         // Check if it's a new article or not
         if ( $editPage->getTitle()->getArticleID() === 0 ) {
             // Let's skip redirects
@@ -21,24 +21,26 @@ class AthenaHooks {
             if( $redirect !== 1 ) {
 
                 // TODO proper message, i18n and stuff
-                /*$error =
-                    "<div class='errorbox'>" .
-                    "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
-                    "</div>\n" .
-                    "<br clear='all' />\n";*/
-                $var1 = AthenaFilters::isDeleted($editPage->getTitle());
-                /*if( $var1 === null ) {
-                    $var1 = "null";
-                } else if( $var1 === true) {
-                    $var1 = "same";
-                } else
-                    $var1 = "different";*/
 
-                $error =
-                    "<div class='errorbox'>" .
-                     $var1 .
-                    "</div>\n" .
-                    "<br clear='all' />\n";
+                $userAge = AthenaFilters::userAge();
+
+                $varName = "user";
+                if( $userAge === -1 ) {
+                    $varName = "anon";
+                }
+
+                // Get probability of it being spam
+                $prob = AthenaHooks::loadProbabilities("spam", $varName);
+                if( $prob ) {
+                    if( $prob > $wgAthenaSpamThreshold ) {
+                        $error =
+                            "<div class='errorbox'>" .
+                            "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
+                            "</div>\n" .
+                            "<br clear='all' />\n";
+                    }
+                }
+                // Log here
             }
         }
         return true;
@@ -48,12 +50,39 @@ class AthenaHooks {
      * Updates the database with the new Athena tabled
      * Called when the update.php maintenance script is run.
      *
-     * @param DatabaseUpdater $updater
+     * @param $updater DatabaseUpdater
      * @return bool
      */
     static function createTables( $updater ) {
-        $updater->addExtensionTable( 'athena_probability',
-            __DIR__ . '/sql/athena_probability.sql' );
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_probability', __DIR__ . '/sql/athena_probability.sql', true ) );
         return true;
+    }
+
+    /**
+     * Load the probabilities related to the given variable
+     *
+     * @param $var string
+     * @param $given string
+     * @return double|bool
+     */
+    static function loadProbabilities( $var, $given ) {
+        $db = wfGetDB( DB_MASTER );
+
+        $whereStatement = " ap_variable='{$var}'";
+        if( $given ) {
+            $whereStatement .= " AND ap_given='{$given}'";
+        }
+
+        $sql = "SELECT ap_value FROM {$db->tableName( 'athena_probability' )} WHERE {$whereStatement};";
+
+        $res = $db->query( $sql, __METHOD__ );
+        $row = $db->fetchObject( $res );
+
+        if( $row ) {
+
+            return $row->ap_value;
+        }
+
+        return false;
     }
 }
