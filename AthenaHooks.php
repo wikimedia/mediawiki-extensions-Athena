@@ -55,6 +55,10 @@ class AthenaHooks {
      */
     static function createTables( $updater ) {
         $updater->addExtensionUpdate( array( 'addTable', 'athena_probability', __DIR__ . '/sql/athena_probability.sql', true ) );
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_success_log', __DIR__ . '/sql/athena_logs.sql', true ) );
+        // don't really need these two
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_fail_log', __DIR__ . '/sql/athena_logs.sql', true ) );
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_fail_page', __DIR__ . '/sql/athena_logs.sql', true ) );
         return true;
     }
 
