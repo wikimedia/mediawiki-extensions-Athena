@@ -25,7 +25,7 @@ CREATE TABLE athena_fail_log (
 CREATE TABLE athena_fail_page (
   `afl_id` int(10) unsigned PRIMARY KEY auto_increment,
   `afp_namespace` int(11) NOT NULL,
-  `afp_title` varchar(255) NOT NULL,
+  `afp_title` varbinary(255) NOT NULL,
   `afp_content` mediumblob NOT NULL,
   `afp_comment` tinyblob,
   `afp_user` int(10) unsigned NOT NULL default 0,
