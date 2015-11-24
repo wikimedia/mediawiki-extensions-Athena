@@ -107,7 +107,7 @@ class AthenaFilters {
     public static function sameLanguage($text) {
         global $wgLanguageCode;
 
-        $classifier = AthenaFilters::getClassifier();
+        $classifier = AthenaHelper::getClassifier();
         try {
             $language = $classifier->detectSimple($text);
         } catch (Text_LanguageDetect_Exception $e) {
@@ -197,41 +197,26 @@ class AthenaFilters {
      * @param $title Title
      * @return int
      */
-    public static function isDeleted($title) {
-        $dbr = wfGetDB( DB_SLAVE );
+    public static function isDeleted($title)
+    {
+        $dbr = wfGetDB(DB_SLAVE);
         $res = $dbr->select(
             'archive',                                  // $table
-            array( 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ),            // $vars (columns of the table)
+            array('ar_namespace', 'ar_title', 'count' => 'COUNT(*)'),            // $vars (columns of the table)
             array('ar_title' => $title->getDBkey(),
                 'ar_namespace' => $title->getNamespace()),
-             null,      // $conds
+            null,      // $conds
             __METHOD__,                                   // $fname = 'Database::select',
             null        // $options = array()
         );
 
         // hacky approach is hacky
         $count = 0;
-        foreach( $res as $row ) {
+        foreach ($res as $row) {
             $count = $row->count;
             break;
         }
 
         return $count;
     }
-
-    /**
-     * Loads the language classifier
-     * @return Text_LanguageDetect
-     */
-    static function getClassifier() {
-        global $IP;
-
-        // Code for Text-LanguageDetect
-        require_once $IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php';
-        $classifier = new Text_LanguageDetect;
-        // Set it to return ISO 639-1 (same format as MediaWiki)
-        $classifier->setNameMode(2);
-        return $classifier;
-    }
-
 }

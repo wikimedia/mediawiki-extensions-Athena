@@ -10,7 +10,8 @@
   "manifest_version": 1,
   "AutoloadClasses": {
     "AthenaHooks": "AthenaHooks.php",
-    "AthenaFilters": "AthenaFilters.php"
+    "AthenaFilters": "AthenaFilters.php",
+    "AthenaHelper": "AthenaHelper.php"
   },
   "Hooks": {
     "EditFilter": [
@@ -18,9 +19,12 @@
     ],
     "LoadExtensionSchemaUpdates": [
       "AthenaHooks::createTables"
+    ],
+    "PageContentSaveComplete": [
+      "AthenaHooks::successfulEdit"
     ]
   },
   "config": {
-    "AthenaSpamThreshold": 0.4
+    "AthenaSpamThreshold": 0.7
   }
 }

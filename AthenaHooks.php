@@ -13,9 +13,12 @@ class AthenaHooks {
      * @return bool
      */
     static function editFilter( $editPage, $text, $section, &$error, $summary ) {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgUser;
         // Check if it's a new article or not
         if ( $editPage->getTitle()->getArticleID() === 0 ) {
+            $namespace = $editPage->getTitle()->getNamespace();
+            $title = $editPage->getTitle()->getTitleValue()->getText();
+
             // Let's skip redirects
             $redirect = preg_match_all("/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text);
             if( $redirect !== 1 ) {
@@ -31,7 +34,7 @@ class AthenaHooks {
                 }
 
                 // Get probability of it being spam
-                $probAge = AthenaHooks::loadProbabilities("spam", 0, $varName, $notFlag);
+                $probAge = AthenaHelper::loadProbabilities("spam", 0, $varName, $notFlag);
                 echo( "\n probAge is " . $probAge );
 
                 $sameLang = AthenaFilters::sameLanguage($text);
@@ -41,14 +44,14 @@ class AthenaHooks {
                 }
 
                 if( empty($sameLang) ) {
-                   $probLang = AthenaHooks::loadProbabilities("spam", 0, "difflang", $notFlag);
+                   $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
                     echo( "\n probLang is " . $probLang );
                 }
 
-                $weightAge = AthenaHooks::loadWeightings("userage");
+                $weightAge = AthenaHelper::loadWeightings("userage");
                 echo( "\n weightAge is " . $weightAge );
-                if( $probLang ) {
-                    $weightLang = AthenaHooks::loadWeightings("lang");
+                if( !empty($probLang) ) {
+                    $weightLang = AthenaHelper::loadWeightings("lang");
                     echo( "\n weightLang is " . $weightLang );
 
                     $prob = $weightLang * $probLang + $weightAge * $probAge;
@@ -57,22 +60,17 @@ class AthenaHooks {
                 }
                 echo( "\n prob is " . $prob );
 
-                /*if( $prob > $wgAthenaSpamThreshold ) {
+                if( $prob > $wgAthenaSpamThreshold ) {
                     $error =
                         "<div class='errorbox'>" .
                         "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                         "</div>\n" .
                         "<br clear='all' />\n";
-                } else {*/
-                    $error =
-                        "<div class='errorbox'>" .
-                        "prob is" . $prob .
-                         "</div>\n" .
-                         "<br clear='all' />\n";
-               // }
+                }
 
                 // Log here
-                AthenaHooks::logAttempt($prob, $userAge, null, null, $sameLang, null, null, null, null);
+                AthenaHelper::logAttempt($prob, $userAge, null, null, $sameLang, null, null, null, $namespace, $title,
+                    $text, $summary, $wgUser->getId());
             }
         }
         return true;
@@ -95,107 +93,46 @@ class AthenaHooks {
     }
 
     /**
-     * Load the probabilities related to the given variable
+     * If an article successfully saves, we want to take the page_id and rev_id and update our
+     * athena_page_details table
      *
-     * @param $var string
-     * @param $varFalg 0|1
-     * @param $given string
-     * @param $givenFlag 0|1
-     * @return double|bool
-     */
-    static function loadProbabilities( $var, $varFlag, $given, $givenFlag ) {
-        $db = wfGetDB( DB_MASTER );
-
-        $whereStatement = " ap_variable='{$var}'";
-
-        if( $varFlag ) {
-            $whereStatement .=  " AND ap_variable_not=1";
-        }
-
-        if( $given ) {
-            $whereStatement .= " AND ap_given='{$given}'";
-        }
-
-        if( $givenFlag ) {
-            $whereStatement .= " AND ap_given_not=1";
-        }
-
-        $sql = "SELECT ap_value FROM {$db->tableName( 'athena_probability' )} WHERE {$whereStatement};";
-
-        echo ($sql);
-
-        $res = $db->query( $sql, __METHOD__ );
-        $row = $db->fetchObject( $res );
-
-        if( $row ) {
-            return $row->ap_value;
-        }
-
-        // else we are bork and so let's say false
-        echo ('Something went wrong :(');
-        return false;
-    }
-
-    /**
-     * Load the weighting for a given variable
+     * @param $article WikiPage
+     * @param $user User
+     * @param $content Content
+     * @param $summary string
+     * @param $isMinor boolean
+     * @param $isWatch boolean
+     * @param $section Deprecated
+     * @param $flags integer
+     * @param $revision {Revision|null}
+     * @param $status Status
+     * @param $baseRevId integer
      *
-     * @param $prob double
-     * @param $userAge int
-     * @param $links double
-     * @param $syntax double
-     * @param $language boolean
-     * @param $broken boolean
-     * @param $deleted boolean
-     * @param $wanted boolean
-     * @return double|bool
+     * @return boolean
      */
-    static function logAttempt( $prob, $userAge, $links, $syntax, $language, $broken, $deleted, $wanted ) {
-        $db = wfGetDB( DB_MASTER );
+    static function successfulEdit( $article, $user, $content, $summary, $isMinor, $isWatch, $section,
+                                    $flags, $revision, $status, $baseRevId ) {
+        $db = wfGetDB(DB_MASTER);
 
-        $insertStatement = " (NULL, {$prob}, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${deleted}, ${wanted})";
+        $page_id = $article->getId();
+        $rev_id = $article->getRevision()->getId();
 
-        $sql = "INSERT INTO {$db->tableName( 'athena_log' )} VALUES {$insertStatement};";
-
-        echo ($sql);
-
-        $res = $db->query( $sql, __METHOD__ );
+        // Get last inserted ID
+        $sql = 'select LAST_INSERT_ID() as id;';
+        $res = $db->query($sql);
         $row = $db->fetchObject( $res );
-
-        if( $row ) {
-            echo( $row->aw_id );
-            return $row->aw_id;
-        }
-
-        // else we are bork and so let's say false
-        echo ('Something went wrong insert :(');
-        return false;
-    }
+        $id = $row->id;
 
 
-    /**
-     * Log the page creation attempt
-     *
-     * @param $var string
-     * @return double|bool
-     */
-    static function loadWeightings( $var ) {
-        $db = wfGetDB( DB_MASTER );
+        $updateStatement = " page_id={$page_id} AND rev_id={$rev_id}";
+        $whereStatement = " al_id = {$id}";
 
-        $whereStatement = " aw_variable='{$var}'";
+        $sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
 
-        $sql = "SELECT aw_value FROM {$db->tableName( 'athena_weighting' )} WHERE {$whereStatement};";
+        echo($sql);
 
-        echo ($sql);
+        $db->query($sql, __METHOD__);
 
-        $res = $db->query( $sql, __METHOD__ );
-        $row = $db->fetchObject( $res );
-
-        if( $row ) {
-            return $row->aw_value;
-        }
-
-        // else we are bork and so let's say false
-        echo ('Something went wrong :(');
         return false;
     }
 }
