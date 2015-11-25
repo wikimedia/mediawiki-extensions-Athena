@@ -25,6 +25,6 @@
     ]
   },
   "config": {
-    "AthenaSpamThreshold": 0.7
+    "AthenaSpamThreshold": 0.5
   }
 }

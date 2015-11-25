@@ -104,7 +104,7 @@ class AthenaFilters {
      * @param $text string
      * @return bool|null
      */
-    public static function sameLanguage($text) {
+    public static function differentLanguage($text) {
         global $wgLanguageCode;
 
         $classifier = AthenaHelper::getClassifier();
@@ -117,13 +117,14 @@ class AthenaFilters {
         // Remove any region specialities from wiki's language code (e.g. en-gb becomes en)
         $arr = preg_split("/-/", $wgLanguageCode);
 
-        echo( $language );
+        echo( "\n\n language code is " .  $arr[0] );
+        echo( "\n\n language is " .  $language );
 
         if( $language !== null ) {
             if ($arr[0] === $language) {
-                return true;
+                return 0;
             }
-            return false;
+            return 1;
         }
 
         return null;

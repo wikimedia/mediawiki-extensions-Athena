@@ -67,12 +67,13 @@ class AthenaHelper
                                 $namespace, $title, $content, $comment, $user) {
         $db = wfGetDB(DB_MASTER);
 
-        $language = !$language;
-
         $userAge = AthenaHelper::makeSQLNull($userAge);
         $links = AthenaHelper::makeSQLNull($links);
         $syntax = AthenaHelper::makeSQLNull($syntax);
+        echo( "LANGUAGE is " . $language );
+
         $language = AthenaHelper::makeSQLNull($language);
+        echo( "LANGUAGE is " . $language );
         $broken = AthenaHelper::makeSQLNull($broken);
         $deleted = AthenaHelper::makeSQLNull($deleted);
         $wanted = AthenaHelper::makeSQLNull($wanted);

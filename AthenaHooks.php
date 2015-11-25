@@ -37,13 +37,15 @@ class AthenaHooks {
                 $probAge = AthenaHelper::loadProbabilities("spam", 0, $varName, $notFlag);
                 echo( "\n probAge is " . $probAge );
 
-                $sameLang = AthenaFilters::sameLanguage($text);
+                $diffLang = AthenaFilters::differentLanguage($text);
+
+                echo( "\n\n Samelanguage is " . $diffLang);
                 $notFlag = 0;
-                if( $sameLang ) {
+                if( $diffLang ) {
                     $notFlag = 1;
                 }
 
-                if( empty($sameLang) ) {
+                if( !empty($sameLang) ) {
                    $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
                     echo( "\n probLang is " . $probLang );
                 }
@@ -60,16 +62,16 @@ class AthenaHooks {
                 }
                 echo( "\n prob is " . $prob );
 
-                if( $prob > $wgAthenaSpamThreshold ) {
+               // if( $prob > $wgAthenaSpamThreshold ) {
                     $error =
                         "<div class='errorbox'>" .
                         "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                         "</div>\n" .
                         "<br clear='all' />\n";
-                }
+              //  }
 
                 // Log here
-                AthenaHelper::logAttempt($prob, $userAge, null, null, $sameLang, null, null, null, $namespace, $title,
+                AthenaHelper::logAttempt($prob, $userAge, null, null, $diffLang, null, null, null, $namespace, $title,
                     $text, $summary, $wgUser->getId());
             }
         }
@@ -117,22 +119,32 @@ class AthenaHooks {
         $page_id = $article->getId();
         $rev_id = $article->getRevision()->getId();
 
-        // Get last inserted ID
-        $sql = 'select LAST_INSERT_ID() as id;';
-        $res = $db->query($sql);
-        $row = $db->fetchObject( $res );
-        $id = $row->id;
+        $title = mysql_real_escape_string ($article->getTitle()->getText());
 
+        $whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
 
-        $updateStatement = " page_id={$page_id} AND rev_id={$rev_id}";
-        $whereStatement = " al_id = {$id}";
-
-        $sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
+        // TODO check multiple instances of the same title
+        $sql = "SELECT al_id FROM {$db->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
 
         echo($sql);
 
-        $db->query($sql, __METHOD__);
+        $res = $db->query($sql, __METHOD__);
+        $row = $db->fetchObject($res);
 
+        if ($row) {
+            $id = $row->al_id;
+            $updateStatement = " page_id={$page_id}, rev_id={$rev_id}";
+            $whereStatement = " al_id = {$id}";
+
+            $sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
+
+            echo($sql);
+
+            $db->query($sql, __METHOD__);
+
+
+            //return true;
+        }
         return false;
     }
 }
