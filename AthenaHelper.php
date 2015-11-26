@@ -47,7 +47,7 @@ class AthenaHelper
     }
 
     /**
-     * Load the weighting for a given variable
+     * Log information about the attempted page creation
      *
      * @param $prob double
      * @param $userAge int
@@ -67,19 +67,34 @@ class AthenaHelper
                                 $namespace, $title, $content, $comment, $user) {
         $db = wfGetDB(DB_MASTER);
 
-        $userAge = AthenaHelper::makeSQLNull($userAge);
         $links = AthenaHelper::makeSQLNull($links);
         $syntax = AthenaHelper::makeSQLNull($syntax);
-        echo( "LANGUAGE is " . $language );
 
+        if( $language === false ) {
+            $language = 0;
+        }
         $language = AthenaHelper::makeSQLNull($language);
-        echo( "LANGUAGE is " . $language );
+
+        if( $broken === false ) {
+            $broken = 0;
+        }
+
         $broken = AthenaHelper::makeSQLNull($broken);
+
+        if( $deleted === false ) {
+            $deleted = 0;
+        }
+
         $deleted = AthenaHelper::makeSQLNull($deleted);
+
+        if( $wanted === false ) {
+            $wanted = 0;
+        }
+
         $wanted = AthenaHelper::makeSQLNull($wanted);
         $comment = AthenaHelper::makeSQLNull($comment);
 
-        $insertStatement = " (NULL, {$prob}, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${deleted}, ${wanted})";
+        $insertStatement = " (NULL, {$prob}, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${wanted}, ${deleted})";
 
         $sql = "INSERT INTO {$db->tableName( 'athena_log' )} VALUES {$insertStatement};";
 
@@ -157,9 +172,261 @@ class AthenaHelper
      * @return string|type
      */
     static function makeSQLNull( $var ) {
-        if( empty($var) ) {
+        // Can't use empty() as 0 and false are empty
+        if( $var === null || $var === '' ) {
             return "NULL";
         }
         return $var;
+    }
+
+    /**
+     * Calculates the Athena value
+     * Calls all the filters, works out the probability of each contributing to the spam level, and combines them
+     *
+     * @param $editPage EditPage
+     * @param $text string
+     * @param $summary string
+     * @return double
+     */
+    static function calculateAthenaValue( $editPage, $text, $summary ) {
+        global $wgUser;
+
+        $titleObj = $editPage->getTitle();
+        $namespace = $titleObj->getNamespace();
+        $title = $titleObj->getTitleValue()->getText();
+
+        /* start different language */
+        $diffLang = AthenaFilters::differentLanguage($text);
+        echo( "<br/>  difflang is " . $diffLang);
+
+        $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang );
+        /* end different language */
+
+        /* start broken spam bot */
+        $brokenSpamBot = AthenaFilters::brokenSpamBot( $text );
+        echo( "<br/>  brokenspambot is " . $brokenSpamBot);
+
+        $probBrokenSpamBot = AthenaHelper::calculateAthenaValue_BrokenSpamBot( $brokenSpamBot );
+
+        $prob = $probDiffLang + $probBrokenSpamBot;
+        /* end broken spam bot */
+
+        /* start deleted */
+        $deleted = AthenaFilters::wasDeleted( $titleObj );
+        echo( "<br/>  deleted is " . $deleted);
+
+        $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted );
+        /* end deleted */
+
+        /* start wanted */
+        $wanted = AthenaFilters::isWanted( $titleObj );
+        echo( "<br/>  wanted is " . $wanted);
+
+        $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted );
+        /* end wanted */
+
+        /* start user type */
+        $userAge = AthenaFilters::userAge();
+        echo( "<br/>  user age is " . $userAge);
+
+        $probUser = AthenaHelper::calculateAthenaValue_User( $userAge );
+        /* end user type */
+
+        /* start title length */
+        $titleLength = AthenaFilters::titleLength( $titleObj );
+        echo( "<br/>  title length is " . $titleLength);
+
+        $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength );
+        /* end title length */
+
+        /* start title length */
+        $namespace = AthenaFilters::getNamespace( $titleObj );
+        echo( "<br/>  namespace is " . $namespace);
+
+        $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace );
+        /* end title length */
+
+        $prob = $probDiffLang + $probBrokenSpamBot + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace;
+
+
+        echo( "<br/> total probability is " . $prob );
+
+        // Log here
+        AthenaHelper::logAttempt($prob, $userAge, null, null, $diffLang, $brokenSpamBot, $deleted, $wanted, $namespace, $title,
+            $text, $summary, $wgUser->getId());
+        return $prob;
+    }
+
+    /**
+     * Calculates the probability related to the different language filter
+     *
+     * @param $diffLang bool
+     * @return double
+     */
+    static function calculateAthenaValue_Language( $diffLang ) {
+        $notFlag = 0;
+        // Let's treat null as false for simplicity
+        if( !$diffLang ) {
+            $notFlag = 1;
+        }
+
+        $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
+        echo( "<br/> probLang is " . $probLang );
+
+        $weightLang = AthenaHelper::loadWeightings("difflang");
+        echo( "<br/>  weightLang is " . $weightLang );
+
+        return $weightLang * $probLang;
+    }
+
+    /**
+     * Calculates the probability related to the broken spam bot filter
+     *
+     * @param $brokenSpamBot bool
+     * @return double
+     */
+    static function calculateAthenaValue_BrokenSpamBot( $brokenSpamBot ) {
+        $notFlag = 0;
+        // Let's treat null as false for simplicity
+        if( !$brokenSpamBot ) {
+            $notFlag = 1;
+        }
+
+        $probLang = AthenaHelper::loadProbabilities("spam", 0, "brokenspambot", $notFlag);
+        echo( "<br/> probSpamBot is " . $probLang );
+
+        $weightLang = AthenaHelper::loadWeightings("brokenspambot");
+        echo( "<br/>  weightSpamBot is " . $weightLang );
+
+        return $weightLang * $probLang;
+    }
+
+    /**
+     * Calculates the probability related to the deleted filter
+     *
+     * @param $wasDeleted bool
+     * @return double
+     */
+    static function calculateAthenaValue_Deleted( $wasDeleted ) {
+        $notFlag = 0;
+        // Let's treat null as false for simplicity
+        if( !$wasDeleted ) {
+            $notFlag = 1;
+        }
+
+        $probDeleted = AthenaHelper::loadProbabilities("spam", 0, "deleted", $notFlag);
+        echo( "<br/> probdeleted is " . $probDeleted );
+
+        $weightDeleted = AthenaHelper::loadWeightings("deleted");
+        echo( "<br/>  weightdeleted is " . $weightDeleted );
+
+        return $weightDeleted * $probDeleted;
+    }
+
+    /**
+     * Calculates the probability related to the wanted filter
+     *
+     * @param $isWanted bool
+     * @return double
+     */
+    static function calculateAthenaValue_Wanted( $isWanted ) {
+        $notFlag = 0;
+        // Let's treat null as false for simplicity
+        if( !$isWanted ) {
+            $notFlag = 1;
+        }
+
+        $probWanted = AthenaHelper::loadProbabilities("spam", 0, "wanted", $notFlag);
+        echo( "<br/> probwanted is " . $probWanted );
+
+        $weightWanted = AthenaHelper::loadWeightings("wanted");
+        echo( "<br/>  weightwanted is " . $weightWanted );
+
+        return $weightWanted * $probWanted;
+    }
+
+    /**
+     * Calculates the probability related to the user type filter
+     *
+     * @param $userAge int
+     * @return double
+     */
+    static function calculateAthenaValue_User( $userAge ) {
+
+        $varName = "anon";
+        if( $userAge >= 0 ) {
+            if( $userAge < 1 )
+                $varName = "user1";
+            else if ( $userAge < 5 )
+                $varName = "user5";
+            else if ( $userAge < 30 )
+                $varName = "user30";
+            else if ( $userAge < 60 )
+                $varName = "user60";
+            else if ( $userAge < 60*12 )
+                $varName = "user12";
+            else if ( $userAge < 60*24 )
+                $varName = "user24";
+            else
+                $varName = "userother";
+        }
+
+
+        $probUser = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
+        echo( "<br/> probUser is " . $probUser );
+
+        $weightUser = AthenaHelper::loadWeightings("userage");
+        echo( "<br/>  weightwanted is " . $weightUser );
+
+        return $weightUser * $probUser;
+    }
+
+    /**
+     * Calculates the probability related to the title length filter
+     *
+     * @param $length int
+     * @return double
+     */
+    static function calculateAthenaValue_Length( $length ) {
+        $notFlag = 1;
+        // Let's treat null as false for simplicity
+        if( $length > 39 ) {
+            $notFlag = 0;
+        }
+
+        $probLength = AthenaHelper::loadProbabilities( "spam", 0, "titlelength", $notFlag );
+        echo( "<br/> probLength is " . $probLength );
+
+        $weightLength = AthenaHelper::loadWeightings( "titlelength" );
+        echo( "<br/>  weightLength is " . $weightLength );
+
+        return $weightLength * $probLength;
+    }
+
+    /**
+     * Calculates the probability related to the namespace filter
+     *
+     * @param $namespace int
+     * @return double
+     */
+    static function calculateAthenaValue_Namespace( $namespace ) {
+
+        $varName = "nsother";
+        if( $namespace === 0 )
+            $varName = "nsmain";
+        else if ( $namespace === 1 )
+            $varName = "nstalk";
+        else if ( $namespace === 2 )
+            $varName = "nsuser";
+        else if ( $namespace === 3 )
+            $varName = "nsusertalk";
+
+        $probNamespace = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
+        echo( "<br/> probnamespace is " . $probNamespace );
+
+        $weightNamespace = AthenaHelper::loadWeightings("namespace");
+        echo( "<br/>  weightwanted is " . $weightNamespace );
+
+        return $weightNamespace * $probNamespace;
     }
 }

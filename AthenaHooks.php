@@ -25,7 +25,7 @@ class AthenaHooks {
 
                 // TODO proper message, i18n and stuff
 
-                $userAge = AthenaFilters::userAge();
+               /* $userAge = AthenaFilters::userAge();
 
                 $varName = "anon";
                 $notFlag = 1;
@@ -39,14 +39,16 @@ class AthenaHooks {
 
                 $diffLang = AthenaFilters::differentLanguage($text);
 
-                echo( "\n\n Samelanguage is " . $diffLang);
                 $notFlag = 0;
+
+
+                echo( "\n\n Samelanguage is " . $diffLang);
                 if( $diffLang ) {
                     $notFlag = 1;
                 }
 
                 if( !empty($sameLang) ) {
-                   $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
+                    $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
                     echo( "\n probLang is " . $probLang );
                 }
 
@@ -61,7 +63,8 @@ class AthenaHooks {
                     $prob = $probAge;
                 }
                 echo( "\n prob is " . $prob );
-
+*/
+                $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
                // if( $prob > $wgAthenaSpamThreshold ) {
                     $error =
                         "<div class='errorbox'>" .
@@ -70,9 +73,7 @@ class AthenaHooks {
                         "<br clear='all' />\n";
               //  }
 
-                // Log here
-                AthenaHelper::logAttempt($prob, $userAge, null, null, $diffLang, null, null, null, $namespace, $title,
-                    $text, $summary, $wgUser->getId());
+
             }
         }
         return true;
@@ -123,7 +124,7 @@ class AthenaHooks {
 
         $whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
 
-        // TODO check multiple instances of the same title
+        // TODO check multiple instances of the same title - maybe check user_id as well
         $sql = "SELECT al_id FROM {$db->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
 
         echo($sql);

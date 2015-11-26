@@ -99,7 +99,7 @@ class AthenaFilters {
 
     /**
      * Compares the language of the site with the language of the edit
-     * Returns true if the same, and false if different or null if error
+     * Returns true if different, and false if the same or null if error
      *
      * @param $text string
      * @return bool|null
@@ -121,10 +121,10 @@ class AthenaFilters {
         echo( "\n\n language is " .  $language );
 
         if( $language !== null ) {
-            if ($arr[0] === $language) {
-                return 0;
+            if ( $arr[0] === $language ) {
+                return false;
             }
-            return 1;
+            return true;
         }
 
         return null;
@@ -135,14 +135,19 @@ class AthenaFilters {
      * Determined based off of {blah|blah|blah} syntax and occurrences of #file_links<>
      *
      * @param $text string
-     * @return int
+     * @return bool
      */
     public static function brokenSpamBot($text) {
         // Word choices
         $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
         // Link count
         $count += preg_match_all("/#file_links<>/", $text);
-        return $count;
+
+        // Let's be reasonable, for now
+        if( $count > 2 )
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -169,7 +174,7 @@ class AthenaFilters {
      * Checks if a page is wanted and if so, how many times
      *
      * @param $title Title
-     * @return int
+     * @return bool
      */
     public static function isWanted($title) {
         $dbr = wfGetDB( DB_SLAVE );
@@ -189,16 +194,19 @@ class AthenaFilters {
             break;
         }
 
-        return $count;
+        if( $count > 0 )
+            return true;
+        return false;
+        //return $count;
     }
 
     /**
      * Checks if a page has been deleted and if so, how many times
      *
      * @param $title Title
-     * @return int
+     * @return bool
      */
-    public static function isDeleted($title)
+    public static function wasDeleted($title)
     {
         $dbr = wfGetDB(DB_SLAVE);
         $res = $dbr->select(
@@ -218,6 +226,9 @@ class AthenaFilters {
             break;
         }
 
-        return $count;
+        if( $count > 0 )
+            return true;
+
+        return false;
     }
 }
