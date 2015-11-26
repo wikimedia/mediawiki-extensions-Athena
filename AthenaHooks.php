@@ -22,6 +22,8 @@ class AthenaHooks {
             // Let's skip redirects
             $redirect = preg_match_all("/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text);
             if( $redirect !== 1 ) {
+                $s = AthenaFilters::linkPercentage($text);
+                echo( "links are " . $s);
 
                 // TODO proper message, i18n and stuff
 

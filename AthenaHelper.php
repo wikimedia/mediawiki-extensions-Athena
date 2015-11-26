@@ -203,12 +203,10 @@ class AthenaHelper
         /* end different language */
 
         /* start broken spam bot */
-        $brokenSpamBot = AthenaFilters::brokenSpamBot( $text );
-        echo( "<br/>  brokenspambot is " . $brokenSpamBot);
+        //$brokenSpamBot = AthenaFilters::brokenSpamBot( $text );
+        //echo( "<br/>  brokenspambot is " . $brokenSpamBot);
 
-        $probBrokenSpamBot = AthenaHelper::calculateAthenaValue_BrokenSpamBot( $brokenSpamBot );
-
-        $prob = $probDiffLang + $probBrokenSpamBot;
+       // $probBrokenSpamBot = AthenaHelper::calculateAthenaValue_BrokenSpamBot( $brokenSpamBot );
         /* end broken spam bot */
 
         /* start deleted */
@@ -246,13 +244,32 @@ class AthenaHelper
         $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace );
         /* end title length */
 
-        $prob = $probDiffLang + $probBrokenSpamBot + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace;
+        /* start syntax */
+        $syntaxType = AthenaFilters::syntaxType( $text );
+        echo( "<br/>  syntax is " . $syntaxType);
+
+        $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType );
+        /* end syntax */
+
+        /* start syntax */
+        $links = AthenaFilters::linkPercentage( $text );
+        echo( "<br/>  links is " . $links);
+
+        $probLinks = AthenaHelper::calculateAthenaValue_Links( $links );
+        /* end syntax */
+
+        $prob = $probDiffLang + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace + $probSyntax + $probLinks;
 
 
         echo( "<br/> total probability is " . $prob );
 
         // Log here
-        AthenaHelper::logAttempt($prob, $userAge, null, null, $diffLang, $brokenSpamBot, $deleted, $wanted, $namespace, $title,
+        if( $syntaxType === 3 ) {
+            $brokenSpamBot = true;
+        } else {
+            $brokenSpamBot = false;
+        }
+        AthenaHelper::logAttempt($prob, $userAge, $links, $syntaxType, $diffLang, $brokenSpamBot, $deleted, $wanted, $namespace, $title,
             $text, $summary, $wgUser->getId());
         return $prob;
     }
@@ -428,5 +445,56 @@ class AthenaHelper
         echo( "<br/>  weightwanted is " . $weightNamespace );
 
         return $weightNamespace * $probNamespace;
+    }
+
+
+    /**
+     * Calculates the probability related to the syntax filter
+     *
+     * @param $type int
+     * @return double
+     */
+    static function calculateAthenaValue_Syntax( $type ) {
+
+        $varName = "syntaxnone";
+        if( $type === 1 )
+            $varName = "syntaxbasic";
+        else if ( $type === 2 )
+            $varName = "syntaxcomplex";
+        else if ( $type === 3 )
+            $varName = "brokenspambot";
+
+        $probNamespace = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
+        echo( "<br/> probnamespace is " . $probNamespace );
+
+        $weightNamespace = AthenaHelper::loadWeightings("syntax");
+        echo( "<br/>  weightwanted is " . $weightNamespace );
+
+        return $weightNamespace * $probNamespace;
+    }
+
+    /**
+     * Calculates the probability related to the link filter
+     *
+     * @param $percentage double
+     * @return double
+     */
+    static function calculateAthenaValue_Links( $percentage ) {
+
+        $varName = "links0";
+        if( $percentage > 0 && $percentage < 0.1 )
+            $varName = "links5";
+        else if ( $percentage >= 0.1 && $percentage <= 0.35 )
+            $varName = "links20";
+        else if ( $percentage > 0.35 )
+            $varName = "links50";
+
+        $probLinks = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
+        echo( "<br/> probLinks is " . $probLinks );
+
+        $weightLinks = AthenaHelper::loadWeightings("links");
+        echo( "<br/>  $weightLinks is " . $weightLinks );
+
+        return $weightLinks * $probLinks;
     }
 }

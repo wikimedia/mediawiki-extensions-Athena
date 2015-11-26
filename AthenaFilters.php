@@ -72,29 +72,75 @@ class AthenaFilters {
     }
 
     /**
-     * Gets the number of (certain) syntax uses in an article
+     * Gets the percentage of the page that is links
      *
      * @param $text string
-     * @return int
+     * @return double
      */
-    public static function numberOfSyntax($text) {
-        // Start with headings
-        $count = preg_match_all("/==([^=]+)==(\s)*(\n|$)/", $text);
-        $count += preg_match_all("/===([^=]+)===(\s)*(\n|$)/", $text);
-        $count += preg_match_all("/====([^=]+)====(\s)*(\n|$)/", $text);
-        $count += preg_match_all("/=====([^=]+)=====(\s)*(\n|$)/", $text);
-        $count += preg_match_all("/======([^=]+)======(\s)*(\n|$)/", $text);
-        // nowiki tags are very wiki specific
-        $count += preg_match_all("/<nowiki>(.*)<\/nowiki>/", $text);
-        $count += preg_match_all("/<nowiki\/>/", $text);
-        // Internal links
-        $count += preg_match_all("/\[\[([^\[\]])+\]\]/", $text);
-        // Tables
-        $count += preg_match_all("/\{\|([^\{\|\}])+\|\}/", $text);
-        // Templates
-        $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
+    public static function linkPercentage( $text ) {
+        // Get character count
+        $charCount = strlen($text);
 
-        return $count;
+        $textNoLinks = preg_replace("/\[http(s?):\/\/([^\[\]])+\]/", "", $text);
+        $charCountNoLinks = strlen($textNoLinks);
+
+        return 1-$charCountNoLinks/$charCount;
+    }
+
+    /**
+     * Gets the number of (certain) syntax uses in an article
+     * 2 is advanced, 1 is basic, 0 is none
+     *
+     * @param $text string
+     * @return 0|1|2|3
+     */
+    public static function syntaxType($text) {
+
+        if( AthenaFilters::brokenSpamBot($text) ) {
+            return 3;
+        } else {
+            // Start with headings
+            $count = preg_match_all("/==([^=]+)==(\s)*(\n|$)/", $text);
+            $count += preg_match_all("/===([^=]+)===(\s)*(\n|$)/", $text);
+            $count += preg_match_all("/====([^=]+)====(\s)*(\n|$)/", $text);
+            $count += preg_match_all("/=====([^=]+)=====(\s)*(\n|$)/", $text);
+            $count += preg_match_all("/======([^=]+)======(\s)*(\n|$)/", $text);
+            // nowiki tags are very wiki specific
+            $count += preg_match_all("/<nowiki>(.*)<\/nowiki>/", $text);
+            $count += preg_match_all("/<nowiki\/>/", $text);
+            // Internal links
+            $count += preg_match_all("/\[\[([^\[\]])+\]\]/", $text);
+            // Tables
+            $count += preg_match_all("/\{\|([^\{\|\}])+\|\}/", $text);
+            // Templates
+            $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
+
+            if( $count > 1 ) {
+                return 2;
+            } else {
+                // Basic wiki syntax (bold, brs, links)
+                $count = 0;
+                // Links
+                $count += AthenaFilters::numberOfLinks($text);
+                // Line breaks
+                $count += preg_match_all("/<br\/>|<br>/", $text);
+                // Bold
+                $count += preg_match_all("/'''([^(''')]+)'''/", $text);
+                // Italics
+                $count += preg_match_all("/''([^('')]+)''/", $text);
+
+                // Check for alternative syntaxes
+                $count += preg_match_all("/<strong>(.*)<\/strong>/", $text);
+                $count += preg_match_all("/<a(.*)>(.*)<\/a>/", $text);
+                $count += preg_match_all("/[url]/", $text);
+                if ($count > 1) {
+                    return 1;
+                }
+            }
+        }
+
+        // Else no syntax
+        return 0;
     }
 
     /**
