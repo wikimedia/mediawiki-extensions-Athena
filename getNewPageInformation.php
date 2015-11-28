@@ -43,9 +43,15 @@ class GetNewPageInformation extends Maintenance {
 					'rev_user=user_id' ) ) )
 		);    
 		
-		$output = '{"pages":[';
+		$output = array();
 		foreach( $res as $row ) {
-			$output .= '{"name": ' . json_encode($row->page_namespace) . ',"title":' . json_encode($row->page_title)  . ',"comment":' . json_encode($row->rev_comment) . ',"content":' . json_encode($row->old_text) . ',"timestamp":' . json_encode($row->rev_timestamp) . ',"user-age":' . json_encode($row->user_registration) . ',"lang":' . json_encode($wgLanguageCode) . "},\n"; 
+			$output[] = array('name'=>$row->page_namespace,
+								'title'=>$row->page_title,
+								'comment'=>$row->rev_comment,
+								'content'=>$row->old_text,
+								'timestamp'=>$row->rev_timestamp,
+								'user-timestamp'=>$row->user_registration,
+								'lang'=>$wgLanguageCode); 
 		}
 		
 		// For anons
@@ -62,12 +68,17 @@ class GetNewPageInformation extends Maintenance {
 		);    
 				
 		foreach( $res as $row ) {
-			$output .= '{"name": ' . json_encode($row->page_namespace) . ',"title":' . json_encode($row->page_title)  . ',"comment":' . json_encode($row->rev_comment) . ',"content":' . json_encode($row->old_text) . ',"timestamp":' . json_encode($row->rev_timestamp) . ',"user-age":' . json_encode(0) . ',"lang":' . json_encode($wgLanguageCode) . "},\n"; 	
+				$output[] = array('name'=>$row->page_namespace,
+								'title'=>$row->page_title,
+								'comment'=>$row->rev_comment,
+								'content'=>$row->old_text,
+								'timestamp'=>$row->rev_timestamp,
+								'user-timestamp'=>0,
+								'lang'=>$wgLanguageCode); 
 		}
-		$output = substr($output, 0, -2);
-		$output .= "\n]}";
+		$outputStr = json_encode($output);
 		
-		$this->output($output);
+		$this->output($outputStr);
 		
 		
 	}
