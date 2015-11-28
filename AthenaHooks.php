@@ -142,11 +142,17 @@ class AthenaHooks {
             $sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
 
             echo($sql);
-
             $db->query($sql, __METHOD__);
 
+            $updateStatement = " al_success=1";
+            $whereStatement = " al_id = {$id}";
 
-            //return true;
+            $sql = "UPDATE {$db->tableName( 'athena_log' )} SET {$updateStatement} WHERE {$whereStatement};";
+
+            echo($sql);
+            $db->query($sql, __METHOD__);
+
+            return true;
         }
         return false;
     }

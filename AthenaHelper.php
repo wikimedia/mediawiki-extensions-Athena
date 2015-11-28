@@ -94,7 +94,7 @@ class AthenaHelper
         $wanted = AthenaHelper::makeSQLNull($wanted);
         $comment = AthenaHelper::makeSQLNull($comment);
 
-        $insertStatement = " (NULL, {$prob}, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${wanted}, ${deleted})";
+        $insertStatement = " (NULL, {$prob}, 0, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${wanted}, ${deleted})";
 
         $sql = "INSERT INTO {$db->tableName( 'athena_log' )} VALUES {$insertStatement};";
 
