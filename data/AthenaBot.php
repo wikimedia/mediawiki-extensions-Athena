@@ -36,6 +36,7 @@ class AthenaBot extends Maintenance {
         $json = json_decode($file_contents, true);
 
         $url = $wgServer . $wgScriptPath . '/api.php';
+        $count = 0;
         foreach($json as $page) {
            // echo 'Namespace: ' . $page['namespace'] . "\n";
             //echo 'Title: ' . $page['title'] . "\n";
@@ -68,21 +69,32 @@ class AthenaBot extends Maintenance {
                 $apiCall .= '&token=' . urlencode('+\\');
             } else {
                 // Cookies for the login
-                $cookieString = AthenaBot::createUser();
+                // Calculate how old the account was when it was created
+                $pagetimestamp = wfTimestamp(TS_UNIX, $page['timestamp']);
+                $usertimestamp = wfTimestamp(TS_UNIX, $page['user-timestamp']);
+                $age = $pagetimestamp - $usertimestamp;
+                $cookieString = AthenaBot::createUser($age);
                 curl_setopt( $ch, CURLOPT_COOKIE, $cookieString);
 
                 // Get an edit token
                 $token = AthenaBot::getEditToken($cookieString);
+                $apiCall .= '&token=' . urlencode($token);
             }
 
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
+           curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-            $response = curl_exec($ch);
-            echo($response);
-            echo("\n\n");
+           echo($apiCall."\n\n\n\n");
+           $response = curl_exec($ch);
+           echo($response);
+           echo("\n\n");
             curl_close($ch);
 
-            sleep(60);
+            $count++;
+            echo($count . " pages completed.\n\n\n");
+
+            if( $count === 100)
+                break;
+            sleep(30);
             // Can't use below code as cookies
 
             /*$apiCall = array('action' => 'edit',
@@ -167,11 +179,11 @@ class AthenaBot extends Maintenance {
     }
 
      /**
-     * Creates a new user. Returns their session cookie
-     *
+     * Creates a new user. Returns their session cookies
+     * @param $age int
      * @return string
      */
-    public static function createUser() {
+    public static function createUser($age) {
         global $session_name, $url;
         // Let's create a new user
         // Random unique string generator from http://stackoverflow.com/questions/19017694/one-line-php-random-string-generator
@@ -222,8 +234,18 @@ class AthenaBot extends Maintenance {
         $response = curl_exec($ch);
         echo($response);
         echo("\n\n");
+        $json = json_decode($response, true);
 
         // END CREATION
+
+        // Alter age of the account
+        $newTime = time() - $age;
+        $newTime = wfTimestamp(TS_MW, $newTime);
+
+        $dbr = wfGetDB( DB_SLAVE );
+        $dbr->update('user', array('user_registration'=>$newTime),array('user_id'=>$json['createaccount']['userid']));
+
+        echo("Timestamp altered\n\n");
         // START LOGIN
 
         $apiCall = 'action=login&format=json&lgname=' . urlencode($username) . '&lgpassword=123';
@@ -244,8 +266,12 @@ class AthenaBot extends Maintenance {
         echo($response);
         echo("\n\n");
 
-        $cookieString = $json['login']['cookieprefix'] . '=' . $json['login']['sessionid'] .'; path=/';
+        $json = json_decode($response, true);
 
+        $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] .';'.
+            $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'].';' .
+            $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] .';' .
+            $json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] .'; path=/';
 
         curl_close($ch);
 
@@ -298,16 +324,13 @@ class AthenaBot extends Maintenance {
     public static function getEditToken($cookieString) {
         global $url;
 
-        //$apiCall = 'action=query&format=json&meta=tokens';
-        $apiCall = 'action=query&format=json&meta=userinfo&uiprop=rights|hasmsg';
+        $apiCall = 'action=query&format=json&meta=tokens';
         // Using CURL as need sessions, which file_get_contents can't provide
         $ch = curl_init();
 
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt( $ch, CURLOPT_COOKIE, $cookieString);
-        curl_setopt( $ch, CURLOPT_VERBOSE, 1);
-        echo($cookieString);
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
         $response = curl_exec($ch);
@@ -316,10 +339,10 @@ class AthenaBot extends Maintenance {
 
 
         $json = json_decode($response, true);
-        print_r($json);
+       // print_r($json);
 
         curl_close($ch);
-
+        return $json['query']['tokens']['csrftoken'];
     }
 
 }
