@@ -108,7 +108,7 @@ class AthenaHelper
         $row = $db->fetchObject( $res );
         $id = $row->id;
 
-        $title = mysql_real_escape_string ($title);
+        /*$title = mysql_real_escape_string ($title);
         $content = mysql_real_escape_string ($content);
         // TODO security
         $insertStatement = " ({$id}, {$namespace}, '{$title}', '{$content}', {$comment}, {$user}, CURRENT_TIMESTAMP, NULL, NULL)";
@@ -117,7 +117,7 @@ class AthenaHelper
 
         echo($sql);
 
-        $db->query($sql, __METHOD__);
+        $db->query($sql, __METHOD__);*/
 
     }
 
