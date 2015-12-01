@@ -32,7 +32,7 @@ class AthenaHelper
 
         $sql = "SELECT ap_value FROM {$db->tableName( 'athena_probability' )} WHERE {$whereStatement};";
 
-        echo($sql);
+        //echo($sql);
 
         $res = $db->query($sql, __METHOD__);
         $row = $db->fetchObject($res);
@@ -94,13 +94,15 @@ class AthenaHelper
         $wanted = AthenaHelper::makeSQLNull($wanted);
         $comment = AthenaHelper::makeSQLNull($comment);
 
-        $insertStatement = " (NULL, {$prob}, 0, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${wanted}, ${deleted})";
+        //$insertStatement = " (NULL, {$prob}, 0, {$userAge}, {$links}, {$syntax}, {$language}, {$broken}, ${wanted}, ${deleted})";
 
-        $sql = "INSERT INTO {$db->tableName( 'athena_log' )} VALUES {$insertStatement};";
+        //$sql = "INSERT INTO {$db->tableName( 'athena_log' )} VALUES {$insertStatement};";
+        $insertArray = array( "al_id"=>NULL, "al_value"=>$prob, "al_success"=>0, "al_user_age"=>$userAge,
+            "al_links"=>$links, "al_syntax"=>$syntax, "al_language"=>$language, "al_broken_spambot"=>$broken,
+            "al_wanted"=>$wanted, "al_deleted"=>$deleted);
+        $db->insert('athena_log', $insertArray, __METHOD__, null);
 
-        echo($sql);
-
-        $db->query($sql, __METHOD__);
+       // $db->query($sql, __METHOD__);
 
         // Get last inserted ID
         $sql = 'select LAST_INSERT_ID() as id;';
@@ -108,16 +110,23 @@ class AthenaHelper
         $row = $db->fetchObject( $res );
         $id = $row->id;
 
-        /*$title = mysql_real_escape_string ($title);
+        $title = mysql_real_escape_string ($title);
         $content = mysql_real_escape_string ($content);
+        $comment = mysql_real_escape_string ($comment);
         // TODO security
-        $insertStatement = " ({$id}, {$namespace}, '{$title}', '{$content}', {$comment}, {$user}, CURRENT_TIMESTAMP, NULL, NULL)";
+        //$insertStatement = " ({$id}, {$namespace}, '{$title}', '{$content}', {$comment}, {$user}, CURRENT_TIMESTAMP, NULL, NULL)";
+        $insertArray = array( "al_id"=>$id, "apd_namespace"=>$namespace, "apd_title"=>$title,
+            "apd_content"=>$content, "apd_comment"=>$comment, "apd_user"=>$user,
+            "page_id"=>"NULL", "rev_id"=>"NULL");
+       // $sql = "INSERT INTO {$db->tableName( 'athena_page_details' )} VALUES {$insertStatement};";
+        //print_r($insertArray);
 
-        $sql = "INSERT INTO {$db->tableName( 'athena_page_details' )} VALUES {$insertStatement};";
-
-        echo($sql);
-
-        $db->query($sql, __METHOD__);*/
+        try {
+            $db->insert('athena_page_details', $insertArray, __METHOD__, null);
+        } catch (Exception $e) {
+            print_r($e);
+        }
+        //$db->query($sql, __METHOD__);
 
     }
 
@@ -136,7 +145,7 @@ class AthenaHelper
 
         $sql = "SELECT aw_value FROM {$db->tableName( 'athena_weighting' )} WHERE {$whereStatement};";
 
-        echo($sql);
+        //echo($sql);
 
         $res = $db->query($sql, __METHOD__);
         $row = $db->fetchObject($res);
@@ -197,9 +206,9 @@ class AthenaHelper
 
         /* start different language */
         $diffLang = AthenaFilters::differentLanguage($text);
-        echo( "<br/>  difflang is " . $diffLang);
 
         $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang );
+        echo( "<br/>  difflang is " . $probDiffLang);
         /* end different language */
 
         /* start broken spam bot */
@@ -211,51 +220,52 @@ class AthenaHelper
 
         /* start deleted */
         $deleted = AthenaFilters::wasDeleted( $titleObj );
-        echo( "<br/>  deleted is " . $deleted);
 
         $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted );
+        echo( "<br/>  deleted is " . $probDeleted);
         /* end deleted */
 
         /* start wanted */
         $wanted = AthenaFilters::isWanted( $titleObj );
-        echo( "<br/>  wanted is " . $wanted);
 
         $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted );
+        echo( "<br/>  wanted is " . $probWanted);
         /* end wanted */
 
         /* start user type */
         $userAge = AthenaFilters::userAge();
-        echo( "<br/>  user age is " . $userAge);
 
         $probUser = AthenaHelper::calculateAthenaValue_User( $userAge );
+        echo( "<br/>  user age is " . $probUser);
         /* end user type */
 
         /* start title length */
         $titleLength = AthenaFilters::titleLength( $titleObj );
-        echo( "<br/>  title length is " . $titleLength);
 
         $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength );
+        echo( "<br/>  title length is " . $probLength);
         /* end title length */
 
         /* start title length */
         $namespace = AthenaFilters::getNamespace( $titleObj );
-        echo( "<br/>  namespace is " . $namespace);
 
         $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace );
+        echo( "<br/>  namespace is " . $probNamespace);
         /* end title length */
 
         /* start syntax */
+        //$brokenSpamBot = AthenaFilters::brokenSpamBot( $text );
         $syntaxType = AthenaFilters::syntaxType( $text );
-        echo( "<br/>  syntax is " . $syntaxType);
 
         $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType );
+        echo( "<br/>  syntax is " . $probSyntax);
         /* end syntax */
 
         /* start syntax */
         $links = AthenaFilters::linkPercentage( $text );
-        echo( "<br/>  links is " . $links);
 
         $probLinks = AthenaHelper::calculateAthenaValue_Links( $links );
+        echo( "<br/>  links is " . $probLinks);
         /* end syntax */
 
         $prob = $probDiffLang + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace + $probSyntax + $probLinks;
@@ -288,10 +298,10 @@ class AthenaHelper
         }
 
         $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
-        echo( "<br/> probLang is " . $probLang );
+        //echo( "<br/> probLang is " . $probLang );
 
         $weightLang = AthenaHelper::loadWeightings("difflang");
-        echo( "<br/>  weightLang is " . $weightLang );
+        //echo( "<br/>  weightLang is " . $weightLang );
 
         return $weightLang * $probLang;
     }
@@ -310,10 +320,10 @@ class AthenaHelper
         }
 
         $probLang = AthenaHelper::loadProbabilities("spam", 0, "brokenspambot", $notFlag);
-        echo( "<br/> probSpamBot is " . $probLang );
+        //echo( "<br/> probSpamBot is " . $probLang );
 
         $weightLang = AthenaHelper::loadWeightings("brokenspambot");
-        echo( "<br/>  weightSpamBot is " . $weightLang );
+        //echo( "<br/>  weightSpamBot is " . $weightLang );
 
         return $weightLang * $probLang;
     }
@@ -332,10 +342,10 @@ class AthenaHelper
         }
 
         $probDeleted = AthenaHelper::loadProbabilities("spam", 0, "deleted", $notFlag);
-        echo( "<br/> probdeleted is " . $probDeleted );
+        //echo( "<br/> probdeleted is " . $probDeleted );
 
         $weightDeleted = AthenaHelper::loadWeightings("deleted");
-        echo( "<br/>  weightdeleted is " . $weightDeleted );
+        //echo( "<br/>  weightdeleted is " . $weightDeleted );
 
         return $weightDeleted * $probDeleted;
     }
@@ -354,10 +364,10 @@ class AthenaHelper
         }
 
         $probWanted = AthenaHelper::loadProbabilities("spam", 0, "wanted", $notFlag);
-        echo( "<br/> probwanted is " . $probWanted );
+        //echo( "<br/> probwanted is " . $probWanted );
 
         $weightWanted = AthenaHelper::loadWeightings("wanted");
-        echo( "<br/>  weightwanted is " . $weightWanted );
+        //echo( "<br/>  weightwanted is " . $weightWanted );
 
         return $weightWanted * $probWanted;
     }
@@ -390,10 +400,10 @@ class AthenaHelper
 
 
         $probUser = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
-        echo( "<br/> probUser is " . $probUser );
+        //echo( "<br/> probUser is " . $probUser );
 
         $weightUser = AthenaHelper::loadWeightings("userage");
-        echo( "<br/>  weightwanted is " . $weightUser );
+        //echo( "<br/>  weightwanted is " . $weightUser );
 
         return $weightUser * $probUser;
     }
@@ -412,10 +422,10 @@ class AthenaHelper
         }
 
         $probLength = AthenaHelper::loadProbabilities( "spam", 0, "titlelength", $notFlag );
-        echo( "<br/> probLength is " . $probLength );
+        //echo( "<br/> probLength is " . $probLength );
 
         $weightLength = AthenaHelper::loadWeightings( "titlelength" );
-        echo( "<br/>  weightLength is " . $weightLength );
+        //echo( "<br/>  weightLength is " . $weightLength );
 
         return $weightLength * $probLength;
     }
@@ -439,10 +449,10 @@ class AthenaHelper
             $varName = "nsusertalk";
 
         $probNamespace = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
-        echo( "<br/> probnamespace is " . $probNamespace );
+        //echo( "<br/> probnamespace is " . $probNamespace );
 
         $weightNamespace = AthenaHelper::loadWeightings("namespace");
-        echo( "<br/>  weightwanted is " . $weightNamespace );
+        //echo( "<br/>  weightwanted is " . $weightNamespace );
 
         return $weightNamespace * $probNamespace;
     }
@@ -465,10 +475,10 @@ class AthenaHelper
             $varName = "brokenspambot";
 
         $probNamespace = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
-        echo( "<br/> probnamespace is " . $probNamespace );
+        //echo( "<br/> probnamespace is " . $probNamespace );
 
         $weightNamespace = AthenaHelper::loadWeightings("syntax");
-        echo( "<br/>  weightwanted is " . $weightNamespace );
+       //echo( "<br/>  weightwanted is " . $weightNamespace );
 
         return $weightNamespace * $probNamespace;
     }
@@ -490,10 +500,10 @@ class AthenaHelper
             $varName = "links50";
 
         $probLinks = AthenaHelper::loadProbabilities("spam", 0, $varName, 0);
-        echo( "<br/> probLinks is " . $probLinks );
+        //echo( "<br/> probLinks is " . $probLinks );
 
         $weightLinks = AthenaHelper::loadWeightings("links");
-        echo( "<br/>  $weightLinks is " . $weightLinks );
+        //echo( "<br/>  $weightLinks is " . $weightLinks );
 
         return $weightLinks * $probLinks;
     }

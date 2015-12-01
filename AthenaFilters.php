@@ -113,7 +113,8 @@ class AthenaFilters {
             // Tables
             $count += preg_match_all("/\{\|([^\{\|\}])+\|\}/", $text);
             // Templates
-            $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
+            // TODO Fix
+            // $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
 
             if( $count > 1 ) {
                 return 2;
@@ -163,8 +164,8 @@ class AthenaFilters {
         // Remove any region specialities from wiki's language code (e.g. en-gb becomes en)
         $arr = preg_split("/-/", $wgLanguageCode);
 
-        echo( "\n\n language code is " .  $arr[0] );
-        echo( "\n\n language is " .  $language );
+       // echo( "\n\n language code is " .  $arr[0] );
+       // echo( "\n\n language is " .  $language );
 
         if( $language !== null ) {
             if ( $arr[0] === $language ) {
@@ -185,12 +186,13 @@ class AthenaFilters {
      */
     public static function brokenSpamBot($text) {
         // Word choices
-        $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
+        // TODO Fix
+       //$count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
         // Link count
-        $count += preg_match_all("/#file_links<>/", $text);
+        $count = preg_match_all("/#file_links<>/", $text);
 
         // Let's be reasonable, for now
-        if( $count > 2 )
+        if( $count > 1 )
             return true;
         else
             return false;

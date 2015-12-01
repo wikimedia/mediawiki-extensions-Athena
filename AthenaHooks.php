@@ -22,9 +22,6 @@ class AthenaHooks {
             // Let's skip redirects
             $redirect = preg_match_all("/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text);
             if( $redirect !== 1 ) {
-                $s = AthenaFilters::linkPercentage($text);
-                echo( "links are " . $s);
-
                 // TODO proper message, i18n and stuff
 
                /* $userAge = AthenaFilters::userAge();
@@ -67,13 +64,13 @@ class AthenaHooks {
                 echo( "\n prob is " . $prob );
 */
                 $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
-               // if( $prob > $wgAthenaSpamThreshold ) {
+                if( $prob > $wgAthenaSpamThreshold ) {
                     $error =
                         "<div class='errorbox'>" .
                         "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                         "</div>\n" .
                         "<br clear='all' />\n";
-              //  }
+                }
 
 
             }
@@ -129,7 +126,7 @@ class AthenaHooks {
         // TODO check multiple instances of the same title - maybe check user_id as well
         $sql = "SELECT al_id FROM {$db->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
 
-        echo($sql);
+        //echo($sql);
 
         $res = $db->query($sql, __METHOD__);
         $row = $db->fetchObject($res);
@@ -139,18 +136,29 @@ class AthenaHooks {
             $updateStatement = " page_id={$page_id}, rev_id={$rev_id}";
             $whereStatement = " al_id = {$id}";
 
-            $sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
+            //$sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
 
-            echo($sql);
-            $db->query($sql, __METHOD__);
+            $db->update('athena_page_details',
+                array('page_id'=>$page_id, 'rev_id'=>$rev_id),
+                array('al_id'=>$id),
+                __METHOD__,
+                null);
 
-            $updateStatement = " al_success=1";
-            $whereStatement = " al_id = {$id}";
+            //echo($sql);
+            //$db->query($sql, __METHOD__);
 
-            $sql = "UPDATE {$db->tableName( 'athena_log' )} SET {$updateStatement} WHERE {$whereStatement};";
+            //$updateStatement = " al_success=1";
+            //$whereStatement = " al_id = {$id}";
 
-            echo($sql);
-            $db->query($sql, __METHOD__);
+            //$sql = "UPDATE {$db->tableName( 'athena_log' )} SET {$updateStatement} WHERE {$whereStatement};";
+            $db->update('athena_log',
+                array('al_success'=>1),
+                array('al_id'=>$id),
+                __METHOD__,
+                null);
+
+            //echo($sql);
+           // $db->query($sql, __METHOD__);
 
             return true;
         }

@@ -40,13 +40,13 @@ CREATE TABLE IF NOT EXISTS `athena_weighting` (
 
 INSERT INTO `athena_weighting` (`aw_id`, `aw_variable`, `aw_value`, `aw_updated`) VALUES
 (1, 'difflang', 0.2, '2015-11-25 23:30:49'),
-(2, 'userage', 0.2, '2015-11-26 00:03:37'),
-(3, 'links', 0.1, '2015-11-26 00:03:37'),
+(2, 'userage', 0.25, '2015-11-26 00:03:37'),
+(3, 'links', 0.2, '2015-11-26 00:03:37'),
 (4, 'syntax', 0.3, '2015-11-26 00:03:37'),
-(5, 'titlelength', 0.05, '2015-11-26 00:03:37'),
-(6, 'namespace', 0.05, '2015-11-26 00:03:37'),
-(7, 'wanted', 0.05, '2015-11-26 00:03:37'),
-(8, 'deleted', 0.05, '2015-11-26 00:03:37'),
+(5, 'titlelength', 0.0125, '2015-11-26 00:03:37'),
+(6, 'namespace', 0.0125, '2015-11-26 00:03:37'),
+(7, 'wanted', 0.0125, '2015-11-26 00:03:37'),
+(8, 'deleted', 0.0125, '2015-11-26 00:03:37'),
 (9, 'brokenspambot', 0, '2015-11-26 00:05:01');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
