@@ -1,6 +1,6 @@
 {
   "name": "Athena",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": [
     "Richard Cook"
   ],
@@ -8,10 +8,19 @@
   "descriptionmsg": "athena-desc",
   "type": "antispam",
   "manifest_version": 1,
+  "SpecialPages": {
+		"Athena": "SpecialAthena"
+	},
+  "MessagesDirs": {
+	"Athena": [
+		"i18n"
+	]
+   },
   "AutoloadClasses": {
     "AthenaHooks": "AthenaHooks.php",
     "AthenaFilters": "AthenaFilters.php",
-    "AthenaHelper": "AthenaHelper.php"
+    "AthenaHelper": "AthenaHelper.php",
+	"SpecialAthena": "Athena_body.php"
   },
   "Hooks": {
     "EditFilter": [
@@ -26,5 +35,13 @@
   },
   "config": {
     "AthenaSpamThreshold": 0.25
+  },
+  "AvailableRights": [
+	"athena"
+  ],
+  "GroupPermissions": {
+	"sysop": {
+	  "athena": true
+	}
   }
 }

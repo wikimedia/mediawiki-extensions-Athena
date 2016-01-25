@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Richard Cook"
+		]
+	},
+	"athena": "Athena",
+	"athena-desc": "Super Cool New Context-Based Anti-Spam Tool",
+	"athena-title": "Athena",
+	"athena-pagetext":"Select what Athena logs you want to view below.",
+	"athena-title-0": "Athena - All logs",
+	"athena-title-1": "Athena - Blocked log",
+	"athena-title-2": "Athena - Not blocked log",
+	"athena-pagetext-0": "Showing all pages Athena has encountered.",
+	"athena-pagetext-1": "Showing all pages Athena has blocked.",
+	"athena-pagetext-2": "Showing all pages Athena has not blocked.",
+	"athena-type-0": "all",
+	"athena-type-1": "spam",
+	"athena-type-2": "notspam",
+	"athena-type-desc-0": "All",
+	"athena-type-desc-1": "Pages blocked by Athena",
+	"athena-type-desc-2": "Pages not blocked by Athena",
+  	"athena-id": "id",
+    "athena-viewing": "Viewing ID #$1",
+  	"athena-viewing-error": "Error - no item with Athena ID #$1"
+}
