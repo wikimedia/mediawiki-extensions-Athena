@@ -42,7 +42,7 @@ class AthenaHelper
         }
 
         // else we are bork and so let's say false
-        echo('Something went wrong :(');
+        //echo('Something went wrong :(');
         return false;
     }
 
@@ -65,21 +65,26 @@ class AthenaHelper
      */
     static function logAttempt($prob, $userAge, $links, $syntax, $language, $broken, $deleted, $wanted,
                                 $namespace, $title, $content, $comment, $user) {
+       // echo("In log attempt 1");
         $db = wfGetDB(DB_MASTER);
+       // echo("In log attempt 2");
 
         $links = AthenaHelper::makeSQLNull($links);
         $syntax = AthenaHelper::makeSQLNull($syntax);
+        //echo("In log attempt 3");
 
         if( $language === false ) {
             $language = 0;
         }
         $language = AthenaHelper::makeSQLNull($language);
+       // echo("In log attempt 4");
 
         if( $broken === false ) {
             $broken = 0;
         }
 
         $broken = AthenaHelper::makeSQLNull($broken);
+        //echo("In log attempt 5");
 
         if( $deleted === false ) {
             $deleted = 0;
@@ -110,9 +115,9 @@ class AthenaHelper
         $row = $db->fetchObject( $res );
         $id = $row->id;
 
-        $title = mysql_real_escape_string ($title);
-        $content = mysql_real_escape_string ($content);
-        $comment = mysql_real_escape_string ($comment);
+        $title = $db->strencode($title);
+        $content = $db->strencode($content);
+        $comment = $db->strencode($comment);
         // TODO security
         //$insertStatement = " ({$id}, {$namespace}, '{$title}', '{$content}', {$comment}, {$user}, CURRENT_TIMESTAMP, NULL, NULL)";
         $insertArray = array( "al_id"=>$id, "apd_namespace"=>$namespace, "apd_title"=>$title,
@@ -127,7 +132,6 @@ class AthenaHelper
             print_r($e);
         }
         //$db->query($sql, __METHOD__);
-
     }
 
 
@@ -155,7 +159,7 @@ class AthenaHelper
         }
 
         // else we are bork and so let's say false
-        echo('Something went wrong :(');
+        //echo('Something went wrong :(');
         return false;
     }
 
@@ -200,6 +204,7 @@ class AthenaHelper
     static function calculateAthenaValue( $editPage, $text, $summary ) {
         global $wgUser;
 
+      //  echo("CALC");
         $titleObj = $editPage->getTitle();
         $namespace = $titleObj->getNamespace();
         $title = $titleObj->getTitleValue()->getText();
@@ -208,7 +213,7 @@ class AthenaHelper
         $diffLang = AthenaFilters::differentLanguage($text);
 
         $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang );
-        echo( "<br/>  difflang is " . $probDiffLang);
+      //  echo( "<br/>  difflang is " . $probDiffLang);
         /* end different language */
 
         /* start broken spam bot */
@@ -222,35 +227,35 @@ class AthenaHelper
         $deleted = AthenaFilters::wasDeleted( $titleObj );
 
         $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted );
-        echo( "<br/>  deleted is " . $probDeleted);
+      //  echo( "<br/>  deleted is " . $probDeleted);
         /* end deleted */
 
         /* start wanted */
         $wanted = AthenaFilters::isWanted( $titleObj );
 
         $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted );
-        echo( "<br/>  wanted is " . $probWanted);
+       // echo( "<br/>  wanted is " . $probWanted);
         /* end wanted */
 
         /* start user type */
         $userAge = AthenaFilters::userAge();
 
         $probUser = AthenaHelper::calculateAthenaValue_User( $userAge );
-        echo( "<br/>  user age is " . $probUser);
+       // echo( "<br/>  user age is " . $probUser);
         /* end user type */
 
         /* start title length */
         $titleLength = AthenaFilters::titleLength( $titleObj );
 
         $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength );
-        echo( "<br/>  title length is " . $probLength);
+      //  echo( "<br/>  title length is " . $probLength);
         /* end title length */
 
         /* start title length */
         $namespace = AthenaFilters::getNamespace( $titleObj );
 
         $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace );
-        echo( "<br/>  namespace is " . $probNamespace);
+       // echo( "<br/>  namespace is " . $probNamespace);
         /* end title length */
 
         /* start syntax */
@@ -258,20 +263,20 @@ class AthenaHelper
         $syntaxType = AthenaFilters::syntaxType( $text );
 
         $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType );
-        echo( "<br/>  syntax is " . $probSyntax);
+       // echo( "<br/>  syntax is " . $probSyntax);
         /* end syntax */
 
         /* start syntax */
         $links = AthenaFilters::linkPercentage( $text );
 
         $probLinks = AthenaHelper::calculateAthenaValue_Links( $links );
-        echo( "<br/>  links is " . $probLinks);
+        //echo( "<br/>  links is " . $probLinks);
         /* end syntax */
 
         $prob = $probDiffLang + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace + $probSyntax + $probLinks;
 
 
-        echo( "<br/> total probability is " . $prob );
+        //echo( "<br/> total probability is " . $prob );
 
         // Log here
         if( $syntaxType === 3 ) {

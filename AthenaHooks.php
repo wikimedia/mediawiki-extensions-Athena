@@ -13,9 +13,10 @@ class AthenaHooks {
      * @return bool
      */
     static function editFilter( $editPage, $text, $section, &$error, $summary ) {
-        global $wgAthenaSpamThreshold, $wgUser;
+        global $wgAthenaSpamThreshold;
         // Check if it's a new article or not
         if ( $editPage->getTitle()->getArticleID() === 0 ) {
+            // ("TEST");
             $namespace = $editPage->getTitle()->getNamespace();
             $title = $editPage->getTitle()->getTitleValue()->getText();
 
@@ -63,18 +64,24 @@ class AthenaHooks {
                 }
                 echo( "\n prob is " . $prob );
 */
+                //echo ("part 0\n");
                 $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
+                //echo ("part 1\n");
                 if( $prob > $wgAthenaSpamThreshold ) {
+                    //echo ("part 2\n");
                     $error =
                         "<div class='errorbox'>" .
                         "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
                         "</div>\n" .
                         "<br clear='all' />\n";
+                   // echo ("part 3\n");
                 }
-
+               // echo ("part 4\n");
 
             }
+           // echo ("part 5\n");
         }
+       // echo ("part 6\n");
         return true;
     }
 
@@ -82,6 +89,7 @@ class AthenaHooks {
      * Updates the database with the new Athena tabled
      * Called when the update.php maintenance script is run.
      *
+     * TODO Auto-fill weighting and probability data
      * @param $updater DatabaseUpdater
      * @return bool
      */
@@ -119,7 +127,7 @@ class AthenaHooks {
         $page_id = $article->getId();
         $rev_id = $article->getRevision()->getId();
 
-        $title = mysql_real_escape_string ($article->getTitle()->getText());
+        $title = $db->strencode ($article->getTitle()->getText());
 
         $whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
 
@@ -132,6 +140,7 @@ class AthenaHooks {
         $row = $db->fetchObject($res);
 
         if ($row) {
+
             $id = $row->al_id;
             $updateStatement = " page_id={$page_id}, rev_id={$rev_id}";
             $whereStatement = " al_id = {$id}";
@@ -162,6 +171,7 @@ class AthenaHooks {
 
             return true;
         }
+
         return false;
     }
 }
