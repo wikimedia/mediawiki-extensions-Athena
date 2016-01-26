@@ -170,7 +170,7 @@ class SpecialAthena extends SpecialPage {
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success',
 				'apd_comment', 'apd_content'),
-			array('athena_log.al_id' => $id),
+			array('athena_log.al_id' => $id, 'athena_page_details.al_id' => $id),
 			__METHOD__,
 			array()
 		);
@@ -182,7 +182,7 @@ class SpecialAthena extends SpecialPage {
 
 			$tableStr .= '<tr><td>Title</td>';
 			// Make a pretty title
-			$title = Title::newFromText($res->apd_title, $res->apd_namespace);
+			$title = Title::newFromText(stripslashes($res->apd_title), $res->apd_namespace);
 			$tableStr .= '<td>' . $title->getFullText() . '</td></tr>';
 
 			// Get the user
@@ -199,22 +199,33 @@ class SpecialAthena extends SpecialPage {
 
 			if ($res->apd_comment) {
 				$tableStr .= '<tr><td>Comment</td>';
-				$tableStr .= '<td>' . $res->apd_comment . '</td></tr>';
-
+				$tableStr .= '<td>' . stripslashes ($res->apd_comment) . '</td></tr>';
 			}
 
 			$tableStr .= '</tbody></table>';
 			$output->addHTML($tableStr);
 
+			// Replace \n with new line, remove slashes
+			$content = stripslashes( str_replace('\\n', PHP_EOL, $res->apd_content ) );
+
 			$output->addWikiText("==Content==");
-			$output->addWikiText("=== WikiText ===");
-			$output->addHTML('<pre>' . $res->apd_content . '</pre>');
-			$output->addWikiText("=== Preview ===");
-			$output->addWikiText($res->apd_content);
+			$output->addWikiText("<h3>WikiText</h3>");
+			$output->addHTML('<div class="toccolours mw-collapsible mw-collapsed">');
+			$output->addHTML('<pre>' . $content . '</pre>');
+			$output->addHTML('</div>');
+			// For the preview, display it replacing {{PAGENAME}} with the correct title
+			$content = str_replace( '{{PAGENAME}}', $title, $content );
+
+			$output->addWikiText("<h3>Preview</h3>");
+			$output->addHTML('<div class="toccolours mw-collapsible mw-collapsed">');
+			$output->addWikiText($content);
+			$output->addHTML('</div>');
+
+			// Display Athena scores
+			$output->addWikiText( "== Athena Results ==" );
 
 		} else {
 			$output->addWikiMsgArray('athena-viewing-error', $id);
 		}
-
 	}
 }
