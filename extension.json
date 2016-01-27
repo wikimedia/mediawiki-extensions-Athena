@@ -31,8 +31,11 @@
     ],
     "PageContentSaveComplete": [
       "AthenaHooks::successfulEdit"
+    ],
+    "ArticleDeleteComplete": [
+      "AthenaHooks::pageDeleted"
     ]
-  },
+},
   "config": {
     "AthenaSpamThreshold": 0.25
   },

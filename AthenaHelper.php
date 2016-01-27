@@ -512,4 +512,77 @@ class AthenaHelper
 
         return $weightLinks * $probLinks;
     }
+
+    /**
+     * Makes a number of seconds look nice and pretty
+     *
+     * @param $seconds integer
+     * @return string
+     */
+    static function secondsToString( $seconds ) {
+        // Look for days
+        $str = '';
+        if( $seconds > 60*60*24 ) {
+            $days = floor( $seconds/(60*60*24) );
+            $str .= $days . ' days';
+            $seconds -= $days*(60*60*24);
+        }
+        if( $seconds > 60*60 ) {
+            $hours = floor( $seconds/(60*60) );
+            if( $str != '' ) {
+                $str .= ', ';
+            }
+            $str .= $hours . ' hours';
+            $seconds -= $hours*(60*60);
+        }
+        if( $seconds > 60 ) {
+            $minutes = floor( $seconds / 60 );
+            if( $str != '' ) {
+                $str .= ', ';
+            }
+            $str .= $minutes . ' minutes';
+            $seconds -= $minutes*60;
+        }
+        if( $seconds >= 0 ) {
+            if( $str != '' ) {
+                $str .= ' and ';
+            }
+            $str .= $seconds . ' seconds';
+        }
+        return $str;
+    }
+
+    /**
+     * Takes a syntax type and returns its string equivalent
+     *
+     * @param $type integer
+     * @return string
+     */
+    static function syntaxTypeToString( $type ) {
+        switch( $type ) {
+            case 0:
+                return "None";
+            case 1:
+                return "Simple";
+            case 2:
+                return "Complex";
+            case 3:
+                return "Broken spambot";
+            default:
+                return "Invalid value";
+        }
+    }
+
+    /**
+     * Takes a boolean (be it of type boolean or integer) and returns the equivalent string
+     *
+     * @param $val boolean|integer
+     * @return string
+     */
+    static function boolToString( $val ) {
+        if( $val ) {
+            return "True";
+        }
+        return "False";
+    }
 }

@@ -120,7 +120,7 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<td>' . $row->al_id . '</td>';
 
 			// Make a pretty title
-			$title = Title::newFromText($row->apd_title, $row->apd_namespace);
+			$title = Title::newFromText(stripslashes($row->apd_title), $row->apd_namespace);
 			$tableStr .= '<td>' . $title->getFullText() . '</td>';
 
 			// Get the user
@@ -157,6 +157,10 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Shows the details for a given Athena id
 	 *
+	 * TODO remove hard-coded strings
+	 * TODO clean up code
+	 * TODO add back buttons
+	 *
 	 * @param $id int the id of the page they want to see
 	 */
 	public function showAthenaPage( $id ) {
@@ -169,21 +173,21 @@ class SpecialAthena extends SpecialPage {
 		$res = $db->selectRow(
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success',
-				'apd_comment', 'apd_content'),
+				'apd_comment', 'apd_content', 'al_user_age', 'al_links', 'al_syntax', 'al_language',
+					'al_wanted', 'al_deleted', 'al_overridden'),
 			array('athena_log.al_id' => $id, 'athena_page_details.al_id' => $id),
 			__METHOD__,
 			array()
 		);
 
 		if( $res ) {
-
 			// Start info box at the top
 			$tableStr = '<table class="wikitable"><tbody>';
 
 			$tableStr .= '<tr><td>Title</td>';
 			// Make a pretty title
 			$title = Title::newFromText(stripslashes($res->apd_title), $res->apd_namespace);
-			$tableStr .= '<td>' . $title->getFullText() . '</td></tr>';
+			$tableStr .= '<td>' . $output->parse('[[' . $title->getFullText() . ']]') . '</td></tr>';
 
 			// Get the user
 			$tableStr .= '<tr><td>User</td>';
@@ -197,18 +201,43 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '</tr><tr><td>Timestamp</td>';
 			$tableStr .= '<td>' . $res->apd_timestamp . '</td></tr>';
 
-			if ($res->apd_comment) {
+			if ($res->apd_comment && $res->apd_comment != "NULL") {
 				$tableStr .= '<tr><td>Comment</td>';
 				$tableStr .= '<td>' . stripslashes ($res->apd_comment) . '</td></tr>';
 			}
 
+			$tableStr .= '<tr><td>Athena Value</td><td>' . $res->al_value . '</td></tr>';
+			$tableStr .= '<tr><td colspan="2">';
+			if( $res->al_success ) {
+				$tableStr .= 'Athena didn\'t block this page';
+			} else {
+				$tableStr .= 'Athena blocked this page';
+			}
+			$tableStr .= '</td></tr>';
 			$tableStr .= '</tbody></table>';
 			$output->addHTML($tableStr);
+
+			// Reinforcement button
+			if( $res->al_success ) {
+				if( $res->al_overridden ) {
+					// TODO i18n
+					$output->addWikiText('Page already deleted');
+				} else {
+					$output->addHTML('<a href=' . $title->getFullURL( array( 'action' => 'delete' ) ) . '>Delete this page</a>');
+				}
+			} else {
+				if( $res->al_overridden ) {
+					// TODO i18n
+					$output->addWikiText('Page already allowed through the filter');
+				} else {
+					$output->addWikiText('[[Special:Create/' . $title . '|Allow this page]]');
+				}
+			}
 
 			// Replace \n with new line, remove slashes
 			$content = stripslashes( str_replace('\\n', PHP_EOL, $res->apd_content ) );
 
-			$output->addWikiText("==Content==");
+			$output->addWikiText("== Content ==");
 			$output->addWikiText("<h3>WikiText</h3>");
 			$output->addHTML('<div class="toccolours mw-collapsible mw-collapsed">');
 			$output->addHTML('<pre>' . $content . '</pre>');
@@ -223,7 +252,22 @@ class SpecialAthena extends SpecialPage {
 
 			// Display Athena scores
 			$output->addWikiText( "== Athena Results ==" );
+			$tableStr = "<table class=\"wikitable\"><thead><th>Metric</th><th>Score</th></thead><tbody>";
 
+			$ageStr = AthenaHelper::secondsToString($res->al_user_age);
+			if( $ageStr == '' ) {
+				$ageStr = 'n/a';
+			}
+			$tableStr .= "<tr><td>User age</td><td>" . $ageStr . "</td></tr>";
+			$tableStr .= "<tr><td>Number of links</td><td>" . $res->al_links . " links</td></tr>";
+			$tableStr .= "<tr><td>Syntax classification</td><td>" . AthenaHelper::syntaxTypeToString( $res->al_syntax ) . "</td></tr>";
+			$tableStr .= "<tr><td>Same language</td><td>" . AthenaHelper::boolToString( $res->al_language ) . "</td></tr>";
+			$tableStr .= "<tr><td>Wanted page</td><td>" . AthenaHelper::boolToString( $res->al_wanted ) . "</td></tr>";
+			$tableStr .= "<tr><td>Deleted page</td><td>" . AthenaHelper::boolToString( $res->al_deleted ) . "</td></tr>";
+			$tableStr .= "<tr><td><b>Total</b></td><td><b>" . $res->al_value . "</b></td></tr>";
+			$tableStr .= "</tbody></table>";
+
+			$output->addHTML($tableStr);
 		} else {
 			$output->addWikiMsgArray('athena-viewing-error', $id);
 		}

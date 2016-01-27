@@ -12,7 +12,8 @@ CREATE TABLE athena_log (
   `al_language` tinyint(1) unsigned,
   `al_broken_spambot` tinyint(1) unsigned,
   `al_wanted` tinyint(1) unsigned,
-  `al_deleted` tinyint(1) unsigned
+  `al_deleted` tinyint(1) unsigned,
+  `al_overridden` tinyint(1) unsigned NOT NULL default 0
 );
 
 --
