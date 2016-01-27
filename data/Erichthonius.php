@@ -2,6 +2,9 @@
 /**
  * A script to grab information about new pages from a wiki
  *
+ * TODO clean up
+ * TODO re-write before future testing
+ *
  * @file
  * @ingroup Maintenance
  * @author Richard Cook <cook879@shoutwiki.com>
@@ -17,7 +20,7 @@ ini_set( 'include_path', dirname( __FILE__ ) . '/../../../maintenance' );
 
 require_once( 'Maintenance.php' );
 
-class AthenaBot extends Maintenance {
+class Erichthonius extends Maintenance {
 
     public function __construct() {
         parent::__construct();
@@ -32,80 +35,80 @@ class AthenaBot extends Maintenance {
 
         // Making lot's of assumptions about input (json file, one line of code)
         // TODO data validation and stuff?
-        $file_contents = fgets($file);
-        $json = json_decode($file_contents, true);
+        $file_contents = fgets( $file );
+        $json = json_decode( $file_contents, true );
 
         // Reverse to test somemore
-        //$json = array_reverse($json);
+        // $json = array_reverse($json);
 
         $url = $wgServer . $wgScriptPath . '/api.php';
         $count = 0;
-        foreach($json as $page) {
+        foreach ( $json as $page ) {
            // echo 'Namespace: ' . $page['namespace'] . "\n";
-            //echo 'Title: ' . $page['title'] . "\n";
-            //echo 'Comment: ' . $page['comment'] . "\n";
-            //echo 'Content: ' . $page['content'] . "\n";
-            //echo 'Timestamp: ' . $page['timestamp'] . "\n";
-            //echo 'User timestamp: ' . $page['user-timestamp'] . "\n";
+            // echo 'Title: ' . $page['title'] . "\n";
+            // echo 'Comment: ' . $page['comment'] . "\n";
+            // echo 'Content: ' . $page['content'] . "\n";
+            // echo 'Timestamp: ' . $page['timestamp'] . "\n";
+            // echo 'User timestamp: ' . $page['user-timestamp'] . "\n";
            // echo 'Lang: ' . $page['lang'] . "\n";
-            //echo "\n\n\n";
+            // echo "\n\n\n";
 
             // Can't use edit.php as it doesn't let you specify anon
-            $title = urlencode(AthenaBot::getNamespace($page['namespace']) . $page['title']);
+            $title = urlencode( Erichthonius::getNamespace( $page['namespace'] ) . $page['title'] );
 
-            echo("Page #" . $count . ": " . $title);
-            echo("\n\n");
+            echo( "Page #" . $count . ": " . $title );
+            echo( "\n\n" );
 
             $apiCall = 'action=edit&format=json&title=' .
                 $title
-                . '&text=' . urlencode($page['content']);
+                . '&text=' . urlencode( $page['content'] );
 
-            if( !empty($page['comment']) )
-                $apiCall .= '&summary=' . urlencode($page['comment']);
+            if ( !empty( $page['comment'] ) )
+                $apiCall .= '&summary=' . urlencode( $page['comment'] );
 
             // Using CURL as need sessions, which file_get_contents can't provide
             $ch = curl_init();
 
             curl_setopt( $ch, CURLOPT_URL, $url );
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-            //curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+            // curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
             // Header needed for cookies
-            //curl_setopt( $ch, CURLOPT_HEADER, 1 );
+            // curl_setopt( $ch, CURLOPT_HEADER, 1 );
 
             // User time
-            if( $page['user-timestamp'] === 0 ) {
-                $apiCall .= '&token=' . urlencode('+\\');
+            if ( $page['user-timestamp'] === 0 ) {
+                $apiCall .= '&token=' . urlencode( '+\\' );
             } else {
                 // Cookies for the login
                 // Calculate how old the account was when it was created
-                $pagetimestamp = wfTimestamp(TS_UNIX, $page['timestamp']);
-                $usertimestamp = wfTimestamp(TS_UNIX, $page['user-timestamp']);
+                $pagetimestamp = wfTimestamp( TS_UNIX, $page['timestamp'] );
+                $usertimestamp = wfTimestamp( TS_UNIX, $page['user-timestamp'] );
                 $age = $pagetimestamp - $usertimestamp;
-                $cookieString = AthenaBot::createUser($age);
-                curl_setopt( $ch, CURLOPT_COOKIE, $cookieString);
+                $cookieString = Erichthonius::createUser( $age );
+                curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
 
                 // Get an edit token
-                $token = AthenaBot::getEditToken($cookieString);
-                $apiCall .= '&token=' . urlencode($token);
+                $token = Erichthonius::getEditToken( $cookieString );
+                $apiCall .= '&token=' . urlencode( $token );
             }
 
-            AthenaBot::existsCheck($title);
+            Erichthonius::existsCheck( $title );
 
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-            echo("Attempting to create the page\n\n");
-            //echo($apiCall."\n\n\n\n");
-            $response = curl_exec($ch);
-            echo($response);
-            echo("\n\n");
-            curl_close($ch);
+            echo( "Attempting to create the page\n\n" );
+            // echo($apiCall."\n\n\n\n");
+            $response = curl_exec( $ch );
+            echo( $response );
+            echo( "\n\n" );
+            curl_close( $ch );
 
             $count++;
-            echo($count . " pages completed.\n ------------------------------------------------------------------------\n\n");
+            echo( $count . " pages completed.\n ------------------------------------------------------------------------\n\n" );
 
            /* if( $count === 100)
                 break;*/
-            sleep(1);
+            sleep( 1 );
             // Can't use below code as cookies
 
             /*$apiCall = array('action' => 'edit',
@@ -141,7 +144,7 @@ class AthenaBot extends Maintenance {
             sleep(5);*/
         }
 
-        fclose($file);
+        fclose( $file );
     }
 
     /**
@@ -150,8 +153,8 @@ class AthenaBot extends Maintenance {
      * @param $id int
      * @return string
      */
-    public static function getNamespace($id) {
-        switch ($id) {
+    public static function getNamespace( $id ) {
+        switch ( $id ) {
             case 0:
                 return '';
             case 1:
@@ -194,101 +197,101 @@ class AthenaBot extends Maintenance {
      * @param $age int
      * @return string
      */
-    public static function createUser($age) {
+    public static function createUser( $age ) {
         global $session_name, $url;
         // Let's create a new user
         // Random unique string generator from http://stackoverflow.com/questions/19017694/one-line-php-random-string-generator
-        $username = substr(str_shuffle("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 1).substr(md5(time()),1);
+        $username = substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 );
 
-        echo("Creating new user called " . $username);
-        echo("\n\n");
+        echo( "Creating new user called " . $username );
+        echo( "\n\n" );
 
-        $apiCall = 'action=createaccount&format=json&name=' . urlencode($username) . '&password=123&token=';
+        $apiCall = 'action=createaccount&format=json&name=' . urlencode( $username ) . '&password=123&token=';
 
         // Using CURL as need sessions, which file_get_contents can't provide
         $ch = curl_init();
 
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        //curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+        // curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
         // Header needed for cookies
         curl_setopt( $ch, CURLOPT_HEADER, 1 );
         curl_setopt( $ch, CURLOPT_POST, 5 ); // Number of fields
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-        $response = curl_exec($ch);
-        //echo($response);
-        //echo("\n\n");
+        $response = curl_exec( $ch );
+        // echo($response);
+        // echo("\n\n");
 
         // From http://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
-        preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
+        preg_match_all( '/^Set-Cookie:\s*([^;]*)/mi', $response, $matches );
         $cookies = array();
-        foreach($matches[1] as $item) {
-            parse_str($item, $cookie);
-            $cookies = array_merge($cookies, $cookie);
+        foreach ( $matches[1] as $item ) {
+            parse_str( $item, $cookie );
+            $cookies = array_merge( $cookies, $cookie );
         }
         // Let's assume we only get one cookie and it's the one we want
-        //var_dump($cookies);
-        curl_setopt( $ch, CURLOPT_COOKIE, $session_name . '=' .$cookies[$session_name].'; path=/');
+        // var_dump($cookies);
+        curl_setopt( $ch, CURLOPT_COOKIE, $session_name . '=' . $cookies[$session_name] . '; path=/' );
 
         // We only want to parse the body of the response as json
         $header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
-        $body = substr($response, $header_size);
+        $body = substr( $response, $header_size );
 
-        $json = json_decode($body, true);
-        //print_r($json);
+        $json = json_decode( $body, true );
+        // print_r($json);
         $apiCall .= $json['createaccount']['token'];
-        //print_r($apiCall);
+        // print_r($apiCall);
 
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
         // Don't need the headers anymore
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
 
-        $response = curl_exec($ch);
-        echo($response);
-        echo("\n\n");
-        $json = json_decode($response, true);
+        $response = curl_exec( $ch );
+        echo( $response );
+        echo( "\n\n" );
+        $json = json_decode( $response, true );
 
         // END CREATION
 
         // Alter age of the account
         $newTime = time() - $age;
-        $newTime = wfTimestamp(TS_MW, $newTime);
+        $newTime = wfTimestamp( TS_MW, $newTime );
 
         $dbr = wfGetDB( DB_SLAVE );
-        $dbr->update('user', array('user_registration'=>$newTime),array('user_id'=>$json['createaccount']['userid']));
+        $dbr->update( 'user', array( 'user_registration' => $newTime ), array( 'user_id' => $json['createaccount']['userid'] ) );
 
-        echo("User register timestamp altered\n\n");
+        echo( "User register timestamp altered\n\n" );
         // START LOGIN
 
-        echo("Logging user in\n\n");
-        $apiCall = 'action=login&format=json&lgname=' . urlencode($username) . '&lgpassword=123';
+        echo( "Logging user in\n\n" );
+        $apiCall = 'action=login&format=json&lgname=' . urlencode( $username ) . '&lgpassword=123';
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
-        $response = curl_exec($ch);
-        echo($response);
-        echo("\n\n");
+        $response = curl_exec( $ch );
+        echo( $response );
+        echo( "\n\n" );
 
 
-        $json = json_decode($response, true);
-        //print_r($json);
+        $json = json_decode( $response, true );
+        // print_r($json);
         $apiCall .= '&lgtoken=' . $json['login']['token'];
-        //print_r($apiCall);
+        // print_r($apiCall);
 
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-        $response = curl_exec($ch);
-        echo($response);
-        echo("\n\n");
+        $response = curl_exec( $ch );
+        echo( $response );
+        echo( "\n\n" );
 
-        $json = json_decode($response, true);
+        $json = json_decode( $response, true );
 
-        $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] .';'.
-            $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'].';' .
-            $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] .';' .
-            $json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] .'; path=/';
+        $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] . ';' .
+            $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'] . ';' .
+            $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] . ';' .
+            $json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] . '; path=/';
 
-        curl_close($ch);
+        curl_close( $ch );
 
         return $cookieString;
 
@@ -336,7 +339,7 @@ class AthenaBot extends Maintenance {
      * @param $cookieString string
      * @return string
      */
-    public static function getEditToken($cookieString) {
+    public static function getEditToken( $cookieString ) {
         global $url;
 
         $apiCall = 'action=query&format=json&meta=tokens';
@@ -345,19 +348,19 @@ class AthenaBot extends Maintenance {
 
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt( $ch, CURLOPT_COOKIE, $cookieString);
+        curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-        echo("Getting edit token for user\n\n");
-        $response = curl_exec($ch);
-        echo($response);
-        echo("\n\n");
+        echo( "Getting edit token for user\n\n" );
+        $response = curl_exec( $ch );
+        echo( $response );
+        echo( "\n\n" );
 
 
-        $json = json_decode($response, true);
+        $json = json_decode( $response, true );
        // print_r($json);
 
-        curl_close($ch);
+        curl_close( $ch );
         return $json['query']['tokens']['csrftoken'];
     }
 
@@ -366,24 +369,24 @@ class AthenaBot extends Maintenance {
      *
      * @param $title string
      */
-    public static function existsCheck($title) {
+    public static function existsCheck( $title ) {
         global $url, $session_name;
-        //action=query&prop=info&format=json&titles=
+        // action=query&prop=info&format=json&titles=
         $urlCall = $url . '?action=query&format=json&prop=info&titles=' . $title;
-        echo("Checking if page already exists");
-        echo("\n\n");
-        $response = file_get_contents($urlCall);
-        $json = json_decode($response, true);
+        echo( "Checking if page already exists" );
+        echo( "\n\n" );
+        $response = file_get_contents( $urlCall );
+        $json = json_decode( $response, true );
 
 
 
 
         // -1 means it doesn't exist
-        if( array_key_exists('-1', $json['query']['pages']) ) {
+        if ( array_key_exists( '-1', $json['query']['pages'] ) ) {
             return;
         }
         else {
-            echo("Page exists - deleting it \n\n");
+            echo( "Page exists - deleting it \n\n" );
 
             $ch = curl_init();
 
@@ -393,53 +396,53 @@ class AthenaBot extends Maintenance {
 
             $apiCall = 'action=login&format=json&lgname=root&lgpassword=123456789';
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
-            $response = curl_exec($ch);
+            $response = curl_exec( $ch );
 
 
             // From http://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
-            preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
+            preg_match_all( '/^Set-Cookie:\s*([^;]*)/mi', $response, $matches );
             $cookies = array();
-            foreach($matches[1] as $item) {
-                parse_str($item, $cookie);
-                $cookies = array_merge($cookies, $cookie);
+            foreach ( $matches[1] as $item ) {
+                parse_str( $item, $cookie );
+                $cookies = array_merge( $cookies, $cookie );
             }
             // Let's assume we only get one cookie and it's the one we want
-            //var_dump($cookies);
-            curl_setopt( $ch, CURLOPT_COOKIE, $session_name . '=' .$cookies[$session_name].'; path=/');
+            // var_dump($cookies);
+            curl_setopt( $ch, CURLOPT_COOKIE, $session_name . '=' . $cookies[$session_name] . '; path=/' );
 
             // We only want to parse the body of the response as json
             $header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
-            $body = substr($response, $header_size);
+            $body = substr( $response, $header_size );
 
-            $json = json_decode($body, true);
+            $json = json_decode( $body, true );
             $apiCall .= '&lgtoken=' . $json['login']['token'];
 
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
-            curl_setopt( $ch, CURLOPT_HEADER, 0);
+            curl_setopt( $ch, CURLOPT_HEADER, 0 );
 
-            $response = curl_exec($ch);
-            $json = json_decode($response, true);
-            //echo($response);
-            $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] .';'.
-                $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'].';' .
-                $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] .';' .
-                $json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] .'; path=/';
-            //echo($cookieString);
+            $response = curl_exec( $ch );
+            $json = json_decode( $response, true );
+            // echo($response);
+            $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] . ';' .
+                $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'] . ';' .
+                $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] . ';' .
+                $json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] . '; path=/';
+            // echo($cookieString);
             // Delete time
             // We need a token
-            $token = AthenaBot::getEditToken($cookieString);
-            $apiCall = 'action=delete&format=json&title=' . $title . '&token=' . urlencode($token);
-            curl_setopt( $ch, CURLOPT_COOKIE, $cookieString);
+            $token = Erichthonius::getEditToken( $cookieString );
+            $apiCall = 'action=delete&format=json&title=' . $title . '&token=' . urlencode( $token );
+            curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
-            $response = curl_exec($ch);
-            echo($response);
-            echo("\n\n");
+            $response = curl_exec( $ch );
+            echo( $response );
+            echo( "\n\n" );
 
-            curl_close($ch);
+            curl_close( $ch );
         }
     }
 }
 
-$maintClass = 'AthenaBot';
+$maintClass = 'Erichthonius';
 require_once( RUN_MAINTENANCE_IF_MAIN );

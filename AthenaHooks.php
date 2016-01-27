@@ -13,77 +13,27 @@ class AthenaHooks
      * @param $summary string
      * @return bool
      */
-    static function editFilter($editPage, $text, $section, &$error, $summary)
+    static function editFilter( $editPage, $text, $section, &$error, $summary )
     {
         global $wgAthenaSpamThreshold;
+
         // Check if it's a new article or not
-        if ($editPage->getTitle()->getArticleID() === 0) {
-            // ("TEST");
-            $namespace = $editPage->getTitle()->getNamespace();
-            $title = $editPage->getTitle()->getTitleValue()->getText();
+        if ( $editPage->getTitle()->getArticleID() === 0 ) {
 
             // Let's skip redirects
-            $redirect = preg_match_all("/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text);
-            if ($redirect !== 1) {
-                // TODO proper message, i18n and stuff
+            $redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
+            if ( $redirect !== 1 ) {
+                $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
 
-                /* $userAge = AthenaFilters::userAge();
-
-                 $varName = "anon";
-                 $notFlag = 1;
-                 if( $userAge === -1 ) {
-                     $notFlag = 0;
-                 }
-
-                 // Get probability of it being spam
-                 $probAge = AthenaHelper::loadProbabilities("spam", 0, $varName, $notFlag);
-                 echo( "\n probAge is " . $probAge );
-
-                 $diffLang = AthenaFilters::differentLanguage($text);
-
-                 $notFlag = 0;
-
-
-                 echo( "\n\n Samelanguage is " . $diffLang);
-                 if( $diffLang ) {
-                     $notFlag = 1;
-                 }
-
-                 if( !empty($sameLang) ) {
-                     $probLang = AthenaHelper::loadProbabilities("spam", 0, "difflang", $notFlag);
-                     echo( "\n probLang is " . $probLang );
-                 }
-
-                 $weightAge = AthenaHelper::loadWeightings("userage");
-                 echo( "\n weightAge is " . $weightAge );
-                 if( !empty($probLang) ) {
-                     $weightLang = AthenaHelper::loadWeightings("lang");
-                     echo( "\n weightLang is " . $weightLang );
-
-                     $prob = $weightLang * $probLang + $weightAge * $probAge;
-                 } else {
-                     $prob = $probAge;
-                 }
-                 echo( "\n prob is " . $prob );
- */
-                //echo ("part 0\n");
-                $prob = AthenaHelper::calculateAthenaValue($editPage, $text, $summary);
-                //echo ("part 1\n");
-                if ($prob > $wgAthenaSpamThreshold) {
-                    //echo ("part 2\n");
+                if ( $prob > $wgAthenaSpamThreshold ) {
                     $error =
-                        "<div class='errorbox'>" .
-                        "Your edit has been triggered as spam. If you think this is a mistake, please let an admin know" .
-                        "</div>\n" .
-                        "<br clear='all' />\n";
-                    // echo ("part 3\n");
+                        '<div class="errorbox">' .
+                        wfMessage( 'athena-blocked-error' ) .
+                        '</div>\n' .
+                        '<br clear="all" />\n';
                 }
-                // echo ("part 4\n");
-
             }
-            // echo ("part 5\n");
         }
-        // echo ("part 6\n");
         return true;
     }
 
@@ -95,13 +45,11 @@ class AthenaHooks
      * @param $updater DatabaseUpdater
      * @return bool
      */
-    static function createTables($updater)
+    static function createTables( $updater )
     {
-        $updater->addExtensionUpdate(array('addTable', 'athena_weighting', __DIR__ . '/sql/athena_probability.sql', true));
-        $updater->addExtensionUpdate(array('addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true));
-        // don't really need these two
-        //$updater->addExtensionUpdate( array( 'addTable', 'athena_fail_log', __DIR__ . '/sql/athena_logs.sql', true ) );
-        //$updater->addExtensionUpdate( array( 'addTable', 'athena_fail_page', __DIR__ . '/sql/athena_logs.sql', true ) );
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_weighting', __DIR__ . '/sql/athena_probability.sql', true ) );
+        $updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true ) );
+
         return true;
     }
 
@@ -120,58 +68,41 @@ class AthenaHooks
      * @param $revision {Revision|null}
      * @param $status Status
      * @param $baseRevId integer
-     *
      * @return boolean
      */
-    static function successfulEdit($article, $user, $content, $summary, $isMinor, $isWatch, $section,
-                                   $flags, $revision, $status, $baseRevId)
+    static function successfulEdit( $article, $user, $content, $summary, $isMinor, $isWatch, $section,
+                                   $flags, $revision, $status, $baseRevId )
     {
-        $db = wfGetDB(DB_MASTER);
+        $dbw = wfGetDB( DB_MASTER );
 
         $page_id = $article->getId();
         $rev_id = $article->getRevision()->getId();
 
-        $title = $db->strencode($article->getTitle()->getText());
+        $title = $dbw->strencode( $article->getTitle()->getText() );
 
         $whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
 
         // TODO check multiple instances of the same title - maybe check user_id as well
-        $sql = "SELECT al_id FROM {$db->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
+        $sql = "SELECT al_id FROM {$dbw->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
 
-        //echo($sql);
+        $res = $dbw->query( $sql, __METHOD__ );
+        $row = $dbw->fetchObject( $res );
 
-        $res = $db->query($sql, __METHOD__);
-        $row = $db->fetchObject($res);
-
-        if ($row) {
+        if ( $row ) {
 
             $id = $row->al_id;
-            $updateStatement = " page_id={$page_id}, rev_id={$rev_id}";
-            $whereStatement = " al_id = {$id}";
 
-            //$sql = "UPDATE {$db->tableName( 'athena_page_details' )} SET {$updateStatement} WHERE {$whereStatement};";
-
-            $db->update('athena_page_details',
-                array('page_id' => $page_id, 'rev_id' => $rev_id),
-                array('al_id' => $id),
+            $dbw->update( 'athena_page_details',
+                array( 'page_id' => $page_id, 'rev_id' => $rev_id ),
+                array( 'al_id' => $id ),
                 __METHOD__,
-                null);
+                null );
 
-            //echo($sql);
-            //$db->query($sql, __METHOD__);
-
-            //$updateStatement = " al_success=1";
-            //$whereStatement = " al_id = {$id}";
-
-            //$sql = "UPDATE {$db->tableName( 'athena_log' )} SET {$updateStatement} WHERE {$whereStatement};";
-            $db->update('athena_log',
-                array('al_success' => 1),
-                array('al_id' => $id),
+            $dbw->update( 'athena_log',
+                array( 'al_success' => 1 ),
+                array( 'al_id' => $id ),
                 __METHOD__,
-                null);
-
-            //echo($sql);
-            // $db->query($sql, __METHOD__);
+                null );
 
             return true;
         }
@@ -189,28 +120,27 @@ class AthenaHooks
      * @param null $content Content
      * @param $logEntry LogEntry
      */
-    static function pageDeleted(&$article, &$user, $reason, $id, $content = null, $logEntry) {
+    static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
         // Search Athena logs for the page id
 
-        // Hardcoding is bad
-        if( strpos($reason, 'Spam') !== false ) {
-            $db = wfGetDB(DB_SLAVE);
-            $res = $db->selectRow(
-                array('athena_page_details'),
-                array('al_id'),
-                array('page_id' => $id),
+        $pos = strpos( $reason, wfMessage( 'athena-spam' ) );
+        if ( $pos !== false ) {
+            $dbw = wfGetDB( DB_SLAVE );
+            $res = $dbw->selectRow(
+                array( 'athena_page_details' ),
+                array( 'al_id' ),
+                array( 'page_id' => $id ),
                 __METHOD__,
                 array()
             );
 
-            if ($res) {
-                $db->update('athena_log',
-                    array('al_overridden' => 1),
-                    array('al_id' => $res->al_id),
+            if ( $res ) {
+                $dbw->update( 'athena_log',
+                    array( 'al_overridden' => 1 ),
+                    array( 'al_id' => $res->al_id ),
                     __METHOD__,
-                    null);
+                    null );
             }
         }
     }
-
 }
