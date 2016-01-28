@@ -41,17 +41,17 @@ class SpecialAthena extends SpecialPage {
 		// See if they have a parameter, and if so show the relevant logs
 		$parts = explode( '/', $par );
 
-		if ( count( $parts ) == 1 ) {
-			if ( $parts[0] == wfMessage( "athena-type-0" ) ) {
+		if ( count( $parts ) === 1 ) {
+			if ( $parts[0] === wfMessage( "athena-type-0" ) ) {
 				$this->showAthenaLogs( $this->ALL );
-			} else if ( $parts[0] == wfMessage( "athena-type-1" ) ) {
+			} else if ( $parts[0] === wfMessage( "athena-type-1" ) ) {
 				$this->showAthenaLogs( $this->SPAM );
-			} else if ( $parts[0] == wfMessage( "athena-type-2" ) ) {
+			} else if ( $parts[0] === wfMessage( "athena-type-2" ) ) {
 				$this->showAthenaLogs( $this->NOTSPAM );
 			} else {
 				$this->showAthenaHome();
 			}
-		} else if ( count( $parts ) == 2 && $parts[0] == wfMessage( "athena-id" ) ) {
+		} else if ( count( $parts ) === 2 && $parts[0] === wfMessage( "athena-id" ) ) {
 			$this->showAthenaPage( $parts[1] );
 		} else {
 			$this->showAthenaHome();
@@ -86,10 +86,10 @@ class SpecialAthena extends SpecialPage {
 		$conds = '';
 		$showStatus = false;
 
-		if ( $type == $this->ALL ) {
+		if ( $type === $this->ALL ) {
 			$output->addWikiMsg( 'athena-pagetext-0' );
 			$showStatus = true;
-		} else if ( $type == $this->SPAM ) {
+		} else if ( $type === $this->SPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-1' );
 			$conds = 'al_success = 0';
 		} else {
@@ -257,7 +257,7 @@ class SpecialAthena extends SpecialPage {
 			$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th><th>' . wfMessage( 'athena-view-result' ) . '</th></thead><tbody>';
 
 			$ageStr = AthenaHelper::secondsToString( $res->al_user_age );
-			if ( $ageStr == '' ) {
+			if ( $ageStr === '' ) {
 				$ageStr = 'n/a';
 			}
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td></tr>';
