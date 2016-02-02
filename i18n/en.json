@@ -49,7 +49,7 @@
   "athena-view-not-blocked": "Athena didn't block this page",
   "athena-view-not-blocked-reinforce": "Allow this page through the filter",
   "athena-view-not-blocked-reinforce-done": "Page already allowed through the filter",
-  "athena-view-number-of-links": "Number of links",
+  "athena-view-link-percentage": "Link percentage (of content)",
   "athena-view-preview": "Preview",
   "athena-view-result": "Result",
   "athena-view-results": "Athena Results",
@@ -61,5 +61,12 @@
   "athena-view-wanted": "Wanted page",
   "athena-view-wikitext": "WikiText",
   "athena-viewing": "Viewing ID #$1",
-  "athena-viewing-error": "Error - no item with Athena ID #$1"
+  "athena-viewing-error": "Error - no item with Athena ID #$1",
+  "athena-view-probability": "Probability",
+  "athena-view-weighting": "Weighting",
+  "athena-view-contribution": "Contribution",
+  "athena-view-title-length": "Title length",
+  "athena-view-namespace": "Namespace",
+  "athena-view-namespace-0": "main",
+  "athena-view-language": "Language"
 }

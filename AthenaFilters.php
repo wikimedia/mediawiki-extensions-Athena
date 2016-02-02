@@ -82,10 +82,34 @@ class AthenaFilters {
         // Get character count
         $charCount = strlen( $text );
 
+        // Three ways to make a link
+        // A: [http(s)://..... ]
         $textNoLinks = preg_replace( "/\[http(s?):\/\/([^\[\]])+\]/", "", $text );
+        // B: http(s)://...
+        $textNoLinks = preg_replace( "/[^\[]http(s?):\/\/[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+        // C: [//.... ]
+        $textNoLinks = preg_replace( "/\[\/\/([^\[\]])+\]/", "", $textNoLinks );
+
+        // Plus alternate protocols
+        // D: [mailto:.... ]
+        $textNoLinks = preg_replace( "/\[mailto:([^\[\]])+\]/", "", $textNoLinks );
+        $textNoLinks = preg_replace( "/[^\[]mailto:[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+        // E: [gopher:.... ]
+        $textNoLinks = preg_replace( "/\[gopher:([^\[\]])+\]/", "", $textNoLinks );
+        $textNoLinks = preg_replace( "/[^\[]gopher:\/\/[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+        // F: [news:.... ]
+        $textNoLinks = preg_replace( "/\[news:([^\[\]])+\]/", "", $textNoLinks );
+        $textNoLinks = preg_replace( "/[^\[]news:\/\/[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+        // G: [ftp:.... ]
+        $textNoLinks = preg_replace( "/\[ftp:([^\[\]])+\]/", "", $textNoLinks );
+        $textNoLinks = preg_replace( "/[^\[]ftp:\/\/[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+        // H: [irc:.... ]
+        $textNoLinks = preg_replace( "/\[irc:([^\[\]])+\]/", "", $textNoLinks );
+        $textNoLinks = preg_replace( "/[^\[]irc:\/\/[^\s^\]^\[]+[^\[]\s/", "", $textNoLinks );
+
         $charCountNoLinks = strlen( $textNoLinks );
 
-        return 1 -$charCountNoLinks / $charCount;
+        return 1 - ($charCountNoLinks / $charCount);
     }
 
     /**
@@ -156,12 +180,7 @@ class AthenaFilters {
     public static function differentLanguage( $text ) {
         global $wgLanguageCode;
 
-        $classifier = AthenaHelper::getClassifier();
-        try {
-            $language = $classifier->detectSimple( $text );
-        } catch ( Text_LanguageDetect_Exception $e ) {
-            return null;
-        }
+        $language = AthenaHelper::getTextLanguage( $text );
 
         // Remove any region specialities from wiki's language code (e.g. en-gb becomes en)
         $arr = preg_split( "/-/", $wgLanguageCode );

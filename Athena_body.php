@@ -43,11 +43,11 @@ class SpecialAthena extends SpecialPage {
 
 		if ( count( $parts ) == 1 ) {
 			if ( $parts[0] == wfMessage( "athena-type-0" ) ) {
-				$this->showAthenaLogs( $this->ALL );
+				$this->showAthenaLogs( $this::$ALL );
 			} else if ( $parts[0] == wfMessage( "athena-type-1" ) ) {
-				$this->showAthenaLogs( $this->SPAM );
+				$this->showAthenaLogs( $this::$SPAM );
 			} else if ( $parts[0] == wfMessage( "athena-type-2" ) ) {
-				$this->showAthenaLogs( $this->NOTSPAM );
+				$this->showAthenaLogs( $this::$NOTSPAM );
 			} else {
 				$this->showAthenaHome();
 			}
@@ -86,10 +86,10 @@ class SpecialAthena extends SpecialPage {
 		$conds = '';
 		$showStatus = false;
 
-		if ( $type == $this->ALL ) {
+		if ( $type == $this::$ALL ) {
 			$output->addWikiMsg( 'athena-pagetext-0' );
 			$showStatus = true;
-		} else if ( $type == $this->SPAM ) {
+		} else if ( $type == $this::$SPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-1' );
 			$conds = 'al_success = 0';
 		} else {
@@ -109,7 +109,6 @@ class SpecialAthena extends SpecialPage {
 
 		$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-log-id' ) . '</th>';
 		$tableStr .= '<th>' . wfMessage( 'athena-view-title' ) . '</th>';
-		$tableStr .= '<th>' . wfMessage( 'athena-view-title' ) . '</th>';
 		$tableStr .= '<th>' . wfMessage( 'athena-view-user' ) . '</th>';
 		$tableStr .= '<th>' . wfMessage( 'athena-log-date' ) . '</th>';
 		$tableStr .= '<th>' . wfMessage( 'athena-view-athena-value' ) . '</th>';
@@ -127,7 +126,8 @@ class SpecialAthena extends SpecialPage {
 
 			// Make a pretty title
 			$title = Title::newFromText( stripslashes( $row->apd_title ), $row->apd_namespace );
-			$tableStr .= '<td>' . $title->getFullText() . '</td>';
+			$link = $output->parse( '[[' . $title->getFullText() . ']]' );
+			$tableStr .= '<td>' . $link . '</td>';
 
 			// Get the user
 			if ( $row->apd_user != 0 ) {
@@ -172,11 +172,15 @@ class SpecialAthena extends SpecialPage {
 
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->selectRow(
-			array( 'athena_log', 'athena_page_details' ),
+			array( 'athena_log', 'athena_page_details', 'athena_calculations' ),
 			array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success',
-				'apd_comment', 'apd_content', 'al_user_age', 'al_links', 'al_syntax', 'al_language',
-					'al_wanted', 'al_deleted', 'al_overridden' ),
-			array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id ),
+				'apd_comment', 'apd_content', 'al_user_age', 'al_links', 'al_link_percentage', 'al_syntax', 'apd_language',
+					'al_language', 'al_wanted', 'al_deleted', 'al_overridden',
+					'ac_p_diff_lang', 'ac_w_diff_lang', 'ac_p_deleted', 'ac_w_deleted',
+					'ac_p_wanted', 'ac_w_wanted', 'ac_p_user_age', 'ac_w_user_age',
+					'ac_p_title_length', 'ac_w_title_length', 'ac_p_namespace', 'ac_w_namespace',
+					'ac_p_syntax', 'ac_w_syntax', 'ac_p_link', 'ac_w_link'),
+			array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id, 'athena_calculations.al_id' => $id ),
 			__METHOD__,
 			array()
 		);
@@ -202,19 +206,22 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '</tr><tr><td>' . wfMessage( 'athena-view-timestamp' ) . '</td>';
 			$tableStr .= '<td>' . $res->apd_timestamp . '</td></tr>';
 
-			if ( $res->apd_comment && $res->apd_comment != "NULL" ) {
+			$tableStr .= '</tr><tr><td>' . wfMessage( 'athena-view-language' ) . '</td>';
+			$tableStr .= '<td>' . $res->apd_language . '</td></tr>';
+
+			if ( $res->apd_comment ) {
 				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-comment' ) . '</td>';
 				$tableStr .= '<td>' . stripslashes ( $res->apd_comment ) . '</td></tr>';
 			}
 
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-athena-value' ) . '</td><td>' . $res->al_value . '</td></tr>';
-			$tableStr .= '<tr><td colspan="2">';
+			$tableStr .= '<tr><td colspan="2"><b>';
 			if ( $res->al_success ) {
 				$tableStr .= wfMessage( 'athena-view-not-blocked' );
 			} else {
 				$tableStr .= wfMessage( 'athena-view-blocked' );
 			}
-			$tableStr .= '</td></tr>';
+			$tableStr .= '</b></td></tr>';
 			$tableStr .= '</tbody></table>';
 			$output->addHTML( $tableStr );
 
@@ -247,29 +254,96 @@ class SpecialAthena extends SpecialPage {
 			// TODO magic words are language dependant
 			$content = str_replace( '{{PAGENAME}}', $title, $content );
 
-			$output->addWikiText( '<h3>' . wfMessage( 'athena-view-preivew' ) . '</h3>' );
+			$output->addWikiText( '<h3>' . wfMessage( 'athena-view-preview' ) . '</h3>' );
 			$output->addHTML( '<div class="toccolours mw-collapsible mw-collapsed">' );
 			$output->addWikiText( $content );
 			$output->addHTML( '</div>' );
 
 			// Display Athena scores
 			$output->addWikiText( '== ' . wfMessage( 'athena-view-results' ) . ' ==' );
-			$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th><th>' . wfMessage( 'athena-view-result' ) . '</th></thead><tbody>';
+			$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th>';
+			$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
+			$tableStr .= '<th>' . wfMessage( 'athena-view-probability' ) . '</th>';
+			$tableStr .= '<th>' . wfMessage( 'athena-view-weighting' ) . '</th>';
+			$tableStr .= '<th>' . wfMessage( 'athena-view-contribution' ) . '</th>';
+			$tableStr .= '</thead><tbody>';
 
 			$ageStr = AthenaHelper::secondsToString( $res->al_user_age );
 			if ( $ageStr == '' ) {
 				$ageStr = 'n/a';
 			}
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td></tr>';
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td>';
 
-			// TODO add link percentage
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-number-of-links' ) . '</td><td>' . $res->al_links . ' ' . wfMessage( 'athena-view-links' ) . '</td></tr>';
+			$p = $res->ac_p_user_age * 100;
+			$w = $res->ac_w_user_age * 100;
+			$total = ($p*$w)/10000;
 
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-syntax' ) . '</td><td>' . AthenaHelper::syntaxTypeToString( $res->al_syntax ) . '</td></tr>';
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-lang' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_language ) . '</td></tr>';
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-wanted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_wanted ) . '</td></tr>';
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-deleted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_deleted ) . '</td></tr>';
-			$tableStr .= '<tr><td><b>' . wfMessage( 'athena-view-athena-value' ) . '</b></td><td><b>' . $res->al_value . '</b></td></tr>';
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$linkPercentage = $res->al_link_percentage * 100;
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-link-percentage' ) . '</td><td>' . $linkPercentage . '% (' . $res->al_links . ' ' . wfMessage( 'athena-view-links' ) . ')</td>';
+
+			$p = $res->ac_p_link * 100;
+			$w = $res->ac_w_link * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-syntax' ) . '</td><td>' . AthenaHelper::syntaxTypeToString( $res->al_syntax ) . '</td>';
+
+			$p = $res->ac_p_syntax * 100;
+			$w = $res->ac_w_syntax * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-lang' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_language ) . '</td>';
+
+			$p = $res->ac_p_diff_lang * 100;
+			$w = $res->ac_w_diff_lang * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-wanted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_wanted ) . '</td>';
+
+			$p = $res->ac_p_wanted * 100;
+			$w = $res->ac_w_wanted * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-deleted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_deleted ) . '</td>';
+
+			$p = $res->ac_p_deleted * 100;
+			$w = $res->ac_w_deleted * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$titleLength = strlen( $title->getText() );
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-title-length' ) . '</td><td>' . $titleLength . '</td>';
+
+			$p = $res->ac_p_title_length * 100;
+			$w = $res->ac_w_title_length * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$namespace = MWNamespace::getCanonicalName( $title->getNamespace() );
+			// Main will return an empty string
+			if ( $namespace === '' ) {
+				$namespace = wfMessage( 'athena-view-namespace-0' );
+			}
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-namespace' ) . '</td><td>' . $namespace . '</td>';
+
+			$p = $res->ac_p_namespace * 100;
+			$w = $res->ac_w_namespace * 100;
+			$total = ($p*$w)/10000;
+
+			$tableStr .= '<td>' . $p . '%</td><td>' . $w . '%</td><td>' . $total . '</td></tr>';
+
+			$tableStr .= '<tr><td colspan="3"></td><td><b>' . wfMessage( 'athena-view-athena-value' ) . '</b></td><td><b>' . $res->al_value . '</b></td></tr>';
 			$tableStr .= '</tbody></table>';
 
 			$output->addHTML( $tableStr );

@@ -22,18 +22,18 @@ class AthenaHelper
     {
         $dbr = wfGetDB( DB_MASTER );
 
-        $whereStatement = ' ap_variable=\'{$var}\'';
+        $whereStatement = " `ap_variable`='$var'";
 
         if ( $varFlag ) {
-            $whereStatement .= ' AND ap_variable_not=1';
+            $whereStatement .= ' AND `ap_variable_not`=1';
         }
 
         if ( $given ) {
-            $whereStatement .= ' AND ap_given=\'{$given}\'';
+            $whereStatement .= " AND `ap_given`='$given'";
         }
 
         if ( $givenFlag ) {
-            $whereStatement .= ' AND ap_given_not=1';
+            $whereStatement .= ' AND `ap_given_not`=1';
         }
 
         $sql = "SELECT ap_value FROM {$dbr->tableName( 'athena_probability' )} WHERE {$whereStatement};";
@@ -51,57 +51,14 @@ class AthenaHelper
     /**
      * Log information about the attempted page creation
      *
-     * @param $prob double
-     * @param $userAge int
-     * @param $links double
-     * @param $syntax double
-     * @param $language boolean
-     * @param $broken boolean
-     * @param $deleted boolean
-     * @param $wanted boolean
-     * @param $namespace int
-     * @param $title string
-     * @param $content string
-     * @param $comment string
-     * @param $user int
+     * @param $logArray array
+     * @param $detailsArray array
+     * @param $calcArray array
      */
-    static function logAttempt( $prob, $userAge, $links, $syntax, $language, $broken, $deleted, $wanted,
-                                $namespace, $title, $content, $comment, $user ) {
+    static function logAttempt( $logArray, $detailsArray, $calcArray ) {
         $dbw = wfGetDB( DB_MASTER );
 
-        $links = AthenaHelper::makeSQLNull( $links );
-        $syntax = AthenaHelper::makeSQLNull( $syntax );
-
-        if ( $language === false ) {
-            $language = 0;
-        }
-        $language = AthenaHelper::makeSQLNull( $language );
-
-        if ( $broken === false ) {
-            $broken = 0;
-        }
-
-        $broken = AthenaHelper::makeSQLNull( $broken );
-
-        if ( $deleted === false ) {
-            $deleted = 0;
-        }
-
-        $deleted = AthenaHelper::makeSQLNull( $deleted );
-
-        if ( $wanted === false ) {
-            $wanted = 0;
-        }
-
-        $wanted = AthenaHelper::makeSQLNull( $wanted );
-        $comment = AthenaHelper::makeSQLNull( $comment );
-
-        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_success' => 0, 'al_user_age' => $userAge,
-            'al_links' => $links, 'al_syntax' => $syntax, 'al_language' => $language, 'al_broken_spambot' => $broken,
-            'al_wanted' => $wanted, 'al_deleted' => $deleted );
-        $dbw->insert( 'athena_log', $insertArray, __METHOD__, null );
-
-       // $db->query($sql, __METHOD__);
+        $dbw->insert( 'athena_log', $logArray, __METHOD__, null );
 
         // Get last inserted ID
         $sql = 'select LAST_INSERT_ID() as id;';
@@ -109,23 +66,98 @@ class AthenaHelper
         $row = $dbw->fetchObject( $res );
         $id = $row->id;
 
-        $title = $dbw->strencode( $title );
-        $content = $dbw->strencode( $content );
-        $comment = $dbw->strencode( $comment );
+        $detailsArray['al_id'] = $id;
+        $calcArray['al_id'] = $id;
 
-        $insertArray = array( 'al_id' => $id, 'apd_namespace' => $namespace, 'apd_title' => $title,
-            'apd_content' => $content, 'apd_comment' => $comment, 'apd_user' => $user,
-            'page_id' => 'NULL', 'rev_id' => 'NULL' );
+        print_r($calcArray);
 
         try {
-            $dbw->insert( 'athena_page_details', $insertArray, __METHOD__, null );
+            $dbw->insert( 'athena_page_details', $detailsArray, __METHOD__, null );
+            $dbw->insert( 'athena_calculations', $calcArray, __METHOD__, null );
         } catch ( Exception $e ) {
             print_r( $e );
         }
     }
 
     /**
-     * Log the page creation attempt
+     * Prepare an array with the details we want to insert into the athena_log table
+     *
+     * @param $prob double
+     * @param $userAge integer
+     * @param $links integer
+     * @param $linkPercentage double
+     * @param $syntax double
+     * @param $language boolean
+     * @param $deleted boolean
+     * @param $wanted boolean
+     * @return array
+     */
+    static function prepareLogArray( $prob, $userAge, $links, $linkPercentage, $syntax, $language, $deleted, $wanted ) {
+
+        if ( $deleted === false ) {
+            $deleted = 0;
+        }
+
+        if ( $wanted === false ) {
+            $wanted = 0;
+        }
+
+        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_success' => 0, 'al_user_age' => $userAge,
+            'al_links' => $links, 'al_link_percentage' => $linkPercentage, 'al_syntax' => $syntax,
+            'al_wanted' => $wanted, 'al_deleted' => $deleted );
+
+        // Language could be null
+        // TODO check this works
+        if ( $language != '' ) {
+            if( $language === false ) {
+                $language = 0;
+            }
+            $insertArray['al_language'] = $language;
+        }
+
+
+
+        return $insertArray;
+    }
+
+    /**
+     * Prepare an array with the details we want to insert into the athena_page_details table
+     *
+     * @param $prob double
+     * @param $namespace int
+     * @param $title string
+     * @param $content string
+     * @param $comment string
+     * @param $user int
+     * @return array
+     */
+    static function preparePageDetailsArray( $namespace, $title, $content, $comment, $user ) {
+        $dbw = wfGetDB( DB_MASTER );
+
+        $title = $dbw->strencode( $title );
+        $content = $dbw->strencode( $content );
+
+        $insertArray = array( 'apd_namespace' => $namespace, 'apd_title' => $title,
+            'apd_content' => $content, 'apd_user' => $user,
+            'page_id' => 'NULL', 'rev_id' => 'NULL' );
+
+        if ( $comment != '' ) {
+            $comment = $dbw->strencode( $comment );
+            $insertArray['apd_comment'] = $comment;
+        }
+
+        $language = AthenaHelper::getTextLanguage( $content );
+
+        if( $language != '') {
+            $language = $dbw->strencode($language);
+            $insertArray['apd_language'] = $language;
+        }
+
+        return $insertArray;
+    }
+
+    /**
+     * Loading a given weight
      *
      * @param $var string
      * @return double|bool
@@ -134,14 +166,13 @@ class AthenaHelper
     {
         $dbr = wfGetDB( DB_MASTER );
 
-        $whereStatement = ' aw_variable=\'{$var}\'';
+        $whereStatement = " `aw_variable`='$var'";
 
         $sql = "SELECT aw_value FROM {$dbr->tableName( 'athena_weighting' )} WHERE {$whereStatement};";
 
-        // echo($sql);
-
         $res = $dbr->query( $sql, __METHOD__ );
         $row = $dbr->fetchObject( $res );
+
 
         if ( $row ) {
             return $row->aw_value;
@@ -156,31 +187,18 @@ class AthenaHelper
      *
      * @return Text_LanguageDetect
      */
-    static function getClassifier() {
+    static function getClassifier()
+    {
         global $IP;
 
         // Code for Text-LanguageDetect
-        require_once( $IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php' );
+        require_once($IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php');
         $classifier = new Text_LanguageDetect;
 
         // Set it to return ISO 639-1 (same format as MediaWiki)
-        $classifier->setNameMode( 2 );
+        $classifier->setNameMode(2);
 
         return $classifier;
-    }
-
-    /**
-     * Converts empty variables to be a NULL string for SQL purposes
-     *
-     * @param $var type
-     * @return string|type
-     */
-    static function makeSQLNull( $var ) {
-        // Can't use empty() as 0 and false are empty
-        if ( $var === null || $var === '' ) {
-            return 'NULL';
-        }
-        return $var;
     }
 
     /**
@@ -195,68 +213,68 @@ class AthenaHelper
     static function calculateAthenaValue( $editPage, $text, $summary ) {
         global $wgUser;
 
+        // Array to store calculation info
+        $calcArray = array();
+
         $titleObj = $editPage->getTitle();
         $title = $titleObj->getTitleValue()->getText();
 
         /* start different language */
         $diffLang = AthenaFilters::differentLanguage( $text );
 
-        $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang );
+        $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang, $calcArray );
         /* end different language */
 
         /* start deleted */
         $deleted = AthenaFilters::wasDeleted( $titleObj );
 
-        $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted );
+        $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted, $calcArray );
         /* end deleted */
 
         /* start wanted */
         $wanted = AthenaFilters::isWanted( $titleObj );
 
-        $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted );
+        $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted, $calcArray );
         /* end wanted */
 
         /* start user type */
         $userAge = AthenaFilters::userAge();
 
-        $probUser = AthenaHelper::calculateAthenaValue_User( $userAge );
+        $probUser = AthenaHelper::calculateAthenaValue_User( $userAge, $calcArray );
         /* end user type */
 
         /* start title length */
         $titleLength = AthenaFilters::titleLength( $titleObj );
 
-        $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength );
+        $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength, $calcArray );
         /* end title length */
 
         /* start title length */
         $namespace = AthenaFilters::getNamespace( $titleObj );
 
-        $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace );
+        $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace, $calcArray );
         /* end title length */
 
         /* start syntax */
         $syntaxType = AthenaFilters::syntaxType( $text );
 
-        $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType );
+        $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType, $calcArray );
         /* end syntax */
 
         /* start syntax */
-        $links = AthenaFilters::linkPercentage( $text );
+        $linksPercentage = AthenaFilters::linkPercentage( $text );
 
-        $probLinks = AthenaHelper::calculateAthenaValue_Links( $links );
+        $probLinks = AthenaHelper::calculateAthenaValue_Links( $linksPercentage, $calcArray );
         /* end syntax */
 
         $prob = $probDiffLang + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace + $probSyntax + $probLinks;
 
-        // Log here
-        if ( $syntaxType === 3 ) {
-            $brokenSpamBot = true;
-        } else {
-            $brokenSpamBot = false;
-        }
+        $links = AthenaFilters::numberOfLinks( $text );
 
-        AthenaHelper::logAttempt( $prob, $userAge, $links, $syntaxType, $diffLang, $brokenSpamBot, $deleted, $wanted, $namespace, $title,
-            $text, $summary, $wgUser->getId() );
+        $logArray = AthenaHelper::prepareLogArray( $prob, $userAge, $links, $linksPercentage, $syntaxType, $diffLang, $deleted, $wanted );
+        $detailsArray = AthenaHelper::preparePageDetailsArray( $namespace, $title, $text, $summary, $wgUser->getId() );
+
+        AthenaHelper::logAttempt( $logArray, $detailsArray, $calcArray );
 
         return $prob;
     }
@@ -265,9 +283,10 @@ class AthenaHelper
      * Calculates the probability related to the different language filter
      *
      * @param $diffLang bool
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Language( $diffLang ) {
+    static function calculateAthenaValue_Language( $diffLang, &$calcArray ) {
         $notFlag = 0;
         // Let's treat null as false for simplicity
         if ( !$diffLang ) {
@@ -278,6 +297,12 @@ class AthenaHelper
 
         $weightLang = AthenaHelper::loadWeightings( 'difflang' );
 
+        echo( "problang is " + $probLang);
+        echo( "weightlang is " + $weightLang);
+
+        $calcArray['ac_p_diff_lang'] = $probLang;
+        $calcArray['ac_w_diff_lang'] = $weightLang;
+
         return $weightLang * $probLang;
     }
 
@@ -285,9 +310,10 @@ class AthenaHelper
      * Calculates the probability related to the deleted filter
      *
      * @param $wasDeleted bool
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Deleted( $wasDeleted ) {
+    static function calculateAthenaValue_Deleted( $wasDeleted, &$calcArray ) {
         $notFlag = 0;
         // Let's treat null as false for simplicity
         if ( !$wasDeleted ) {
@@ -298,6 +324,9 @@ class AthenaHelper
 
         $weightDeleted = AthenaHelper::loadWeightings( 'deleted' );
 
+        $calcArray['ac_p_deleted'] = $probDeleted;
+        $calcArray['ac_w_deleted'] = $weightDeleted;
+
         return $weightDeleted * $probDeleted;
     }
 
@@ -305,9 +334,10 @@ class AthenaHelper
      * Calculates the probability related to the wanted filter
      *
      * @param $isWanted bool
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Wanted( $isWanted ) {
+    static function calculateAthenaValue_Wanted( $isWanted, &$calcArray ) {
         $notFlag = 0;
         // Let's treat null as false for simplicity
         if ( !$isWanted ) {
@@ -318,6 +348,9 @@ class AthenaHelper
 
         $weightWanted = AthenaHelper::loadWeightings( 'wanted' );
 
+        $calcArray['ac_p_wanted'] = $probWanted;
+        $calcArray['ac_w_wanted'] = $weightWanted;
+
         return $weightWanted * $probWanted;
     }
 
@@ -325,9 +358,10 @@ class AthenaHelper
      * Calculates the probability related to the user type filter
      *
      * @param $userAge int
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_User( $userAge ) {
+    static function calculateAthenaValue_User( $userAge, &$calcArray ) {
 
         $varName = 'anon';
         if ( $userAge >= 0 ) {
@@ -347,10 +381,12 @@ class AthenaHelper
                 $varName = 'userother';
         }
 
-
         $probUser = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
 
         $weightUser = AthenaHelper::loadWeightings( 'userage' );
+
+        $calcArray['ac_p_user_age'] = $probUser;
+        $calcArray['ac_w_user_age'] = $weightUser;
 
         return $weightUser * $probUser;
     }
@@ -359,9 +395,10 @@ class AthenaHelper
      * Calculates the probability related to the title length filter
      *
      * @param $length int
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Length( $length ) {
+    static function calculateAthenaValue_Length( $length, &$calcArray ) {
         $notFlag = 1;
         // Let's treat null as false for simplicity
         if ( $length > 39 ) {
@@ -372,6 +409,9 @@ class AthenaHelper
 
         $weightLength = AthenaHelper::loadWeightings( 'titlelength' );
 
+        $calcArray['ac_p_title_length'] = $probLength;
+        $calcArray['ac_w_title_length'] = $weightLength;
+
         return $weightLength * $probLength;
     }
 
@@ -379,35 +419,40 @@ class AthenaHelper
      * Calculates the probability related to the namespace filter
      *
      * @param $namespace int
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Namespace( $namespace ) {
+    static function calculateAthenaValue_Namespace( $namespace, &$calcArray )
+    {
 
         $varName = 'nsother';
-        if ( $namespace === 0 )
+        if ($namespace === 0)
             $varName = 'nsmain';
-        else if ( $namespace === 1 )
+        else if ($namespace === 1)
             $varName = 'nstalk';
-        else if ( $namespace === 2 )
+        else if ($namespace === 2)
             $varName = 'nsuser';
-        else if ( $namespace === 3 )
+        else if ($namespace === 3)
             $varName = 'nsusertalk';
 
-        $probNamespace = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
+        $probNamespace = AthenaHelper::loadProbabilities('spam', 0, $varName, 0);
 
-        $weightNamespace = AthenaHelper::loadWeightings( 'namespace' );
+        $weightNamespace = AthenaHelper::loadWeightings('namespace');
+
+        $calcArray['ac_p_namespace'] = $probNamespace;
+        $calcArray['ac_w_namespace'] = $weightNamespace;
 
         return $weightNamespace * $probNamespace;
     }
-
 
     /**
      * Calculates the probability related to the syntax filter
      *
      * @param $type int
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Syntax( $type ) {
+    static function calculateAthenaValue_Syntax( $type, &$calcArray ) {
 
         $varName = 'syntaxnone';
         if ( $type === 1 )
@@ -417,20 +462,24 @@ class AthenaHelper
         else if ( $type === 3 )
             $varName = 'brokenspambot';
 
-        $probNamespace = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
+        $probSyntax = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
 
-        $weightNamespace = AthenaHelper::loadWeightings( 'syntax' );
+        $weightSyntax = AthenaHelper::loadWeightings( 'syntax' );
 
-        return $weightNamespace * $probNamespace;
+        $calcArray['ac_p_syntax'] = $probSyntax;
+        $calcArray['ac_w_syntax'] = $weightSyntax;
+
+        return $weightSyntax * $probSyntax;
     }
 
     /**
      * Calculates the probability related to the link filter
      *
      * @param $percentage double
+     * @param &$calcArray array stores details about calculations
      * @return double
      */
-    static function calculateAthenaValue_Links( $percentage ) {
+    static function calculateAthenaValue_Links( $percentage, &$calcArray ) {
 
         $varName = 'links0';
         if ( $percentage > 0 && $percentage < 0.1 )
@@ -443,6 +492,9 @@ class AthenaHelper
         $probLinks = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
 
         $weightLinks = AthenaHelper::loadWeightings( 'links' );
+
+        $calcArray['ac_p_link'] = $probLinks;
+        $calcArray['ac_w_link'] = $weightLinks;
 
         return $weightLinks * $probLinks;
     }
@@ -518,5 +570,20 @@ class AthenaHelper
             return wfMessage( 'athena-true');
         }
         return wfMessage( 'athena-false');
+    }
+
+    /**
+     * Gets the language of a given text
+     *
+     * @param $text string
+     * @return string
+     */
+    static function getTextLanguage( $text ) {
+        $classifier = AthenaHelper::getClassifier();
+        try {
+            return $classifier->detectSimple( $text );
+        } catch ( Text_LanguageDetect_Exception $e ) {
+            return null;
+        }
     }
 }
