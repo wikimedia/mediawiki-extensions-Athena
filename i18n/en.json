@@ -68,5 +68,7 @@
   "athena-view-title-length": "Title length",
   "athena-view-namespace": "Namespace",
   "athena-view-namespace-0": "main",
-  "athena-view-language": "Language"
+  "athena-view-language": "Language",
+  "athena-view-imported": "Imported content",
+  "athena-view-not-available": "n/a"
 }

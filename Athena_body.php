@@ -270,7 +270,13 @@ class SpecialAthena extends SpecialPage {
 
 			$ageStr = AthenaHelper::secondsToString( $res->al_user_age );
 			if ( $ageStr === '' ) {
-				$ageStr = 'n/a';
+				if ($ageStr === -1) {
+					$ageStr = wfMessage('athena-anon');
+				} else if ($ageStr === -2) {
+					$ageStr = wfMessage( 'athena-view-not-available' );
+				} else {
+					$ageStr = wfMessage( 'athena-view-imported' );
+				}
 			}
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td>';
 

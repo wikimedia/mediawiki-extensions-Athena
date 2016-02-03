@@ -379,6 +379,12 @@ class AthenaHelper
                 $varName = 'user24';
             else
                 $varName = 'userother';
+        } else {
+            if ( $userAge != -1 ) {
+                // -2 is no registration details - we shouldn't have that problem though
+                // anything bigger will be imported content, so let's just assume they were greater than a day and do other
+                $varName = 'userother';
+            }
         }
 
         $probUser = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
