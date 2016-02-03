@@ -17,10 +17,12 @@
 	]
    },
   "AutoloadClasses": {
-    "AthenaHooks": "AthenaHooks.php",
     "AthenaFilters": "AthenaFilters.php",
+    "AthenaHooks": "AthenaHooks.php",
     "AthenaHelper": "AthenaHelper.php",
-	"SpecialAthena": "Athena_body.php"
+	"SpecialAthena": "Athena_body.php",
+    "TextLanguageDetect": "TextLanguageDetect.php",
+    "TextLanguageDetectException": "TextLanguageDetectException.php"
   },
   "Hooks": {
     "EditFilter": [

@@ -42,16 +42,16 @@ class SpecialAthena extends SpecialPage {
 		$parts = explode( '/', $par );
 
 		if ( count( $parts ) === 1 ) {
-			if ( $parts[0] === wfMessage( "athena-type-0" ) ) {
+			if ( $parts[0] == wfMessage( "athena-type-0" ) ) {
 				$this->showAthenaLogs( $this::$ALL );
-			} else if ( $parts[0] === wfMessage( "athena-type-1" ) ) {
+			} else if ( $parts[0] == wfMessage( "athena-type-1" ) ) {
 				$this->showAthenaLogs( $this::$SPAM );
-			} else if ( $parts[0] === wfMessage( "athena-type-2" ) ) {
+			} else if ( $parts[0] == wfMessage( "athena-type-2" ) ) {
 				$this->showAthenaLogs( $this::$NOTSPAM );
 			} else {
 				$this->showAthenaHome();
 			}
-		} else if ( count( $parts ) === 2 && $parts[0] === wfMessage( "athena-id" ) ) {
+		} else if ( count( $parts ) === 2 && $parts[0] == wfMessage( "athena-id" ) ) {
 			$this->showAthenaPage( $parts[1] );
 		} else {
 			$this->showAthenaHome();
