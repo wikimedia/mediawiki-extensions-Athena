@@ -14,9 +14,9 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Class constants for types of log viewing
 	 */
-	protected static $ALL = 0;
-	protected static $SPAM = 1;
-	protected static $NOTSPAM = 2;
+	const ALL = 0;
+	const SPAM = 1;
+	const NOTSPAM = 2;
 
 	/**
 	 * Constructor
@@ -43,11 +43,11 @@ class SpecialAthena extends SpecialPage {
 
 		if ( count( $parts ) === 1 ) {
 			if ( $parts[0] == wfMessage( "athena-type-0" ) ) {
-				$this->showAthenaLogs( $this::$ALL );
+				$this->showAthenaLogs( $this::ALL );
 			} else if ( $parts[0] == wfMessage( "athena-type-1" ) ) {
-				$this->showAthenaLogs( $this::$SPAM );
+				$this->showAthenaLogs( $this::SPAM );
 			} else if ( $parts[0] == wfMessage( "athena-type-2" ) ) {
-				$this->showAthenaLogs( $this::$NOTSPAM );
+				$this->showAthenaLogs( $this::NOTSPAM );
 			} else {
 				$this->showAthenaHome();
 			}
@@ -86,10 +86,10 @@ class SpecialAthena extends SpecialPage {
 		$conds = '';
 		$showStatus = false;
 
-		if ( $type === $this::$ALL ) {
+		if ( $type === $this::ALL ) {
 			$output->addWikiMsg( 'athena-pagetext-0' );
 			$showStatus = true;
-		} else if ( $type === $this::$SPAM ) {
+		} else if ( $type === $this::SPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-1' );
 			$conds = 'al_success = 0';
 		} else {
