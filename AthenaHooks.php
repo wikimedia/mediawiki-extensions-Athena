@@ -29,8 +29,8 @@ class AthenaHooks
                     $error =
                         '<div class="errorbox">' .
                         wfMessage( 'athena-blocked-error' ) .
-                        '</div>\n' .
-                        '<br clear="all" />\n';
+                        '</div>' .
+                        '<br clear="all" />';
                 }
             }
         }

@@ -70,5 +70,9 @@
   "athena-view-namespace-0": "main",
   "athena-view-language": "Language",
   "athena-view-imported": "Imported content",
-  "athena-view-not-available": "n/a"
+  "athena-view-not-available": "n/a",
+  "athena-create-url": "create",
+  "athena-create-confirm-url": "confirm",
+  "athena-create-confirm": "Confirm",
+  "athena-create-go-page": "View created page"
 }
