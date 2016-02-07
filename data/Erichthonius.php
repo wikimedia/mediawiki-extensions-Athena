@@ -394,7 +394,7 @@ class Erichthonius extends Maintenance {
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
             curl_setopt( $ch, CURLOPT_HEADER, 1 );
 
-            $apiCall = 'action=login&format=json&lgname=root&lgpassword=123456789';
+            $apiCall = 'action=login&format=json&lgname=Cook879&lgpassword=123';
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
             $response = curl_exec( $ch );
 
@@ -417,12 +417,16 @@ class Erichthonius extends Maintenance {
             $json = json_decode( $body, true );
             $apiCall .= '&lgtoken=' . $json['login']['token'];
 
+            //print_r($apiCall);
+
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
             curl_setopt( $ch, CURLOPT_HEADER, 0 );
 
             $response = curl_exec( $ch );
             $json = json_decode( $response, true );
-            // echo($response);
+
+            //print_r( $json );
+
             $cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] . ';' .
                 $json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'] . ';' .
                 $json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] . ';' .

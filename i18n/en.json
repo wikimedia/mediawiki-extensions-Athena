@@ -38,8 +38,8 @@
   "athena-type-desc-2": "Pages not blocked by Athena",
   "athena-view-athena-value": "Athena Value",
   "athena-view-blocked": "Athena blocked this page",
-  "athena-view-blocked-reinforce": "Delete this page",
-  "athena-view-blocked-reinforce-done": "Page already deleted",
+  "athena-view-not-blocked-reinforce": "Delete this page",
+  "athena-view-not-blocked-reinforce-done": "Page already deleted",
   "athena-view-comment": "Comment",
   "athena-view-content": "Content",
   "athena-view-deleted": "Deleted page",
@@ -47,8 +47,8 @@
   "athena-view-links": "links",
   "athena-view-metric": "Metric",
   "athena-view-not-blocked": "Athena didn't block this page",
-  "athena-view-not-blocked-reinforce": "Allow this page through the filter",
-  "athena-view-not-blocked-reinforce-done": "Page already allowed through the filter",
+  "athena-view-blocked-reinforce": "Allow this page through the filter",
+  "athena-view-blocked-reinforce-done": "Page already allowed through the filter",
   "athena-view-link-percentage": "Link percentage (of content)",
   "athena-view-preview": "Preview",
   "athena-view-result": "Result",
@@ -70,5 +70,10 @@
   "athena-view-namespace-0": "main",
   "athena-view-language": "Language",
   "athena-view-imported": "Imported content",
-  "athena-view-not-available": "n/a"
+  "athena-view-not-available": "n/a",
+  "athena-view-not-blocked-deleted": "This page has already been deleted, separate from Athena's operations",
+  "athena-create-title": "Create blocked page $1",
+  "athena-create-text": "Are you sure you want to create the blocked page $1?",
+  "athena-create-already-text": "A page already exists with the title $1. However, you can still tell Athena this was a bad block",
+  "athena-create-button": "Create"
 }

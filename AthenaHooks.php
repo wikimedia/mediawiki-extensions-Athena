@@ -123,9 +123,11 @@ class AthenaHooks
     static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
         // Search Athena logs for the page id
 
-        $pos = strpos( $reason, wfMessage( 'athena-spam' ) );
+        $pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
+        echo($pos);
         if ( $pos !== false ) {
             $dbw = wfGetDB( DB_SLAVE );
+
             $res = $dbw->selectRow(
                 array( 'athena_page_details' ),
                 array( 'al_id' ),
