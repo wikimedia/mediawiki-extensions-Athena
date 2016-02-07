@@ -42,17 +42,21 @@ class SpecialAthena extends SpecialPage {
 		$parts = explode( '/', $par );
 
 		if ( count( $parts ) === 1 ) {
-			if ( $parts[0] == wfMessage( "athena-type-0" ) ) {
+			if ( $parts[0] == wfMessage( 'athena-type-0' ) ) {
 				$this->showAthenaLogs( $this::ALL );
-			} else if ( $parts[0] == wfMessage( "athena-type-1" ) ) {
+			} else if ( $parts[0] == wfMessage( 'athena-type-1' ) ) {
 				$this->showAthenaLogs( $this::SPAM );
-			} else if ( $parts[0] == wfMessage( "athena-type-2" ) ) {
+			} else if ( $parts[0] == wfMessage( 'athena-type-2' ) ) {
 				$this->showAthenaLogs( $this::NOTSPAM );
 			} else {
 				$this->showAthenaHome();
 			}
-		} else if ( count( $parts ) === 2 && $parts[0] == wfMessage( "athena-id" ) ) {
+		} else if ( count( $parts ) === 2 && $parts[0] == wfMessage( 'athena-id' ) ) {
 			$this->showAthenaPage( $parts[1] );
+		} else if ( count( $parts ) === 2 && $parts[0] == wfMessage( 'athena-create-url' ) ) {
+			$this->createAthenaPage( $parts[1], false );
+		} else if ( count( $parts ) === 3 && $parts[0] == wfMessage( 'athena-create-url' ) && $parts[2] == wfMessage( 'athena-create-confirm-url' ) ) {
+			$this->createAthenaPage( $parts[1], true );
 		} else {
 			$this->showAthenaHome();
 		}
@@ -179,7 +183,7 @@ class SpecialAthena extends SpecialPage {
 					'ac_p_diff_lang', 'ac_w_diff_lang', 'ac_p_deleted', 'ac_w_deleted',
 					'ac_p_wanted', 'ac_w_wanted', 'ac_p_user_age', 'ac_w_user_age',
 					'ac_p_title_length', 'ac_w_title_length', 'ac_p_namespace', 'ac_w_namespace',
-					'ac_p_syntax', 'ac_w_syntax', 'ac_p_link', 'ac_w_link', 'apd_page_id' ),
+					'ac_p_syntax', 'ac_w_syntax', 'ac_p_link', 'ac_w_link' ),
 			array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id, 'athena_calculations.al_id' => $id ),
 			__METHOD__,
 			array()
@@ -241,8 +245,8 @@ class SpecialAthena extends SpecialPage {
 				if ( $res->al_overridden ) {
 					$output->addWikiText( wfMessage( 'athena-view-blocked-reinforce-done' ) );
 				} else {
-
-					$output->addWikiText( '[[Special:Create/' . $title . '|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
+					$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
+							 '|' . wfMessage( 'athena-view-not-blocked-reinforce' ) . ']]' );
 				}
 			}
 
@@ -360,6 +364,81 @@ class SpecialAthena extends SpecialPage {
 			$output->addHTML( $tableStr );
 		} else {
 			$output->addWikiMsgArray( 'athena-viewing-error', $id );
+		}
+	}
+
+	/**
+	 * Creates the page with the given Athena ID
+	 *
+	 * @param $id integer the id of the page they want to create
+	 * @param $confirmed boolean whether they have clicked confirm of not
+	 */
+	public function createAthenaPage( $id, $confirmed ) {
+		$output = $this->getOutput();
+		$this->setHeaders();
+
+		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create', $id ) );
+
+		$dbr = wfGetDB( DB_SLAVE );
+		$res = $dbr->selectRow(
+				array( 'athena_log', 'athena_page_details' ),
+				array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
+				array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id ),
+				__METHOD__,
+				array()
+		);
+
+		// Check the Athena id exists
+		if ( $res ) {
+			// Check it was blocked by Athena
+			if ( $res->al_success == 0 ) {
+				// Check it hasn't been overridden already
+				if ( $res->al_overridden == 0 ) {
+					$title = Title::newFromText( stripslashes( $res->apd_title ), $res->apd_namespace );
+
+					// At this point, we want to reinforce Athena if we've confirmed it.
+					if ( $confirmed ) {
+						// Let's reinforce and depending on the scenario, create the page
+						if ( !$title->exists() ) {
+							$wikiPage = WikiPage::factory( $title );
+
+							// Replace \n with new line, remove slashes
+							$textContent = stripslashes( str_replace( '\\n', PHP_EOL, $res->apd_content ) );
+
+							$content = new WikitextContent( $textContent );
+
+							$comment = stripslashes ( $res->apd_comment );
+
+							if ( $res->apd_user != 0 ) {
+								$user = User::newFromId( $res->apd_user );
+								$wikiPage->doEditContent( $content, $comment, 0, false, $user, null );
+							} else {
+								$wikiPage->doEditContent($content, $comment);
+							}
+
+							$output->addWikiText( '[[' . $title->getFullText() . '|'. wfMessage( 'athena-create-go-page' ) . ']]' );
+
+						}
+						// Reinforce the system
+						$output->addWikiText('DO REINFORCEmENT HERE');
+					} else {
+						// Check a page with this title doesn't already exist
+						if ( $title->exists() ) {
+							$output->addWikiMsg( 'athena-create-already-text' );
+						} else {
+							$output->addWikiMsg( 'athena-create-text' );
+						}
+						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
+								'/' . wfMessage( 'athena-create-confirm-url' ) . '|' . wfMessage( 'athena-create-confirm' ) . ']]' );
+					}
+				} else {
+					$output->addWikiMsgArray( 'athena-create-error-overridden', $id );
+				}
+			} else {
+				$output->addWikiMsgArray( 'athena-create-error-not-blocked', $id );
+			}
+		} else {
+			$output->addWikiMsgArray( 'athena-create-error-not-exists', $id );
 		}
 	}
 }

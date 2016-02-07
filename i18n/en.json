@@ -75,5 +75,8 @@
   "athena-create-title": "Create blocked page $1",
   "athena-create-text": "Are you sure you want to create the blocked page $1?",
   "athena-create-already-text": "A page already exists with the title $1. However, you can still tell Athena this was a bad block",
-  "athena-create-button": "Create"
+  "athena-create-url": "create",
+  "athena-create-confirm-url": "confirm",
+  "athena-create-confirm": "Confirm",
+  "athena-create-go-page": "View created page"
 }
