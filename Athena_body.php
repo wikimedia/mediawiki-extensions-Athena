@@ -183,7 +183,7 @@ class SpecialAthena extends SpecialPage {
 					'ac_p_diff_lang', 'ac_w_diff_lang', 'ac_p_deleted', 'ac_w_deleted',
 					'ac_p_wanted', 'ac_w_wanted', 'ac_p_user_age', 'ac_w_user_age',
 					'ac_p_title_length', 'ac_w_title_length', 'ac_p_namespace', 'ac_w_namespace',
-					'ac_p_syntax', 'ac_w_syntax', 'ac_p_link', 'ac_w_link' ),
+					'ac_p_syntax', 'ac_w_syntax', 'ac_p_link', 'ac_w_link', 'page_id' ),
 			array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id, 'athena_calculations.al_id' => $id ),
 			__METHOD__,
 			array()
@@ -235,7 +235,7 @@ class SpecialAthena extends SpecialPage {
 					$output->addWikiText( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
 				} else {
 					// Page has been deleted, but not within Athena's remit
-					if ( $title->getArticleID() === $res->apd_page_id ) {
+					if ( $title->getArticleID() === $res->page_id ) {
 						$output->addWikiText( wfMessage( 'athena-view-not-blocked-deleted' ) );
 					} else {
 						$output->addHTML('<a href=' . $title->getFullURL(array('action' => 'delete')) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>');
