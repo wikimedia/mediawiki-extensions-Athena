@@ -20,9 +20,7 @@
     "AthenaFilters": "AthenaFilters.php",
     "AthenaHooks": "AthenaHooks.php",
     "AthenaHelper": "AthenaHelper.php",
-	"SpecialAthena": "Athena_body.php",
-    "TextLanguageDetect": "TextLanguageDetect.php",
-    "TextLanguageDetectException": "TextLanguageDetectException.php"
+	"SpecialAthena": "Athena_body.php"
   },
   "Hooks": {
     "EditFilter": [

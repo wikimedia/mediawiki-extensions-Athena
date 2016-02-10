@@ -424,8 +424,8 @@ class TextLanguageDetect
      */
     public static function getLanguages()
     {
-        return $this->_convertToNameMode(
-            array_keys($this->_lang_db)
+        return self::_convertToNameMode(
+            array_keys(self::_lang_db)
         );
     }
 

@@ -23,18 +23,30 @@ class AthenaHelper
         $dbr = wfGetDB( DB_MASTER );
 
         $whereStatement = " `ap_variable`='$var'";
+        $debugStatement = 'Probability of ';
 
         if ( $varFlag ) {
             $whereStatement .= ' AND `ap_variable_not`=1';
+            $debugStatement .= ' NOT ';
         }
+        $debugStatement .= $var;
 
         if ( $given ) {
             $whereStatement .= " AND `ap_given`='$given'";
+            $debugStatement .= ' given ';
         }
 
         if ( $givenFlag ) {
             $whereStatement .= ' AND `ap_given_not`=1';
+            $debugStatement .= ' NOT ';
         }
+
+        if( $given ) {
+            $debugStatement .= $given;
+        }
+
+        $debugStatement .= ' is ';
+
 
         $sql = "SELECT ap_value FROM {$dbr->tableName( 'athena_probability' )} WHERE {$whereStatement};";
 
@@ -42,6 +54,8 @@ class AthenaHelper
         $row = $dbr->fetchObject( $res );
 
         if ( $row ) {
+            wfErrorLog( $debugStatement . $row->ap_value, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
             return $row->ap_value;
         }
 
@@ -61,6 +75,7 @@ class AthenaHelper
         $dbw->insert( 'athena_log', $logArray, __METHOD__, null );
 
         // Get last inserted ID
+        // TODO could do with a MediaWiki method
         $sql = 'select LAST_INSERT_ID() as id;';
         $res = $dbw->query( $sql );
         $row = $dbw->fetchObject( $res );
@@ -69,7 +84,7 @@ class AthenaHelper
         $detailsArray['al_id'] = $id;
         $calcArray['al_id'] = $id;
 
-        print_r($calcArray);
+        //print_r($calcArray);
 
         try {
             $dbw->insert( 'athena_page_details', $detailsArray, __METHOD__, null );
@@ -183,25 +198,6 @@ class AthenaHelper
     }
 
     /**
-     * Loads the language classifier
-     *
-     * @return Text_LanguageDetect
-     */
-    static function getClassifier()
-    {
-        global $IP;
-
-        // Code for Text-LanguageDetect
-        require_once($IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php');
-        $classifier = new Text_LanguageDetect;
-
-        // Set it to return ISO 639-1 (same format as MediaWiki)
-        $classifier->setNameMode(2);
-
-        return $classifier;
-    }
-
-    /**
      * Calculates the Athena value
      * Calls all the filters, works out the probability of each contributing to the spam level, and combines them
      *
@@ -275,6 +271,7 @@ class AthenaHelper
         $detailsArray = AthenaHelper::preparePageDetailsArray( $namespace, $title, $text, $summary, $wgUser->getId() );
 
         AthenaHelper::logAttempt( $logArray, $detailsArray, $calcArray );
+        AthenaHelper::updateStats( $logArray, $titleObj );
 
         return $prob;
     }
@@ -297,8 +294,8 @@ class AthenaHelper
 
         $weightLang = AthenaHelper::loadWeightings( 'difflang' );
 
-        echo( "problang is " + $probLang);
-        echo( "weightlang is " + $weightLang);
+        //echo( "problang is " + $probLang);
+        //echo( "weightlang is " + $weightLang);
 
         $calcArray['ac_p_diff_lang'] = $probLang;
         $calcArray['ac_w_diff_lang'] = $weightLang;
@@ -573,9 +570,27 @@ class AthenaHelper
      */
     static function boolToString( $val ) {
         if ( $val ) {
-            return wfMessage( 'athena-true');
+            return wfMessage( 'athena-true' );
         }
-        return wfMessage( 'athena-false');
+        return wfMessage( 'athena-false' );
+    }
+
+    /**
+     * Loads the language classifier
+     *
+     * @return Text_LanguageDetect
+     */
+    static function getClassifier()
+    {
+        global $IP;
+
+        require_once( $IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php' );
+        $classifier = new Text_LanguageDetect;
+
+        // Set it to return ISO 639-1 (same format as MediaWiki)
+        $classifier->setNameMode(2);
+
+        return $classifier;
     }
 
     /**
@@ -587,9 +602,127 @@ class AthenaHelper
     static function getTextLanguage( $text ) {
         $classifier = AthenaHelper::getClassifier();
         try {
+            //print_r( $classifier->detect( $text ) );
             return $classifier->detectSimple( $text );
         } catch ( Text_LanguageDetect_Exception $e ) {
             return null;
         }
+    }
+
+    /**
+     * Updates the stats table with information from this edit
+     *
+     * @param $array array (logArray - contains details of the edit to be inserted into the athena_log table)
+     * @param $title Title
+     */
+    static function updateStats( $array, $title ) {
+        global $wgAthenaSpamThreshold;
+        $dbw = wfGetDB( DB_SLAVE );
+
+        // TODO not the best way but get me incrementing with the better way and I'll use it
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages'";
+
+        if ( $array['al_value'] > $wgAthenaSpamThreshold ) {
+            $sql .= " OR `as_name`='spam' ";
+        } else {
+            $sql .= " OR `as_name`='notspam' ";
+        }
+
+        if ( $array['al_language'] ) {
+            $sql .= " OR `as_name`='difflang' ";
+        } else {
+            $sql .= " OR `as_name`='samelang' ";
+        }
+
+        if ( $array['al_deleted'] ) {
+            $sql .= " OR `as_name`='deleted' ";
+        } else {
+            $sql .= " OR `as_name`='notdeleted' ";
+        }
+
+        if ( $array['al_wanted'] ) {
+            $sql .= " OR `as_name`='wanted' ";
+        } else {
+            $sql .= " OR `as_name`='notwanted' ";
+        }
+
+        $userAge = $array['al_user_age'];
+          if ( $userAge >= 0 ) {
+              if ( $userAge < 1 )
+                  $sql .= " OR `as_name`='user1' ";
+              else if ( $userAge < 5 )
+                  $sql .= " OR `as_name`='user5' ";
+              else if ( $userAge < 30 )
+                  $sql .= " OR `as_name`='user30' ";
+              else if ( $userAge < 60 )
+                  $sql .= " OR `as_name`='user60' ";
+              else if ( $userAge < 60 * 12 )
+                  $sql .= " OR `as_name`='user12' ";
+              else if ( $userAge < 60 * 24 )
+                  $sql .= " OR `as_name`='user24' ";
+              else
+                  $sql .= " OR `as_name`='userother' ";
+          } else if ( $userAge != -1 ) {
+              $sql .= " OR `as_name`='userother' ";
+          } else {
+              $sql .= " OR `as_name`='anon' ";
+          }
+
+        if ( strlen( $title->getText() ) > 39 ) {
+            $sql .= " OR `as_name`='titlelength' ";
+        } else {
+            $sql .= " OR `as_name`='nottitlelength' ";
+        }
+
+        $namespace = $title->getNamespace();
+        if ( $namespace == 0 )
+            $sql .= " OR `as_name`='nsmain' ";
+        else if ( $namespace == 1 )
+            $sql .= " OR `as_name`='nstalk' ";
+        else if ( $namespace == 2 )
+            $sql .= " OR `as_name`='nsuser' ";
+        else if ( $namespace == 3 )
+            $sql .= " OR `as_name`='nsusertalk' ";
+        else
+            $sql .= " OR `as_name`='nsother' ";
+
+        $syntax = $array['al_syntax'];
+        if ( $syntax === 1 )
+            $sql .= " OR `as_name`='syntaxbasic' ";
+        else if ( $syntax === 2 )
+            $sql .= " OR `as_name`='syntaxcomplex' ";
+        else if ( $syntax === 3 )
+            $sql .= " OR `as_name`='brokenspambot' ";
+        else
+            $sql .= " OR `as_name`='syntaxnone' ";
+
+        $percentage = $array['al_link_percentage'];
+        // TODO why is this named like this...
+        if ( $percentage == 0 )
+            $sql .= " OR `as_name`='links0' ";
+        else if ( $percentage > 0 && $percentage < 0.1 )
+            $sql .= " OR `as_name`='links5' ";
+        else if ( $percentage >= 0.1 && $percentage <= 0.35 )
+            $sql .= " OR `as_name`='links20' ";
+        else if ( $percentage > 0.35 )
+            $sql .= " OR `as_name`='links50' ";
+
+        $sql .= ";";
+
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+    }
+
+    /**
+     * Updates the probability table based on the new stats
+     *
+     * @param $array array (logArray - contains details of the edit to be inserted into the athena_log table)
+     * @param $title Title
+     */
+    static function updateProbabilities( $array, $title ) {
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages';";
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
     }
 }

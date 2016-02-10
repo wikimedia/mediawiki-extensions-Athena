@@ -21,6 +21,7 @@ class AthenaFilters {
             // if false, user is anon
             return -1;
         } elseif ( $registration === null ) {
+        } elseif ( $registration === null ) {
             // if null, user is registered but info not available
             return -2;
         } else {
