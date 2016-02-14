@@ -394,7 +394,7 @@ class Erichthonius extends Maintenance {
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
             curl_setopt( $ch, CURLOPT_HEADER, 1 );
 
-            $apiCall = 'action=login&format=json&lgname=Cook879&lgpassword=123';
+            $apiCall = 'action=login&format=json&lgname=root&lgpassword=123456789';
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
             $response = curl_exec( $ch );
 
