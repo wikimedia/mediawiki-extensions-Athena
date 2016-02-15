@@ -43,7 +43,7 @@
   "athena-view-comment": "Comment",
   "athena-view-content": "Content",
   "athena-view-deleted": "Deleted page",
-  "athena-view-lang": "Same language",
+  "athena-view-lang": "Different language",
   "athena-view-links": "links",
   "athena-view-metric": "Metric",
   "athena-view-not-blocked": "Athena didn't block this page",
@@ -78,5 +78,7 @@
   "athena-create-url": "create",
   "athena-create-confirm-url": "confirm",
   "athena-create-confirm": "Confirm",
-  "athena-create-go-page": "View created page"
+  "athena-create-go-page": "View created page",
+  "athena-create-reinforced": "You have reinforced this page!",
+  "athena-create-error-overridden": "Athena has has already been overridden concerning this page."
 }

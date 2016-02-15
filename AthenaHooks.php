@@ -121,13 +121,12 @@ class AthenaHooks
      * @param $logEntry LogEntry
      */
     static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
-        // Search Athena logs for the page id
-
         $pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
         echo($pos);
         if ( $pos !== false ) {
             $dbw = wfGetDB( DB_SLAVE );
 
+            // Search Athena logs for the page id
             $res = $dbw->selectRow(
                 array( 'athena_page_details' ),
                 array( 'al_id' ),
@@ -142,6 +141,8 @@ class AthenaHooks
                     array( 'al_id' => $res->al_id ),
                     __METHOD__,
                     null );
+
+                AthenaHelper::reinforceDelete( $id );
             }
         }
     }

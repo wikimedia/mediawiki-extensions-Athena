@@ -130,8 +130,6 @@ class AthenaHelper
             $insertArray['al_language'] = $language;
         }
 
-
-
         return $insertArray;
     }
 
@@ -590,6 +588,9 @@ class AthenaHelper
 
         // Set it to return ISO 639-1 (same format as MediaWiki)
         $classifier->setNameMode(2);
+        foreach( $classifier->getLanguages() as $lang ) {
+            wfErrorLog( $lang, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log');
+        }
 
         return $classifier;
     }
@@ -603,7 +604,10 @@ class AthenaHelper
     static function getTextLanguage( $text ) {
         $classifier = AthenaHelper::getClassifier();
         try {
-            //print_r( $classifier->detect( $text ) );
+            foreach( $classifier->detect( $text ) as $lang=>$val ) {
+                wfErrorLog( $lang . " - " . $val, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log');
+            }
+            wfErrorLog( $classifier->detectSimple( $text ), 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log' );
             return $classifier->detectSimple( $text );
         } catch ( Text_LanguageDetect_Exception $e ) {
             return null;
@@ -816,7 +820,7 @@ class AthenaHelper
         $dbw = wfGetDB( DB_SLAVE );
 
         // Have to use ids, which is far from ideal but is efficient
-        $sql = "UPDATE `athena_probability` SET (`ap_value` = CASE ";
+        $sql = "UPDATE `athena_probability` SET `ap_value` = CASE ";
 
         $stats = AthenaHelper::getStatistics();
 
@@ -1172,7 +1176,7 @@ class AthenaHelper
         $sql .= " WHEN `ap_id`=72 THEN $condProb ";
         wfErrorLog( "spam given links50 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
-        $sql .= "END), `as_updated`=CURRENT_TIMESTAMP;"; // don't need a where for efficiency as we are updating every row
+        $sql .= "END, `ap_updated`=CURRENT_TIMESTAMP;"; // don't need a where for efficiency as we are updating every row
 
         // Hacky fix is hacky
         $sql = str_replace( 'NAN', '0', $sql );
@@ -1211,5 +1215,263 @@ class AthenaHelper
 
         return $array;
     }
-}
 
+    /**
+     * Reinforce during page deletion
+     *
+     * @param $id integer
+     */
+    static function reinforceDelete( $id ) {
+        // Get page details
+        $res = AthenaHelper::getAthenaDetails( $id );
+
+        AthenaHelper::updateStatsDeleted( $res );
+        AthenaHelper::updateProbabilities();
+    }
+
+    /**
+     * Prepare the log array without any data already
+     *
+     * @param $id integer
+     * @return StdClass - database query results
+     */
+    static function getAthenaDetails( $id ) {
+
+        $dbr = wfGetDB( DB_SLAVE );
+        // Get data from the database
+        $res = $dbr->selectRow(
+            array( 'athena_log', 'athena_page_details' ),
+            array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_timestamp',
+                'al_user_age', 'al_link_percentage', 'al_syntax', 'al_language', 'al_wanted', 'al_deleted' ),
+            array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id ),
+            __METHOD__,
+            array()
+        );
+
+        return $res;
+    }
+
+    /**
+     * Updates the stats table with information from this edit
+     *
+     * @param $res StdClass
+     */
+    static function updateStatsDeleted( $res ) {
+        $dbw = wfGetDB( DB_SLAVE );
+
+        // Start by reducing the number of not spam
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
+        // Now increment spam and all the spamands
+
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
+
+        if ( $res->al_language ) {
+            $sql .= " OR `as_name`='spamanddifflang' ";
+        } else {
+            $sql .= " OR `as_name`='spamandsamelang' ";
+        }
+
+        if ( $res->al_deleted ) {
+            $sql .= " OR `as_name`='spamanddeleted' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnotdeleted' ";
+        }
+
+        if ( $res->al_wanted ) {
+            $sql .= " OR `as_name`='spamandwanted' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnotwanted' ";
+        }
+
+        $userAge = $res->al_user_age;
+        if ( $userAge >= 0 ) {
+            if ($userAge < 1) {
+                $sql .= " OR `as_name`='spamanduser1' ";
+            } else if ($userAge < 5) {
+                $sql .= " OR `as_name`='spamanduser5' ";
+            } else if ( $userAge < 30 ) {
+                $sql .= " OR `as_name`='spamanduser30' ";
+            } else if ( $userAge < 60 ) {
+                $sql .= " OR `as_name`='spamanduser60' ";
+            } else if ( $userAge < 60 * 12 ) {
+                $sql .= " OR `as_name`='spamanduser12' ";
+            } else if ( $userAge < 60 * 24 ) {
+                $sql .= " OR `as_name`='spamanduser24' ";
+            }  else {
+                $sql .= " OR `as_name`='spamanduserother' ";
+            }
+        } else if ( $userAge != -1 ) {
+            $sql .= " OR `as_name`='spamanduserothe' ";
+        } else {
+            $sql .= " OR `as_name`='spamandanon' ";
+        }
+
+        if ( strlen( $res->apd_title ) > 39 ) {
+            $sql .= " OR `as_name`='spamandtitlelength' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnottitlelength' ";
+        }
+
+        $namespace = $res->apd_namespace;
+        if ( $namespace == 0 ) {
+            $sql .= " OR `as_name`='spamandnsmain' ";
+        } else if ( $namespace == 1 ) {
+            $sql .= " OR `as_name`='spamandnstalk' ";
+        } else if ( $namespace == 2 ) {
+            $sql .= " OR `as_name`='spamandnsuser' ";
+        } else if ( $namespace == 3 ) {
+            $sql .= " OR `as_name`='spamandnsusertalk' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnsother' ";
+        }
+
+        $syntax = $res->al_syntax;
+        if ( $syntax === 1 ) {
+            $sql .= " OR `as_name`='spamandsyntaxbasic' ";
+        } else if ( $syntax === 2 ) {
+            $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
+        } else if ( $syntax === 3 ) {
+            $sql .= " OR `as_name`='spamandbrokenspambot' ";
+        } else {
+            $sql .= " OR `as_name`='spamandsyntaxnone' ";
+        }
+
+        $percentage = $res->al_link_percentage;
+        // TODO why is this named like this...
+        if ( $percentage == 0 ) {
+            $sql .= " OR `as_name`='spamandlinks0' ";
+        } else if ( $percentage > 0 && $percentage < 0.1 ) {
+            $sql .= " OR `as_name`='spamandlinks5' ";
+        } else if ( $percentage >= 0.1 && $percentage <= 0.35 ) {
+            $sql .= " OR `as_name`='spamandlinks20' ";
+        } else {
+            $sql .= " OR `as_name`='spamandlinks50' ";
+        }
+        $sql .= ";";
+
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+    }
+
+    /**
+     * Reinforce during reinforcement page creation
+     *
+     * @param $id integer
+     */
+    static function reinforceCreate( $id ) {
+        // Get page details
+        $res = AthenaHelper::getAthenaDetails( $id );
+
+        AthenaHelper::updateStatsCreated( $res );
+        AthenaHelper::updateProbabilities();
+    }
+
+    /**
+     * Updates the stats table with information from this edit
+     *
+     * @param $res StdClass
+     */
+    static function updateStatsCreated( $res ) {
+        $dbw = wfGetDB( DB_SLAVE );
+
+        // Start by reducing the number of not spam
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
+        // Now increment spam and all the spamands
+
+        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
+
+        if ( $res->al_language ) {
+            $sql .= " OR `as_name`='spamanddifflang' ";
+        } else {
+            $sql .= " OR `as_name`='spamandsamelang' ";
+        }
+
+        if ( $res->al_deleted ) {
+            $sql .= " OR `as_name`='spamanddeleted' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnotdeleted' ";
+        }
+
+        if ( $res->al_wanted ) {
+            $sql .= " OR `as_name`='spamandwanted' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnotwanted' ";
+        }
+
+        $userAge = $res->al_user_age;
+        if ( $userAge >= 0 ) {
+            if ($userAge < 1) {
+                $sql .= " OR `as_name`='spamanduser1' ";
+            } else if ($userAge < 5) {
+                $sql .= " OR `as_name`='spamanduser5' ";
+            } else if ( $userAge < 30 ) {
+                $sql .= " OR `as_name`='spamanduser30' ";
+            } else if ( $userAge < 60 ) {
+                $sql .= " OR `as_name`='spamanduser60' ";
+            } else if ( $userAge < 60 * 12 ) {
+                $sql .= " OR `as_name`='spamanduser12' ";
+            } else if ( $userAge < 60 * 24 ) {
+                $sql .= " OR `as_name`='spamanduser24' ";
+            }  else {
+                $sql .= " OR `as_name`='spamanduserother' ";
+            }
+        } else if ( $userAge != -1 ) {
+            $sql .= " OR `as_name`='spamanduserothe' ";
+        } else {
+            $sql .= " OR `as_name`='spamandanon' ";
+        }
+
+        if ( strlen( $res->apd_title ) > 39 ) {
+            $sql .= " OR `as_name`='spamandtitlelength' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnottitlelength' ";
+        }
+
+        $namespace = $res->apd_namespace;
+        if ( $namespace == 0 ) {
+            $sql .= " OR `as_name`='spamandnsmain' ";
+        } else if ( $namespace == 1 ) {
+            $sql .= " OR `as_name`='spamandnstalk' ";
+        } else if ( $namespace == 2 ) {
+            $sql .= " OR `as_name`='spamandnsuser' ";
+        } else if ( $namespace == 3 ) {
+            $sql .= " OR `as_name`='spamandnsusertalk' ";
+        } else {
+            $sql .= " OR `as_name`='spamandnsother' ";
+        }
+
+        $syntax = $res->al_syntax;
+        if ( $syntax === 1 ) {
+            $sql .= " OR `as_name`='spamandsyntaxbasic' ";
+        } else if ( $syntax === 2 ) {
+            $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
+        } else if ( $syntax === 3 ) {
+            $sql .= " OR `as_name`='spamandbrokenspambot' ";
+        } else {
+            $sql .= " OR `as_name`='spamandsyntaxnone' ";
+        }
+
+        $percentage = $res->al_link_percentage;
+        // TODO why is this named like this...
+        if ( $percentage == 0 ) {
+            $sql .= " OR `as_name`='spamandlinks0' ";
+        } else if ( $percentage > 0 && $percentage < 0.1 ) {
+            $sql .= " OR `as_name`='spamandlinks5' ";
+        } else if ( $percentage >= 0.1 && $percentage <= 0.35 ) {
+            $sql .= " OR `as_name`='spamandlinks20' ";
+        } else {
+            $sql .= " OR `as_name`='spamandlinks50' ";
+        }
+        $sql .= ";";
+
+        $dbw->query( $sql );
+        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+    }
+
+}

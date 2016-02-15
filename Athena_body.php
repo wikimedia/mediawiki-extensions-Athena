@@ -211,7 +211,8 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<td>' . $res->apd_timestamp . '</td></tr>';
 
 			$tableStr .= '</tr><tr><td>' . wfMessage( 'athena-view-language' ) . '</td>';
-			$tableStr .= '<td>' . $res->apd_language . '</td></tr>';
+			$lang = Language::fetchLanguageName( $res->apd_language );
+			$tableStr .= '<td>' . $lang . '</td></tr>';
 
 			if ( $res->apd_comment ) {
 				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-comment' ) . '</td>';
@@ -246,7 +247,7 @@ class SpecialAthena extends SpecialPage {
 					$output->addWikiText( wfMessage( 'athena-view-blocked-reinforce-done' ) );
 				} else {
 					$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
-							 '|' . wfMessage( 'athena-view-not-blocked-reinforce' ) . ']]' );
+							 '|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
 				}
 			}
 
@@ -279,9 +280,9 @@ class SpecialAthena extends SpecialPage {
 
 			$ageStr = AthenaHelper::secondsToString( $res->al_user_age );
 			if ( $ageStr === '' ) {
-				if ($ageStr === -1) {
+				if ( $res->al_user_age == -1 ) {
 					$ageStr = wfMessage('athena-anon');
-				} else if ($ageStr === -2) {
+				} else if ( $res->al_user_age == -2 ) {
 					$ageStr = wfMessage( 'athena-view-not-available' );
 				} else {
 					$ageStr = wfMessage( 'athena-view-imported' );
@@ -377,7 +378,7 @@ class SpecialAthena extends SpecialPage {
 		$output = $this->getOutput();
 		$this->setHeaders();
 
-		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create', $id ) );
+		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->selectRow(
@@ -420,13 +421,20 @@ class SpecialAthena extends SpecialPage {
 
 						}
 						// Reinforce the system
-						$output->addWikiText('DO REINFORCEmENT HERE');
+						AthenaHelper::reinforceCreate( $id );
+						$output->addWikiMsg( 'athena-create-reinforced' );
+
+						$dbr->update( 'athena_log',
+								array( 'al_overridden' => 1 ),
+								array( 'al_id' => $id ),
+								__METHOD__,
+								null );
 					} else {
 						// Check a page with this title doesn't already exist
 						if ( $title->exists() ) {
-							$output->addWikiMsg( 'athena-create-already-text' );
+							$output->addWikiMsg( 'athena-create-already-text', $id  );
 						} else {
-							$output->addWikiMsg( 'athena-create-text' );
+							$output->addWikiMsg( 'athena-create-text', $id  );
 						}
 						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
 								'/' . wfMessage( 'athena-create-confirm-url' ) . '|' . wfMessage( 'athena-create-confirm' ) . ']]' );
