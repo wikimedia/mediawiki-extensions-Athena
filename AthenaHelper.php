@@ -577,14 +577,14 @@ class AthenaHelper
     /**
      * Loads the language classifier
      *
-     * @return Text_LanguageDetect
+     * @return TextLanguageDetect
      */
-    static function getClassifier()
+   /* static function getClassifier()
     {
         global $IP;
 
-        require_once( $IP . '\extensions\Athena\libs\Text_LanguageDetect-0.3.0\Text\LanguageDetect.php' );
-        $classifier = new Text_LanguageDetect;
+        require_once( $IP . '\extensions\Athena\libs\text-language-detect-master\lib\TextLanguageDetect\TextLanguageDetect.php' );
+        $classifier = new \TextLanguageDetect\TextLanguageDetect();
 
         // Set it to return ISO 639-1 (same format as MediaWiki)
         $classifier->setNameMode(2);
@@ -593,7 +593,7 @@ class AthenaHelper
         }
 
         return $classifier;
-    }
+    }*/
 
     /**
      * Gets the language of a given text
@@ -602,16 +602,10 @@ class AthenaHelper
      * @return string
      */
     static function getTextLanguage( $text ) {
-        $classifier = AthenaHelper::getClassifier();
-        try {
-            foreach( $classifier->detect( $text ) as $lang=>$val ) {
-                wfErrorLog( $lang . " - " . $val, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log');
-            }
-            wfErrorLog( $classifier->detectSimple( $text ), 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log' );
-            return $classifier->detectSimple( $text );
-        } catch ( Text_LanguageDetect_Exception $e ) {
-            return null;
-        }
+        $return = system( 'franc "$text"' );
+        wfErrorLog( $return, 'D:/xamp2/htdocs/spam2/extensions/Athena/data/debug-lang.log');
+
+        return null;
     }
 
     /**
