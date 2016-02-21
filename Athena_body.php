@@ -17,6 +17,7 @@ class SpecialAthena extends SpecialPage {
 	const ALL = 0;
 	const SPAM = 1;
 	const NOTSPAM = 2;
+	const TRAINING = 3;
 
 	/**
 	 * Constructor
@@ -48,6 +49,8 @@ class SpecialAthena extends SpecialPage {
 				$this->showAthenaLogs( $this::SPAM );
 			} else if ( $parts[0] == wfMessage( 'athena-type-2' ) ) {
 				$this->showAthenaLogs( $this::NOTSPAM );
+			} else if ( $parts[0] == wfMessage( 'athena-type-3' ) ) {
+				$this->showAthenaLogs( $this::TRAINING );
 			} else {
 				$this->showAthenaHome();
 			}
@@ -75,6 +78,7 @@ class SpecialAthena extends SpecialPage {
 		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-0' ) . '|' . wfMessage( 'athena-type-desc-0' ) . ']]' );
 		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-1' ) . '|' . wfMessage( 'athena-type-desc-1' ) . ']]' );
 		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-2' ) . '|' . wfMessage( 'athena-type-desc-2' ) . ']]' );
+		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-3' ) . '|' . wfMessage( 'athena-type-desc-3' ) . ']]' );
 	}
 
 	/**
@@ -96,9 +100,12 @@ class SpecialAthena extends SpecialPage {
 		} else if ( $type === $this::SPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-1' );
 			$conds = 'al_success = 0';
-		} else {
+		} else if ( $type === $this::NOTSPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-2' );
 			$conds = 'al_success = 1';
+		} else {
+			$output->addWikiMsg( 'athena-pagetext-3' );
+			$conds = 'al_success = 2';
 		}
 
 		$dbr = wfGetDB( DB_SLAVE );
@@ -123,7 +130,6 @@ class SpecialAthena extends SpecialPage {
 
 		$tableStr .= '<th>' . wfMessage( 'athena-log-view' ) . '</th></thead><tbody>';
 
-
 		foreach ( $res as $row ) {
 			$tableStr .= '<tr>';
 			$tableStr .= '<td>' . $row->al_id . '</td>';
@@ -145,10 +151,12 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<td>' . $row->al_value . '</td>';
 
 			if ( $showStatus ) {
-				if ( $row->al_success ) {
+				if ( $row->al_success == 1 ) {
 					$tableStr .= '<td>' . wfMessage( 'athena-not-blocked' ) . '</td>';
-				} else {
+				} else if ( $row->al_success == 0 ) {
 					$tableStr .= '<td>' . wfMessage( 'athena-blocked' ) . '</td>';
+				} else {
+					$tableStr .= '<td>' . wfMessage( 'athena-training' ) . '</td>';
 				}
 			}
 
@@ -169,6 +177,8 @@ class SpecialAthena extends SpecialPage {
 	 * @param $id integer the id of the page they want to see
 	 */
 	public function showAthenaPage( $id ) {
+		global $wgAthenaTraining;
+		
 		$output = $this->getOutput();
 		$this->setHeaders();
 
@@ -233,24 +243,28 @@ class SpecialAthena extends SpecialPage {
 			$output->addHTML( $tableStr );
 
 			// Reinforcement button
-			if ( $res->al_success ) {
-				if ( $res->al_overridden ) {
-					$output->addWikiText( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
-				} else {
-					// Page has been deleted, but not within Athena's remit
-					if ( $title->getArticleID() === $res->page_id ) {
-						$output->addWikiText( wfMessage( 'athena-view-not-blocked-deleted' ) );
+			if ( !$wgAthenaTraining || $wgAthenaTraining && $res->al_success == 2 ) {
+				if ( $res->al_success ) {
+					if ( $res->al_overridden ) {
+						$output->addWikiText( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
 					} else {
-						$output->addHTML('<a href=' . $title->getFullURL(array('action' => 'delete')) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>');
+						// Page has been deleted, but not within Athena's remit
+						if ( $title->getArticleID() === $res->page_id ) {
+							$output->addWikiText( wfMessage( 'athena-view-not-blocked-deleted' ) );
+						} else {
+							$output->addHTML('<a href=' . $title->getFullURL(array('action' => 'delete')) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>');
+						}
+					}
+				} else {
+					if ( $res->al_overridden ) {
+						$output->addWikiText( wfMessage( 'athena-view-blocked-reinforce-done' ) );
+					} else {
+						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
+								 '|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
 					}
 				}
 			} else {
-				if ( $res->al_overridden ) {
-					$output->addWikiText( wfMessage( 'athena-view-blocked-reinforce-done' ) );
-				} else {
-					$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
-							 '|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
-				}
+				$output->addWikiMsg( 'athena-training-off' );
 			}
 
 			// Replace \n with new line, remove slashes
@@ -281,7 +295,7 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<th>' . wfMessage( 'athena-view-probability-given-result' ) . '</th>';
 			$tableStr .= '</thead><tbody>';
 
-			$probSpam = $res->ac_p_spam * 100;
+			$probSpam = $res->ac_p_spam;
 			$numerator = '';
 			$denominator = '';
 
@@ -297,12 +311,12 @@ class SpecialAthena extends SpecialPage {
 			}
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td>';
 
-			$p = $res->ac_p_user * 100;
-			$a = $res->ac_p_userandspam * 100;
-			$g = $res->ac_p_usergivenspam * 100;
+			$p = $res->ac_p_user;
+			$a = $res->ac_p_userandspam;
+			$g = $res->ac_p_usergivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
@@ -310,60 +324,60 @@ class SpecialAthena extends SpecialPage {
 			$linkPercentage = $res->al_link_percentage * 100;
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-link-percentage' ) . '</td><td>' . $linkPercentage . '% (' . $res->al_links . ' ' . wfMessage( 'athena-view-links' ) . ')</td>';
 
-			$p = $res->ac_p_links * 100;
-			$a = $res->ac_p_linksandspam * 100;
-			$g = $res->ac_p_linksgivenspam * 100;
+			$p = $res->ac_p_links;
+			$a = $res->ac_p_linksandspam;
+			$g = $res->ac_p_linksgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
 
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-syntax' ) . '</td><td>' . AthenaHelper::syntaxTypeToString( $res->al_syntax ) . '</td>';
 
-			$p = $res->ac_p_syntax * 100;
-			$a = $res->ac_p_syntaxandspam * 100;
-			$g = $res->ac_p_syntaxgivenspam * 100;
+			$p = $res->ac_p_syntax;
+			$a = $res->ac_p_syntaxandspam;
+			$g = $res->ac_p_syntaxgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
 
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-lang' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_language ) . '</td>';
 
-			$p = $res->ac_p_lang * 100;
-			$a = $res->ac_p_langandspam * 100;
-			$g = $res->ac_p_langgivenspam * 100;
+			$p = $res->ac_p_lang;
+			$a = $res->ac_p_langandspam;
+			$g = $res->ac_p_langgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
 
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-wanted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_wanted ) . '</td>';
 
-			$p = $res->ac_p_wanted * 100;
-			$a = $res->ac_p_wantedandspam * 100;
-			$g = $res->ac_p_wantedgivenspam * 100;
+			$p = $res->ac_p_wanted;
+			$a = $res->ac_p_wantedandspam;
+			$g = $res->ac_p_wantedgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
 
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-deleted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_deleted ) . '</td>';
 
-			$p = $res->ac_p_deleted * 100;
-			$a = $res->ac_p_deletedandspam * 100;
-			$g = $res->ac_p_deletedgivenspam * 100;
+			$p = $res->ac_p_deleted;
+			$a = $res->ac_p_deletedandspam;
+			$g = $res->ac_p_deletedgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
@@ -371,12 +385,12 @@ class SpecialAthena extends SpecialPage {
 			$titleLength = strlen( $title->getText() );
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-title-length' ) . '</td><td>' . $titleLength . '</td>';
 
-			$p = $res->ac_p_titlelength * 100;
-			$a = $res->ac_p_titlelengthandspam * 100;
-			$g = $res->ac_p_titlelengthgivenspam * 100;
+			$p = $res->ac_p_titlelength;
+			$a = $res->ac_p_titlelengthandspam;
+			$g = $res->ac_p_titlelengthgivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
 			$numerator .= "$g * ";
 			$denominator .= "$p * ";
@@ -388,18 +402,18 @@ class SpecialAthena extends SpecialPage {
 			}
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-namespace' ) . '</td><td>' . $namespace . '</td>';
 
-			$p = $res->ac_p_namespace * 100;
-			$a = $res->ac_p_namespaceandspam * 100;
-			$g = $res->ac_p_namespacegivenspam * 100;
+			$p = $res->ac_p_namespace;
+			$a = $res->ac_p_namespaceandspam;
+			$g = $res->ac_p_namespacegivenspam;
 			$gr = ($g*$probSpam)/$p;
 
-			$tableStr .= "<td>$p%</td><td>$a%</td><td>$g%</td><td>$gr%</td></tr></tbody></table>";
+			$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr></tbody></table>";
 
 			$numerator .= "$g * ";
 			$denominator .= $p;
 
 			$tableStr .= '<table class="wikitable"><tbody>';
-			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-probability-spam' ) . "</td><td>$probSpam%</td></tr>";
+			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-probability-spam' ) . "</td><td>$probSpam</td></tr>";
 			$numerator .= $probSpam;
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-probability-calc' ) . "</td><td>$numerator<br/><hr/>$denominator</td></tr>";
 			$tableStr .= '<tr><td><b>' . wfMessage( 'athena-view-athena-value' ) . '</b></td><td><b>' . $res->al_value . '</b></td></tr>';

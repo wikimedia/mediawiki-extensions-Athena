@@ -53,7 +53,7 @@ class AthenaHelper
      * @return array
      */
     static function prepareLogArray( $prob, $userAge, $links, $linkPercentage, $syntax, $language, $deleted, $wanted ) {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgAthenaTraining;
 
         if ( $deleted === false ) {
             $deleted = 0;
@@ -63,7 +63,7 @@ class AthenaHelper
             $wanted = 0;
         }
 
-        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_success' => 0, 'al_user_age' => $userAge,
+        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_user_age' => $userAge,
             'al_links' => $links, 'al_link_percentage' => $linkPercentage, 'al_syntax' => $syntax,
             'al_wanted' => $wanted, 'al_deleted' => $deleted );
 
@@ -77,11 +77,15 @@ class AthenaHelper
             $insertArray['al_language'] = 0;
         }
 
-        if ( $prob > $wgAthenaSpamThreshold ) {
-            $insertArray['al_success'] = 0;
-        } else {
-            $insertArray['al_success'] = 1;
-        }
+		if( !$wgAthenaTraining ) {
+			if ( $prob > $wgAthenaSpamThreshold ) {
+				$insertArray['al_success'] = 0;
+			} else {
+				$insertArray['al_success'] = 1;
+			}
+		} else {
+			$insertArray['al_success'] = 2;
+		}
 
         return $insertArray;
     }
@@ -153,6 +157,10 @@ class AthenaHelper
         AthenaHelper::calculateProbability_Spam( $stats, $probabilityArray );
 
         $numerator = $probabilityArray['ac_p_spam'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* start different language */
         $diffLang = AthenaFilters::differentLanguage( $text );
@@ -161,6 +169,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_langgivenspam'];
         $denominator = $probabilityArray['ac_p_lang'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end different language */
 
@@ -171,6 +183,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_deletedgivenspam'];
         $denominator *= $probabilityArray['ac_p_deleted'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end deleted */
 
@@ -181,6 +197,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_wantedgivenspam'];
         $denominator *= $probabilityArray['ac_p_wanted'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end wanted */
 
@@ -191,6 +211,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_usergivenspam'];
         $denominator *= $probabilityArray['ac_p_user'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end user type */
 
@@ -201,6 +225,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_titlelengthgivenspam'];
         $denominator *= $probabilityArray['ac_p_titlelength'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end title length */
 
@@ -211,6 +239,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_namespacegivenspam'];
         $denominator *= $probabilityArray['ac_p_namespace'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end namespace */
 
@@ -221,6 +253,10 @@ class AthenaHelper
 
         $numerator *= $probabilityArray['ac_p_syntaxgivenspam'];
         $denominator *= $probabilityArray['ac_p_syntax'];
+        wfErrorLog( "------------------------------------------------", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Numerator is $numerator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Denominator is $denominator", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability is $prob", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
         /* end syntax */
 

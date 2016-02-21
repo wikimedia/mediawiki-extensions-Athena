@@ -83,5 +83,10 @@
   "athena-create-reinforced": "You have reinforced this page!",
   "athena-create-error-overridden": "Athena has has already been overridden concerning this page.",
   "athena-view-probability-spam": "Probability of a page being spam",
-  "athena-view-probability-calc": "Athena Value calculation"
+  "athena-view-probability-calc": "Athena Value calculation",
+  "athena-type-3": "training",
+  "athena-type-desc-3": "Athena training data",
+  "athena-training": "Training data",
+  "athena-pagetext-3": "Showing all pages Athena has used as training data.",
+  "athena-training-off": "Training mode is currently off. You may only reinforce this page in training mode."
 }

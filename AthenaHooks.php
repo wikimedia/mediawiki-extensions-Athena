@@ -15,7 +15,7 @@ class AthenaHooks
      */
     static function editFilter( $editPage, $text, $section, &$error, $summary )
     {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgAthenaTraining;
 
         // Check if it's a new article or not
         if ( $editPage->getTitle()->getArticleID() === 0 ) {
@@ -25,7 +25,7 @@ class AthenaHooks
             if ( $redirect !== 1 ) {
                 $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
 
-                if ( $prob > $wgAthenaSpamThreshold ) {
+                if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
                     $error =
                         '<div class="errorbox">' .
                         wfMessage( 'athena-blocked-error' ) .
@@ -41,7 +41,7 @@ class AthenaHooks
      * Updates the database with the new Athena tabled
      * Called when the update.php maintenance script is run.
      *
-     * TODO Auto-fill weighting and probability data
+     * TODO Auto-fill data
      * @param $updater DatabaseUpdater
      * @return bool
      */
