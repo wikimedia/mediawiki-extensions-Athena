@@ -392,17 +392,17 @@ class AthenaHelper
 
         $var = 'anon';
         if ( $userAge >= 0 ) {
-            if ( $userAge < 1 )
+            if ( $userAge < 60 )
                 $var = 'user1';
-            else if ( $userAge < 5 )
+            else if ( $userAge < 5 * 60 )
                 $var = 'user5';
-            else if ( $userAge < 30 )
+            else if ( $userAge < 30 * 60 )
                 $var = 'user30';
-            else if ( $userAge < 60 )
+            else if ( $userAge < 60 * 60 )
                 $var = 'user60';
-            else if ( $userAge < 60 * 12 )
+            else if ( $userAge < 60 * 60 * 12 )
                 $var = 'user12';
-            else if ( $userAge < 60 * 24 )
+            else if ( $userAge < 60 * 60 * 24 )
                 $var = 'user24';
             else
                 $var = 'userother';

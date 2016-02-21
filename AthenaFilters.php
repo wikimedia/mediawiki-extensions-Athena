@@ -30,10 +30,21 @@ class AthenaFilters {
             $now = wfTimestamp();
             // convert registration from MediaWiki timestamp to Unix timestamp
             $registration = wfTimestamp( TS_UNIX, $registration );
+
             // Get difference (in seconds)
             $diff = $now - $registration;
+
+            wfErrorLog( "+++++++++++++++++++++++++++++++++++++++", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+            wfErrorLog( "Now is $now", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+            wfErrorLog( "Registration is $registration", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+            wfErrorLog( "Difference is $diff", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
             // Convert to minutes, rounding down
-            $diff = floor( $diff / 60 );
+            //$diff = floor( $diff / 60 );
+
+            wfErrorLog( "Difference post ronding is $diff", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+            wfErrorLog( "+++++++++++++++++++++++++++++++++++++++", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+
             return $diff;
         }
     }
