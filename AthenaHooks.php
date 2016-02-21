@@ -98,11 +98,12 @@ class AthenaHooks
                 __METHOD__,
                 null );
 
-            $dbw->update( 'athena_log',
+            // Move this to initial log attempt
+           /* $dbw->update( 'athena_log',
                 array( 'al_success' => 1 ),
                 array( 'al_id' => $id ),
                 __METHOD__,
-                null );
+                null );*/
 
             return true;
         }
