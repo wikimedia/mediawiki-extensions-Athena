@@ -37,7 +37,7 @@
     ]
 },
   "config": {
-    "AthenaSpamThreshold": 0.25
+    "AthenaSpamThreshold": 0.5
   },
   "AvailableRights": [
 	"athena"

@@ -30,3 +30,877 @@ Number of links and spam is 89
 Probability of links is 0.16423357664234
 Probability of links and spam is 0.16240875912409
 Probability of links given spam is 0.16542750929368
+------------------------------------------------
+Number of spam is 538
+Number of pages is 548
+Probability of spam is 0.98175182481752
+------------------------------------------------
+Lang type is difflang
+Number of lang is 282
+Number of pages is 548
+Number of lang and spam is 275
+Probability of lang is 0.51459854014599
+Probability of lang and spam is 0.50182481751825
+Probability of lang given spam is 0.51115241635688
+------------------------------------------------
+Delete type is deleted
+Number of deleted is 33
+Number of pages is 548
+Number of deleted and spam is 27
+Probability of deleted is 0.06021897810219
+Probability of deleted and spam is 0.049270072992701
+Probability of deleted given spam is 0.050185873605948
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 540
+Number of pages is 548
+Number of wanted and spam is 533
+Probability of wanted is 0.98540145985401
+Probability of wanted and spam is 0.97262773722628
+Probability of wanted given spam is 0.9907063197026
+------------------------------------------------
+User type is userother
+Number of user is 348
+Number of pages is 548
+Number of user and spam is 283
+Probability of user is 0.63503649635036
+Probability of user and spam is 0.51642335766423
+Probability of user given spam is 0.52602230483271
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 49
+Number of pages is 548
+Number of title length and spam is 49
+Probability of title length is 0.089416058394161
+Probability of title length and spam is 0.089416058394161
+Probability of title length given spam is 0.091078066914498
+------------------------------------------------
+Namespace type is nsmain
+Number of namespace is 207
+Number of pages is 548
+Number of namespace and spam is 200
+Probability of namespace is 0.37773722627737
+Probability of namespace and spam is 0.36496350364964
+Probability of namespace given spam is 0.37174721189591
+------------------------------------------------
+Syntax type is syntaxbasic
+Number of syntax is 323
+Number of pages is 548
+Number of syntax and spam is 319
+Probability of syntax is 0.58941605839416
+Probability of syntax and spam is 0.58211678832117
+Probability of syntax given spam is 0.59293680297398
+------------------------------------------------
+Links type is links5
+Number of links is 90
+Number of pages is 548
+Number of links and spam is 89
+Probability of links is 0.16423357664234
+Probability of links and spam is 0.16240875912409
+Probability of links given spam is 0.16542750929368
+------------------------------------------------
+Numerator is 4.3587341365223E-5
+Denominator is 6.3402012195979E-5
+Probability is 0.68747567869758
+------------------------------------------------
+Number of spam is 538
+Number of pages is 548
+Probability of spam is 0.98175182481752
+------------------------------------------------
+Lang type is samelang
+Number of lang is 266
+Number of pages is 548
+Number of lang and spam is 263
+Probability of lang is 0.48540145985401
+Probability of lang and spam is 0.47992700729927
+Probability of lang given spam is 0.48884758364312
+------------------------------------------------
+Delete type is deleted
+Number of deleted is 33
+Number of pages is 548
+Number of deleted and spam is 27
+Probability of deleted is 0.06021897810219
+Probability of deleted and spam is 0.049270072992701
+Probability of deleted given spam is 0.050185873605948
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 540
+Number of pages is 548
+Number of wanted and spam is 533
+Probability of wanted is 0.98540145985401
+Probability of wanted and spam is 0.97262773722628
+Probability of wanted given spam is 0.9907063197026
+------------------------------------------------
+User type is userother
+Number of user is 348
+Number of pages is 548
+Number of user and spam is 283
+Probability of user is 0.63503649635036
+Probability of user and spam is 0.51642335766423
+Probability of user given spam is 0.52602230483271
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 49
+Number of pages is 548
+Number of title length and spam is 49
+Probability of title length is 0.089416058394161
+Probability of title length and spam is 0.089416058394161
+Probability of title length given spam is 0.091078066914498
+------------------------------------------------
+Namespace type is nsmain
+Number of namespace is 207
+Number of pages is 548
+Number of namespace and spam is 200
+Probability of namespace is 0.37773722627737
+Probability of namespace and spam is 0.36496350364964
+Probability of namespace given spam is 0.37174721189591
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 123
+Number of pages is 548
+Number of syntax and spam is 117
+Probability of syntax is 0.22445255474453
+Probability of syntax and spam is 0.21350364963504
+Probability of syntax given spam is 0.21747211895911
+------------------------------------------------
+Links type is links0
+Number of links is 273
+Number of pages is 548
+Number of links and spam is 268
+Probability of links is 0.49817518248175
+Probability of links and spam is 0.48905109489051
+Probability of links given spam is 0.49814126394052
+------------------------------------------------
+Numerator is 4.6038736955438E-5
+Denominator is 6.9080949208276E-5
+Probability is 0.66644621249533
+------------------------------------------------
+Number of spam is 538
+Number of pages is 548
+Probability of spam is 0.98175182481752
+------------------------------------------------
+Lang type is samelang
+Number of lang is 266
+Number of pages is 548
+Number of lang and spam is 263
+Probability of lang is 0.48540145985401
+Probability of lang and spam is 0.47992700729927
+Probability of lang given spam is 0.48884758364312
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 515
+Number of pages is 548
+Number of deleted and spam is 511
+Probability of deleted is 0.93978102189781
+Probability of deleted and spam is 0.93248175182482
+Probability of deleted given spam is 0.94981412639405
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 540
+Number of pages is 548
+Number of wanted and spam is 533
+Probability of wanted is 0.98540145985401
+Probability of wanted and spam is 0.97262773722628
+Probability of wanted given spam is 0.9907063197026
+------------------------------------------------
+User type is userother
+Number of user is 348
+Number of pages is 548
+Number of user and spam is 283
+Probability of user is 0.63503649635036
+Probability of user and spam is 0.51642335766423
+Probability of user given spam is 0.52602230483271
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 49
+Number of pages is 548
+Number of title length and spam is 49
+Probability of title length is 0.089416058394161
+Probability of title length and spam is 0.089416058394161
+Probability of title length given spam is 0.091078066914498
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 240
+Number of pages is 548
+Number of namespace and spam is 238
+Probability of namespace is 0.43795620437956
+Probability of namespace and spam is 0.43430656934307
+Probability of namespace given spam is 0.44237918215613
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 123
+Number of pages is 548
+Number of syntax and spam is 117
+Probability of syntax is 0.22445255474453
+Probability of syntax and spam is 0.21350364963504
+Probability of syntax given spam is 0.21747211895911
+------------------------------------------------
+Links type is links0
+Number of links is 273
+Number of pages is 548
+Number of links and spam is 268
+Probability of links is 0.49817518248175
+Probability of links and spam is 0.48905109489051
+Probability of links given spam is 0.49814126394052
+------------------------------------------------
+Numerator is 0.0010368776131567
+Denominator is 0.0012499495421085
+Probability is 0.82953557581828
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 539
+Number of pages is 549
+Probability of spam is 0.98178506375228
+------------------------------------------------
+Lang type is samelang
+Number of lang is 267
+Number of pages is 549
+Number of lang and spam is 264
+Probability of lang is 0.48633879781421
+Probability of lang and spam is 0.48087431693989
+Probability of lang given spam is 0.48979591836735
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 516
+Number of pages is 549
+Number of deleted and spam is 512
+Probability of deleted is 0.93989071038251
+Probability of deleted and spam is 0.93260473588342
+Probability of deleted given spam is 0.94990723562152
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 541
+Number of pages is 549
+Number of wanted and spam is 534
+Probability of wanted is 0.98542805100182
+Probability of wanted and spam is 0.97267759562842
+Probability of wanted given spam is 0.99072356215213
+------------------------------------------------
+User type is userother
+Number of user is 349
+Number of pages is 549
+Number of user and spam is 284
+Probability of user is 0.63570127504554
+Probability of user and spam is 0.51730418943534
+Probability of user given spam is 0.52690166975881
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 50
+Number of pages is 549
+Number of title length and spam is 50
+Probability of title length is 0.091074681238616
+Probability of title length and spam is 0.091074681238616
+Probability of title length given spam is 0.092764378478664
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 241
+Number of pages is 549
+Number of namespace and spam is 239
+Probability of namespace is 0.43897996357013
+Probability of namespace and spam is 0.43533697632058
+Probability of namespace given spam is 0.44341372912801
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 124
+Number of pages is 549
+Number of syntax and spam is 118
+Probability of syntax is 0.22586520947177
+Probability of syntax and spam is 0.21493624772313
+Probability of syntax given spam is 0.21892393320965
+------------------------------------------------
+Links type is links0
+Number of links is 274
+Number of pages is 549
+Number of links and spam is 269
+Probability of links is 0.49908925318761
+Probability of links and spam is 0.48998178506375
+Probability of links given spam is 0.49907235621521
+------------------------------------------------
+Numerator is 0.0010716228779995
+Denominator is 0.00129051838017
+Probability is 0.83038172448056
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 540
+Number of pages is 550
+Probability of spam is 0.98181818181818
+------------------------------------------------
+Lang type is samelang
+Number of lang is 268
+Number of pages is 550
+Number of lang and spam is 265
+Probability of lang is 0.48727272727273
+Probability of lang and spam is 0.48181818181818
+Probability of lang given spam is 0.49074074074074
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 517
+Number of pages is 550
+Number of deleted and spam is 513
+Probability of deleted is 0.94
+Probability of deleted and spam is 0.93272727272727
+Probability of deleted given spam is 0.95
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 542
+Number of pages is 550
+Number of wanted and spam is 535
+Probability of wanted is 0.98545454545455
+Probability of wanted and spam is 0.97272727272727
+Probability of wanted given spam is 0.99074074074074
+------------------------------------------------
+User type is userother
+Number of user is 350
+Number of pages is 550
+Number of user and spam is 285
+Probability of user is 0.63636363636364
+Probability of user and spam is 0.51818181818182
+Probability of user given spam is 0.52777777777778
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 51
+Number of pages is 550
+Number of title length and spam is 51
+Probability of title length is 0.092727272727273
+Probability of title length and spam is 0.092727272727273
+Probability of title length given spam is 0.094444444444444
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 242
+Number of pages is 550
+Number of namespace and spam is 240
+Probability of namespace is 0.44
+Probability of namespace and spam is 0.43636363636364
+Probability of namespace given spam is 0.44444444444444
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 125
+Number of pages is 550
+Number of syntax and spam is 119
+Probability of syntax is 0.22727272727273
+Probability of syntax and spam is 0.21636363636364
+Probability of syntax given spam is 0.22037037037037
+------------------------------------------------
+Links type is links0
+Number of links is 275
+Number of pages is 550
+Number of links and spam is 270
+Probability of links is 0.5
+Probability of links and spam is 0.49090909090909
+Probability of links given spam is 0.5
+------------------------------------------------
+Numerator is 0.0011069678715832
+Denominator is 0.001331739866949
+Probability is 0.83121929368929
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 541
+Number of pages is 551
+Probability of spam is 0.98185117967332
+------------------------------------------------
+Lang type is samelang
+Number of lang is 269
+Number of pages is 551
+Number of lang and spam is 266
+Probability of lang is 0.48820326678766
+Probability of lang and spam is 0.48275862068966
+Probability of lang given spam is 0.4916820702403
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 518
+Number of pages is 551
+Number of deleted and spam is 514
+Probability of deleted is 0.94010889292196
+Probability of deleted and spam is 0.93284936479129
+Probability of deleted given spam is 0.95009242144177
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 543
+Number of pages is 551
+Number of wanted and spam is 536
+Probability of wanted is 0.98548094373866
+Probability of wanted and spam is 0.97277676950998
+Probability of wanted given spam is 0.99075785582255
+------------------------------------------------
+User type is userother
+Number of user is 351
+Number of pages is 551
+Number of user and spam is 286
+Probability of user is 0.63702359346642
+Probability of user and spam is 0.51905626134301
+Probability of user given spam is 0.52865064695009
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 52
+Number of pages is 551
+Number of title length and spam is 52
+Probability of title length is 0.09437386569873
+Probability of title length and spam is 0.09437386569873
+Probability of title length given spam is 0.096118299445471
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 243
+Number of pages is 551
+Number of namespace and spam is 241
+Probability of namespace is 0.44101633393829
+Probability of namespace and spam is 0.43738656987296
+Probability of namespace given spam is 0.44547134935305
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 126
+Number of pages is 551
+Number of syntax and spam is 120
+Probability of syntax is 0.22867513611615
+Probability of syntax and spam is 0.21778584392015
+Probability of syntax given spam is 0.22181146025878
+------------------------------------------------
+Links type is links0
+Number of links is 276
+Number of pages is 551
+Number of links and spam is 271
+Probability of links is 0.50090744101633
+Probability of links and spam is 0.49183303085299
+Probability of links given spam is 0.50092421441774
+------------------------------------------------
+Numerator is 0.0011429153010691
+Denominator is 0.0013736163116098
+Probability is 0.83204843405628
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 542
+Number of pages is 552
+Probability of spam is 0.98188405797101
+------------------------------------------------
+Lang type is samelang
+Number of lang is 270
+Number of pages is 552
+Number of lang and spam is 267
+Probability of lang is 0.48913043478261
+Probability of lang and spam is 0.48369565217391
+Probability of lang given spam is 0.49261992619926
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 519
+Number of pages is 552
+Number of deleted and spam is 515
+Probability of deleted is 0.94021739130435
+Probability of deleted and spam is 0.93297101449275
+Probability of deleted given spam is 0.95018450184502
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 544
+Number of pages is 552
+Number of wanted and spam is 537
+Probability of wanted is 0.98550724637681
+Probability of wanted and spam is 0.97282608695652
+Probability of wanted given spam is 0.99077490774908
+------------------------------------------------
+User type is userother
+Number of user is 352
+Number of pages is 552
+Number of user and spam is 287
+Probability of user is 0.63768115942029
+Probability of user and spam is 0.51992753623188
+Probability of user given spam is 0.52952029520295
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 53
+Number of pages is 552
+Number of title length and spam is 53
+Probability of title length is 0.096014492753623
+Probability of title length and spam is 0.096014492753623
+Probability of title length given spam is 0.097785977859779
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 244
+Number of pages is 552
+Number of namespace and spam is 242
+Probability of namespace is 0.44202898550725
+Probability of namespace and spam is 0.43840579710145
+Probability of namespace given spam is 0.44649446494465
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 127
+Number of pages is 552
+Number of syntax and spam is 121
+Probability of syntax is 0.23007246376812
+Probability of syntax and spam is 0.21920289855072
+Probability of syntax given spam is 0.22324723247232
+------------------------------------------------
+Links type is links0
+Number of links is 277
+Number of pages is 552
+Number of links and spam is 272
+Probability of links is 0.5018115942029
+Probability of links and spam is 0.49275362318841
+Probability of links given spam is 0.50184501845018
+------------------------------------------------
+Numerator is 0.0011794678280381
+Denominator is 0.0014161499759402
+Probability is 0.83286929214898
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 543
+Number of pages is 553
+Probability of spam is 0.98191681735986
+------------------------------------------------
+Lang type is samelang
+Number of lang is 271
+Number of pages is 553
+Number of lang and spam is 268
+Probability of lang is 0.49005424954792
+Probability of lang and spam is 0.48462929475588
+Probability of lang given spam is 0.49355432780847
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 520
+Number of pages is 553
+Number of deleted and spam is 516
+Probability of deleted is 0.94032549728752
+Probability of deleted and spam is 0.93309222423146
+Probability of deleted given spam is 0.95027624309392
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 545
+Number of pages is 553
+Number of wanted and spam is 538
+Probability of wanted is 0.98553345388788
+Probability of wanted and spam is 0.97287522603978
+Probability of wanted given spam is 0.99079189686924
+------------------------------------------------
+User type is userother
+Number of user is 353
+Number of pages is 553
+Number of user and spam is 288
+Probability of user is 0.63833634719711
+Probability of user and spam is 0.52079566003617
+Probability of user given spam is 0.53038674033149
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 54
+Number of pages is 553
+Number of title length and spam is 54
+Probability of title length is 0.097649186256781
+Probability of title length and spam is 0.097649186256781
+Probability of title length given spam is 0.099447513812155
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 245
+Number of pages is 553
+Number of namespace and spam is 243
+Probability of namespace is 0.44303797468354
+Probability of namespace and spam is 0.43942133815552
+Probability of namespace given spam is 0.4475138121547
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 128
+Number of pages is 553
+Number of syntax and spam is 122
+Probability of syntax is 0.23146473779385
+Probability of syntax and spam is 0.22061482820976
+Probability of syntax given spam is 0.22467771639042
+------------------------------------------------
+Links type is links0
+Number of links is 278
+Number of pages is 553
+Number of links and spam is 273
+Probability of links is 0.50271247739602
+Probability of links and spam is 0.49367088607595
+Probability of links given spam is 0.50276243093923
+------------------------------------------------
+Numerator is 0.0012166280686617
+Denominator is 0.0014593430746229
+Probability is 0.83368201063765
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 544
+Number of pages is 554
+Probability of spam is 0.98194945848375
+------------------------------------------------
+Lang type is samelang
+Number of lang is 272
+Number of pages is 554
+Number of lang and spam is 269
+Probability of lang is 0.49097472924188
+Probability of lang and spam is 0.485559566787
+Probability of lang given spam is 0.49448529411765
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 521
+Number of pages is 554
+Number of deleted and spam is 517
+Probability of deleted is 0.94043321299639
+Probability of deleted and spam is 0.93321299638989
+Probability of deleted given spam is 0.95036764705882
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 546
+Number of pages is 554
+Number of wanted and spam is 539
+Probability of wanted is 0.985559566787
+Probability of wanted and spam is 0.97292418772563
+Probability of wanted given spam is 0.99080882352941
+------------------------------------------------
+User type is userother
+Number of user is 354
+Number of pages is 554
+Number of user and spam is 289
+Probability of user is 0.63898916967509
+Probability of user and spam is 0.52166064981949
+Probability of user given spam is 0.53125
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 55
+Number of pages is 554
+Number of title length and spam is 55
+Probability of title length is 0.09927797833935
+Probability of title length and spam is 0.09927797833935
+Probability of title length given spam is 0.10110294117647
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 246
+Number of pages is 554
+Number of namespace and spam is 244
+Probability of namespace is 0.44404332129964
+Probability of namespace and spam is 0.44043321299639
+Probability of namespace given spam is 0.44852941176471
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 129
+Number of pages is 554
+Number of syntax and spam is 123
+Probability of syntax is 0.23285198555957
+Probability of syntax and spam is 0.22202166064982
+Probability of syntax given spam is 0.22610294117647
+------------------------------------------------
+Links type is links0
+Number of links is 279
+Number of pages is 554
+Number of links and spam is 274
+Probability of links is 0.50361010830325
+Probability of links and spam is 0.49458483754513
+Probability of links given spam is 0.50367647058824
+------------------------------------------------
+Numerator is 0.0012543985938775
+Denominator is 0.0015031977755102
+Probability is 0.83448672843582
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 545
+Number of pages is 555
+Probability of spam is 0.98198198198198
+------------------------------------------------
+Lang type is samelang
+Number of lang is 273
+Number of pages is 555
+Number of lang and spam is 270
+Probability of lang is 0.49189189189189
+Probability of lang and spam is 0.48648648648649
+Probability of lang given spam is 0.4954128440367
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 522
+Number of pages is 555
+Number of deleted and spam is 518
+Probability of deleted is 0.94054054054054
+Probability of deleted and spam is 0.93333333333333
+Probability of deleted given spam is 0.95045871559633
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 547
+Number of pages is 555
+Number of wanted and spam is 540
+Probability of wanted is 0.98558558558559
+Probability of wanted and spam is 0.97297297297297
+Probability of wanted given spam is 0.99082568807339
+------------------------------------------------
+User type is userother
+Number of user is 355
+Number of pages is 555
+Number of user and spam is 290
+Probability of user is 0.63963963963964
+Probability of user and spam is 0.52252252252252
+Probability of user given spam is 0.53211009174312
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 56
+Number of pages is 555
+Number of title length and spam is 56
+Probability of title length is 0.1009009009009
+Probability of title length and spam is 0.1009009009009
+Probability of title length given spam is 0.10275229357798
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 247
+Number of pages is 555
+Number of namespace and spam is 245
+Probability of namespace is 0.44504504504505
+Probability of namespace and spam is 0.44144144144144
+Probability of namespace given spam is 0.44954128440367
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 130
+Number of pages is 555
+Number of syntax and spam is 124
+Probability of syntax is 0.23423423423423
+Probability of syntax and spam is 0.22342342342342
+Probability of syntax given spam is 0.22752293577982
+------------------------------------------------
+Links type is links0
+Number of links is 280
+Number of pages is 555
+Number of links and spam is 275
+Probability of links is 0.5045045045045
+Probability of links and spam is 0.4954954954955
+Probability of links given spam is 0.5045871559633
+------------------------------------------------
+Numerator is 0.0012927819295702
+Denominator is 0.0015477161999025
+Probability is 0.83528358083453
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 546
+Number of pages is 556
+Probability of spam is 0.98201438848921
+------------------------------------------------
+Lang type is samelang
+Number of lang is 274
+Number of pages is 556
+Number of lang and spam is 271
+Probability of lang is 0.49280575539568
+Probability of lang and spam is 0.48741007194245
+Probability of lang given spam is 0.496336996337
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 523
+Number of pages is 556
+Number of deleted and spam is 519
+Probability of deleted is 0.94064748201439
+Probability of deleted and spam is 0.93345323741007
+Probability of deleted given spam is 0.95054945054945
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 548
+Number of pages is 556
+Number of wanted and spam is 541
+Probability of wanted is 0.98561151079137
+Probability of wanted and spam is 0.97302158273381
+Probability of wanted given spam is 0.99084249084249
+------------------------------------------------
+User type is userother
+Number of user is 356
+Number of pages is 556
+Number of user and spam is 291
+Probability of user is 0.64028776978417
+Probability of user and spam is 0.52338129496403
+Probability of user given spam is 0.53296703296703
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 57
+Number of pages is 556
+Number of title length and spam is 57
+Probability of title length is 0.10251798561151
+Probability of title length and spam is 0.10251798561151
+Probability of title length given spam is 0.1043956043956
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 248
+Number of pages is 556
+Number of namespace and spam is 246
+Probability of namespace is 0.44604316546763
+Probability of namespace and spam is 0.44244604316547
+Probability of namespace given spam is 0.45054945054945
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 131
+Number of pages is 556
+Number of syntax and spam is 125
+Probability of syntax is 0.23561151079137
+Probability of syntax and spam is 0.22482014388489
+Probability of syntax given spam is 0.22893772893773
+------------------------------------------------
+Links type is links0
+Number of links is 281
+Number of pages is 556
+Number of links and spam is 276
+Probability of links is 0.50539568345324
+Probability of links and spam is 0.49640287769784
+Probability of links given spam is 0.50549450549451
+------------------------------------------------
+Numerator is 0.0013317805567579
+Denominator is 0.0015929004228298
+Probability is 0.83607269963054
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;
+------------------------------------------------
+Number of spam is 547
+Number of pages is 557
+Probability of spam is 0.98204667863555
+------------------------------------------------
+Lang type is samelang
+Number of lang is 275
+Number of pages is 557
+Number of lang and spam is 272
+Probability of lang is 0.49371633752244
+Probability of lang and spam is 0.48833034111311
+Probability of lang given spam is 0.49725776965265
+------------------------------------------------
+Delete type is notdeleted
+Number of deleted is 524
+Number of pages is 557
+Number of deleted and spam is 520
+Probability of deleted is 0.94075403949731
+Probability of deleted and spam is 0.93357271095153
+Probability of deleted given spam is 0.95063985374771
+------------------------------------------------
+Wanted type is notwanted
+Number of wanted is 549
+Number of pages is 557
+Number of wanted and spam is 542
+Probability of wanted is 0.98563734290844
+Probability of wanted and spam is 0.97307001795332
+Probability of wanted given spam is 0.9908592321755
+------------------------------------------------
+User type is userother
+Number of user is 357
+Number of pages is 557
+Number of user and spam is 292
+Probability of user is 0.64093357271095
+Probability of user and spam is 0.52423698384201
+Probability of user given spam is 0.53382084095064
+------------------------------------------------
+Title length type is titlelength
+Number of title length is 58
+Number of pages is 557
+Number of title length and spam is 58
+Probability of title length is 0.10412926391382
+Probability of title length and spam is 0.10412926391382
+Probability of title length given spam is 0.10603290676417
+------------------------------------------------
+Namespace type is nsother
+Number of namespace is 249
+Number of pages is 557
+Number of namespace and spam is 247
+Probability of namespace is 0.44703770197487
+Probability of namespace and spam is 0.44344703770197
+Probability of namespace given spam is 0.45155393053016
+------------------------------------------------
+Syntax type is syntaxnone
+Number of syntax is 132
+Number of pages is 557
+Number of syntax and spam is 126
+Probability of syntax is 0.23698384201077
+Probability of syntax and spam is 0.2262118491921
+Probability of syntax given spam is 0.23034734917733
+------------------------------------------------
+Links type is links0
+Number of links is 282
+Number of pages is 557
+Number of links and spam is 277
+Probability of links is 0.50628366247756
+Probability of links and spam is 0.49730700179533
+Probability of links given spam is 0.50639853747715
+------------------------------------------------
+Numerator is 0.0013713969117827
+Denominator is 0.0016387524733353
+Probability is 0.83685421324894
+UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages' OR `as_name`='spam'  OR `as_name`='samelang'  OR `as_name`='spamandsamelang'  OR `as_name`='notdeleted'  OR `as_name`='spamandnotdeleted'  OR `as_name`='notwanted'  OR `as_name`='spamandnotwanted'  OR `as_name`='userother'  OR `as_name`='spamanduserother'  OR `as_name`='titlelength'  OR `as_name`='spamandtitlelength'  OR `as_name`='nsother'  OR `as_name`='spamandnsother'  OR `as_name`='syntaxnone'  OR `as_name`='spamandsyntaxnone'  OR `as_name`='links0'  OR `as_name`='spamandlinks0' ;

@@ -123,7 +123,7 @@ class AthenaHooks
      */
     static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
         $pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
-        echo($pos);
+        //echo($pos);
         if ( $pos !== false ) {
             $dbw = wfGetDB( DB_SLAVE );
 
