@@ -958,7 +958,6 @@ class AthenaHelper
      * @return StdClass - database query results
      */
     static function getAthenaDetails( $id ) {
-
         $dbr = wfGetDB( DB_SLAVE );
         // Get data from the database
         $res = $dbr->selectRow(
@@ -1098,12 +1097,12 @@ class AthenaHelper
     static function updateStatsCreated( $res ) {
         $dbw = wfGetDB( DB_SLAVE );
 
-        // Start by reducing the number of not spam
+        // Start by increaing the number of not spam
         $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
         $dbw->query( $sql );
         wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
-        // Now increment spam and all the spamands
+        // Now decrement spam and all the spamands
 
         $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
 

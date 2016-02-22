@@ -42,9 +42,9 @@ class Erichthonius extends Maintenance {
         // $json = array_reverse($json);
 
         $url = $wgServer . $wgScriptPath . '/api.php';
-        $count = 0;
+        $count = 1;
         foreach ( $json as $page ) {
-            if( $count >= 964 ) {
+            if( $count >= 1 ) {
                 // echo 'Namespace: ' . $page['namespace'] . "\n";
                 // echo 'Title: ' . $page['title'] . "\n";
                 // echo 'Comment: ' . $page['comment'] . "\n";

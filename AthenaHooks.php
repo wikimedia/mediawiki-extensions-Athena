@@ -143,7 +143,7 @@ class AthenaHooks
                     __METHOD__,
                     null );
 
-                AthenaHelper::reinforceDelete( $id );
+                AthenaHelper::reinforceDelete( $res->al_id );
             }
         }
     }

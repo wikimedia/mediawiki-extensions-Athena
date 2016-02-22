@@ -88,5 +88,22 @@
   "athena-type-desc-3": "Athena training data",
   "athena-training": "Training data",
   "athena-pagetext-3": "Showing all pages Athena has used as training data.",
-  "athena-training-off": "Training mode is currently off. You may only reinforce this page in training mode."
+  "athena-training-off": "Training mode is currently off. You may only reinforce this page in training mode.",
+  "athena-view-training-reinforce-done": "Training item already reinforced",
+  "athena-reinforce-url": "reinforce",
+  "athena-reinforce-spam-url": "spam",
+  "athena-reinforce-not-spam-url": "not-spam",
+  "athena-view-training-reinforce-spam": "Spam",
+  "athena-view-training-reinforce-not-spam": "Not Spam",
+  "athena-reinforce-title": "Reinforcing training data with Athena ID #$1",
+  "athena-reinforce-reinforced": "You have reinforced this page!",
+  "athena-view-training": "This page is a part of Athena's training data",
+  "athena-view-overridden": "Reinforced?",
+  "athena-no": "No",
+  "athena-yes": "Yes",
+  "athena-delete-title": "Deleting page with Athena ID #$1",
+  "athena-delete-still-exists": "This page still exists. You should delete it through Special:Delete, using the word spam in the reason.",
+  "athena-delete-text": "This page has been deleted, but out of Athena's remit. If it was spam, you can tell Athena that now.",
+  "athena-view-not-blocked-reinforce": "Tell Athena it got this page wrong",
+  "athena-delete-url": "delete"
 }
