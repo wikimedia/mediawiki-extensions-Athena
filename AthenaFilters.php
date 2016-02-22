@@ -21,7 +21,6 @@ class AthenaFilters {
             // if false, user is anon
             return -1;
         } elseif ( $registration === null ) {
-        } elseif ( $registration === null ) {
             // if null, user is registered but info not available
             return -2;
         } else {
@@ -33,17 +32,6 @@ class AthenaFilters {
 
             // Get difference (in seconds)
             $diff = $now - $registration;
-
-            wfErrorLog( "+++++++++++++++++++++++++++++++++++++++", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-            wfErrorLog( "Now is $now", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-            wfErrorLog( "Registration is $registration", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-            wfErrorLog( "Difference is $diff", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-            // Convert to minutes, rounding down
-            //$diff = floor( $diff / 60 );
-
-            wfErrorLog( "Difference post ronding is $diff", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-            wfErrorLog( "+++++++++++++++++++++++++++++++++++++++", 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
 
             return $diff;
         }
@@ -151,9 +139,7 @@ class AthenaFilters {
             // Tables
             $count += preg_match_all( "/\{\|([^\{\|\}])+\|\}/", $text );
             // Templates
-            // TODO Fix
-            // $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
-
+            $count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
             if ( $count > 1 ) {
                 return 2;
             } else {
@@ -219,10 +205,9 @@ class AthenaFilters {
      */
     public static function brokenSpamBot( $text ) {
         // Word choices
-        // TODO Fix
-       // $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
+        $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
         // Link count
-        $count = preg_match_all( "/#file_links<>/", $text );
+        $count += preg_match_all( "/#file_links<>/", $text );
 
         // Let's be reasonable, for now
         if ( $count > 1 )
