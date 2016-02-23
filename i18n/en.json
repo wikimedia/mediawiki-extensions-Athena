@@ -104,6 +104,6 @@
   "athena-delete-title": "Deleting page with Athena ID #$1",
   "athena-delete-still-exists": "This page still exists. You should delete it through Special:Delete, using the word spam in the reason.",
   "athena-delete-text": "This page has been deleted, but out of Athena's remit. If it was spam, you can tell Athena that now.",
-  "athena-view-not-blocked-reinforce": "Tell Athena it got this page wrong",
-  "athena-delete-url": "delete"
+  "athena-delete-url": "delete",
+  "athena-not-available": "N/A"
 }
