@@ -99,11 +99,15 @@
   "athena-reinforce-reinforced": "You have reinforced this page!",
   "athena-view-training": "This page is a part of Athena's training data",
   "athena-view-overridden": "Reinforced?",
-  "athena-no": "No",
+  "athena-no": "Nope",
   "athena-yes": "Yes",
   "athena-delete-title": "Deleting page with Athena ID #$1",
   "athena-delete-still-exists": "This page still exists. You should delete it through Special:Delete, using the word spam in the reason.",
   "athena-delete-text": "This page has been deleted, but out of Athena's remit. If it was spam, you can tell Athena that now.",
   "athena-delete-url": "delete",
-  "athena-not-available": "N/A"
+  "athena-not-available": "N/A",
+  "athena-view-training-reinforce-done-spam": "Training item already reinforced as spam",
+  "athena-view-training-reinforce-done-not-spam": "Training item already reinforced as not spam",
+  "athena-view-training-spam": "Training data - spam",
+  "athena-view-training-not-spam": "Training data - not spam"
 }

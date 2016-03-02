@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Special:Athena, provides a way to monitor and review Athena activity
  *
@@ -114,7 +114,7 @@ class SpecialAthena extends SpecialPage {
 			$conds = 'al_success = 1';
 		} else {
 			$output->addWikiMsg( 'athena-pagetext-3' );
-			$conds = 'al_success = 2';
+			$conds = 'al_success = 2 OR al_success = 3 OR al_success = 4';
 		}
 
 		$dbr = wfGetDB( DB_SLAVE );
@@ -166,7 +166,7 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<td>' . $row->apd_timestamp . '</td>';
 
 			if ( $type !== $this::TRAINING ) {
-				if ( $row->al_success == 2 ) {
+				if ( $row->al_success >= 2 ) {
 					$tableStr .= '<td>' . wfMessage( 'athena-not-available' ) . '</td>';
 				} else {
 					$tableStr .= '<td>' . $row->al_value . '</td>';
@@ -185,7 +185,11 @@ class SpecialAthena extends SpecialPage {
 
 			if ( $type === $this::TRAINING ) {
 				if ( $row->al_overridden ) {
-					$tableStr .= '<td>' . wfMessage('athena-yes') . '</td>';
+					// TODO i18n
+					if ( $row->al_success == 4 ) 
+						$tableStr .= '<td>' . wfMessage('athena-yes') . ' - NOT SPAM</td>';
+					else
+						$tableStr .= '<td>' . wfMessage('athena-yes') . ' - SPAM</td>';
 				} else {
 					$tableStr .= '<td>' . wfMessage('athena-no') . '</td>';
 				}
@@ -257,9 +261,8 @@ class SpecialAthena extends SpecialPage {
 				$tableStr .= '<td>' . stripslashes ( $res->apd_comment ) . '</td></tr>';
 			}
 
-			if ( $res->al_success != 2 ) {
-				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-athena-value' ) . '</td><td>' . $valStr . '</td></tr>';
-			} else {
+			if ( $res->al_success < 2 ) {
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-athena-value' ) . '</td><td>' . $res->al_value . '</td></tr>';
 			}
 
 			$tableStr .= '<tr><td colspan="2"><b>';
@@ -267,6 +270,10 @@ class SpecialAthena extends SpecialPage {
 				$tableStr .= wfMessage( 'athena-view-not-blocked' );
 			} else if ( $res->al_success == 0 ) {
 				$tableStr .= wfMessage( 'athena-view-blocked' );
+			} else if ( $res->al_success == 3 ) {
+				$tableStr .= wfMessage( 'athena-view-training-spam' );
+			} else if ( $res->al_success == 4 ) {
+				$tableStr .= wfMessage( 'athena-view-training-not-spam' );
 			} else {
 				$tableStr .= wfMessage( 'athena-view-training' );
 			}
@@ -297,7 +304,11 @@ class SpecialAthena extends SpecialPage {
 			} else {
 				if ( $wgAthenaTraining ) {
 					if ( $res->al_overridden ) {
-						$output->addWikiText( wfMessage( 'athena-view-training-reinforce-done' ) );
+						if ( $res->al_success == 3 ) {
+							$output->addWikiText(wfMessage('athena-view-training-reinforce-done-spam'));
+						} else {
+							$output->addWikiText(wfMessage('athena-view-training-reinforce-done-not-spam'));
+						}
 					} else {
 						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-reinforce-url' ) . '/' . wfMessage( 'athena-reinforce-spam-url' ) . '/' . $res->al_id .
 								'|<span style="color:red;">' . wfMessage( 'athena-view-training-reinforce-spam' ) . '</span>]] [[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-reinforce-url' ) . '/' . wfMessage( 'athena-reinforce-not-spam-url' ) . '/' . $res->al_id .
@@ -326,7 +337,7 @@ class SpecialAthena extends SpecialPage {
 			$output->addWikiText( $content );
 			$output->addHTML( '</div>' );
 
-			if ( $res->al_success != 2 ) {
+			if ( $res->al_success < 2 ) {
 				$calc = $dbr->selectRow(
 						array('athena_calculations'),
 						array('ac_p_spam', 'ac_p_lang', 'ac_p_langandspam', 'ac_p_langgivenspam', 'ac_p_deleted',
@@ -533,8 +544,8 @@ class SpecialAthena extends SpecialPage {
 
 		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
-		$dbr = wfGetDB( DB_SLAVE );
-		$res = $dbr->selectRow(
+		$dbw = wfGetDB( DB_SLAVE );
+		$res = $dbw->selectRow(
 				array( 'athena_log', 'athena_page_details' ),
 				array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
 				array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id ),
@@ -577,7 +588,7 @@ class SpecialAthena extends SpecialPage {
 						AthenaHelper::reinforceCreate( $id );
 						$output->addWikiMsg( 'athena-create-reinforced' );
 
-						$dbr->update( 'athena_log',
+						$dbw->update( 'athena_log',
 								array( 'al_overridden' => 1 ),
 								array( 'al_id' => $id ),
 								__METHOD__,
@@ -618,8 +629,8 @@ class SpecialAthena extends SpecialPage {
 		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-reinforce-title', $id ) );
 
 		if ( $wgAthenaTraining ) {
-			$dbr = wfGetDB(DB_SLAVE);
-			$res = $dbr->selectRow(
+			$dbw = wfGetDB(DB_SLAVE);
+			$res = $dbw->selectRow(
 					array('athena_log', 'athena_page_details'),
 					array('athena_log.al_id', 'al_value', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user'),
 					array('athena_log.al_id' => $id, 'athena_page_details.al_id' => $id),
@@ -630,7 +641,7 @@ class SpecialAthena extends SpecialPage {
 			// Check the Athena id exists
 			if ($res) {
 				// Check it is training data
-				if ($res->al_success == 2) {
+				if ($res->al_success >= 2) {
 					// Check it hasn't been overridden already
 					if ($res->al_overridden == 0) {
 						if ($spam) {
@@ -642,8 +653,14 @@ class SpecialAthena extends SpecialPage {
 						// Reinforce the system
 						$output->addWikiMsg('athena-reinforce-reinforced');
 
-						$dbr->update('athena_log',
-								array('al_overridden' => 1),
+						if ( $spam ) {
+							$al_success = 3;
+						} else {
+							$al_success = 4;
+						}
+
+						$dbw->update('athena_log',
+								array('al_overridden' => 1, 'al_success' => $al_success),
 								array('al_id' => $id),
 								__METHOD__,
 								null);
@@ -676,8 +693,8 @@ class SpecialAthena extends SpecialPage {
 
 		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-delete-title', $id ) );
 
-		$dbr = wfGetDB( DB_SLAVE );
-		$res = $dbr->selectRow(
+		$dbw = wfGetDB( DB_SLAVE );
+		$res = $dbw->selectRow(
 				array( 'athena_log', 'athena_page_details' ),
 				array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
 				array( 'athena_log.al_id' => $id, 'athena_page_details.al_id' => $id ),
@@ -704,7 +721,7 @@ class SpecialAthena extends SpecialPage {
 							AthenaHelper::reinforceDelete($id);
 							$output->addWikiMsg('athena-create-reinforced');
 
-							$dbr->update('athena_log',
+							$dbw->update('athena_log',
 									array('al_overridden' => 1),
 									array('al_id' => $id),
 									__METHOD__,

@@ -121,8 +121,7 @@ class AthenaHelper
 
         $language = AthenaHelper::getTextLanguage( $content );
 
-        $language = $dbw->strencode($language);
-        $insertArray['apd_language'] = Language::fetchLanguageName($language);
+        $insertArray['apd_language'] = $dbw->strencode(Language::fetchLanguageName($language));
 
         return $insertArray;
     }
@@ -739,32 +738,32 @@ class AthenaHelper
 
         $userAge = $array['al_user_age'];
           if ( $userAge >= 0 ) {
-              if ($userAge < 1) {
+              if ($userAge < 1 * 60 ) {
                   $sql .= " OR `as_name`='user1' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser1' ";
                   }
-              } else if ($userAge < 5) {
+              } else if ($userAge < 5 * 60 ) {
                   $sql .= " OR `as_name`='user5' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser5' ";
                   }
-              } else if ( $userAge < 30 ) {
+              } else if ( $userAge < 30 * 60 ) {
                   $sql .= " OR `as_name`='user30' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser30' ";
                   }
-              } else if ( $userAge < 60 ) {
+              } else if ( $userAge < 60 * 60 ) {
                   $sql .= " OR `as_name`='user60' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser60' ";
                   }
-              } else if ( $userAge < 60 * 12 ) {
+              } else if ( $userAge < 60 * 12 * 60 ) {
                 $sql .= " OR `as_name`='user12' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser12' ";
                   }
-              } else if ( $userAge < 60 * 24 ) {
+              } else if ( $userAge < 60 * 24 * 60 ) {
                    $sql .= " OR `as_name`='user24' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser24' ";
@@ -997,23 +996,23 @@ class AthenaHelper
 
         $userAge = $res->al_user_age;
         if ( $userAge >= 0 ) {
-            if ($userAge < 1) {
+            if ($userAge < 1 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser1' ";
-            } else if ($userAge < 5) {
+            } else if ($userAge < 5 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser5' ";
-            } else if ( $userAge < 30 ) {
+            } else if ( $userAge < 30 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser30' ";
-            } else if ( $userAge < 60 ) {
+            } else if ( $userAge < 60 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser60' ";
-            } else if ( $userAge < 60 * 12 ) {
+            } else if ( $userAge < 60 * 12 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser12' ";
-            } else if ( $userAge < 60 * 24 ) {
+            } else if ( $userAge < 60 * 24 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser24' ";
             }  else {
                 $sql .= " OR `as_name`='spamanduserother' ";
             }
         } else if ( $userAge != -1 ) {
-            $sql .= " OR `as_name`='spamanduserothe' ";
+            $sql .= " OR `as_name`='spamanduserother' ";
         } else {
             $sql .= " OR `as_name`='spamandanon' ";
         }
@@ -1128,17 +1127,17 @@ class AthenaHelper
 
             $userAge = $res->al_user_age;
             if ($userAge >= 0) {
-                if ($userAge < 1) {
+                if ($userAge < 1 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser1' ";
-                } else if ($userAge < 5) {
+                } else if ($userAge < 5 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser5' ";
-                } else if ($userAge < 30) {
+                } else if ($userAge < 30 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser30' ";
-                } else if ($userAge < 60) {
+                } else if ($userAge < 60 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser60' ";
-                } else if ($userAge < 60 * 12) {
+                } else if ($userAge < 60 * 12 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser12' ";
-                } else if ($userAge < 60 * 24) {
+                } else if ($userAge < 60 * 24 * 60 ) {
                     $sql .= " OR `as_name`='spamanduser24' ";
                 } else {
                     $sql .= " OR `as_name`='spamanduserother' ";

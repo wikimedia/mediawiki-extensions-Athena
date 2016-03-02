@@ -205,7 +205,8 @@ class AthenaFilters {
      */
     public static function brokenSpamBot( $text ) {
         // Word choices
-        $count = preg_match_all("/\{([^\{\}]|)+\}/", $text);
+		// Added space as hacky way to stop matching templates
+        $count = preg_match_all("/\s\{([^\{\}]|)+\}/", $text);
         // Link count
         $count += preg_match_all( "/#file_links<>/", $text );
 
