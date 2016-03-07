@@ -29,7 +29,7 @@ class Erichthonius extends Maintenance {
 
     public function execute() {
         global $wgServer, $wgScriptPath, $session_name, $url;
-        $session_name = 'training3_session';
+        $session_name = 'test_session';
 
         $file = fopen( $this->getArg(), 'r' );
 

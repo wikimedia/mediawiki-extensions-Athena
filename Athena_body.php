@@ -361,7 +361,7 @@ class SpecialAthena extends SpecialPage {
 				$tableStr .= '<th>' . wfMessage( 'athena-view-probability-given-result' ) . '</th>';
 				$tableStr .= '</thead><tbody>';
 
-				$probSpam = $res->ac_p_spam;
+				$probSpam = $calc->ac_p_spam;
 				$numerator = '';
 				$denominator = '';
 
