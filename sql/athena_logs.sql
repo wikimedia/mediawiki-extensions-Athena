@@ -4,7 +4,7 @@
 
 CREATE TABLE athena_log (
   `al_id` int(10) unsigned PRIMARY KEY auto_increment,
-  `al_value` double unsigned NOT NULL,
+  `al_value` double NOT NULL,
   `al_success` tinyint(1) unsigned NOT NULL default 0,
   `al_user_age` int(11),
   `al_links` double unsigned,
@@ -63,5 +63,22 @@ CREATE TABLE athena_calculations (
   `ac_p_syntaxgivenspam` double unsigned NOT NULL,
   `ac_p_links` double unsigned NOT NULL,
   `ac_p_linksandspam` double unsigned NOT NULL,
-  `ac_p_linksgivenspam` double unsigned NOT NULL
+  `ac_p_linksgivenspam` double unsigned NOT NULL,
+  `ac_p_not_spam` double unsigned NOT NULL,
+  `ac_p_langandnotspam` double unsigned NOT NULL,
+  `ac_p_langgivennotspam` double unsigned NOT NULL,
+  `ac_p_deletedandnotspam` double unsigned NOT NULL,
+  `ac_p_deletedgivennotspam` double unsigned NOT NULL,
+  `ac_p_wantedandnotspam` double unsigned NOT NULL,
+  `ac_p_wantedgivennotspam` double unsigned NOT NULL,
+  `ac_p_userandnotspam` double unsigned NOT NULL,
+  `ac_p_usergivennotspam` double unsigned NOT NULL,
+  `ac_p_titlelengthandnotspam` double unsigned NOT NULL,
+  `ac_p_titlelengthgivennotspam` double unsigned NOT NULL,
+  `ac_p_namespaceandnotspam` double unsigned NOT NULL,
+  `ac_p_namespacegivennotspam` double unsigned NOT NULL,
+  `ac_p_syntaxandnotspam` double unsigned NOT NULL,
+  `ac_p_syntaxgivennotspam` double unsigned NOT NULL,
+  `ac_p_linksandnotspam` double unsigned NOT NULL,
+  `ac_p_linksgivennotspam` double unsigned NOT NULL
 );

@@ -340,12 +340,7 @@ class SpecialAthena extends SpecialPage {
 			if ( $res->al_success < 2 ) {
 				$calc = $dbr->selectRow(
 						array('athena_calculations'),
-						array('ac_p_spam', 'ac_p_lang', 'ac_p_langandspam', 'ac_p_langgivenspam', 'ac_p_deleted',
-								'ac_p_deletedandspam', 'ac_p_deletedgivenspam', 'ac_p_wanted', 'ac_p_wantedandspam',
-								'ac_p_wantedgivenspam', 'ac_p_user', 'ac_p_userandspam', 'ac_p_usergivenspam', 'ac_p_titlelength',
-								'ac_p_titlelengthandspam', 'ac_p_titlelengthgivenspam', 'ac_p_namespace', 'ac_p_namespaceandspam',
-								'ac_p_namespacegivenspam', 'ac_p_syntax', 'ac_p_syntaxandspam', 'ac_p_syntaxgivenspam',
-								'ac_p_links', 'ac_p_linksandspam', 'ac_p_linksgivenspam'),
+						array('*'),
 						array('al_id' => $id),
 						__METHOD__,
 						array()
@@ -362,6 +357,8 @@ class SpecialAthena extends SpecialPage {
 				$tableStr .= '</thead><tbody>';
 
 				$probSpam = $calc->ac_p_spam;
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-prob-spam' ) . '</td><td colspan="5">' . $probSpam . '</td></tr>';
+
 				$numerator = '';
 				$denominator = '';
 
@@ -475,14 +472,128 @@ class SpecialAthena extends SpecialPage {
 
 				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr></tbody></table>";
 
+				$tableStr .= '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th>';
+				$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
+				$tableStr .= '<th>' . wfMessage( 'athena-view-probability' ) . '</th>';
+				$tableStr .= '<th>' . wfMessage( 'athena-view-probability-and' ) . '</th>';
+				$tableStr .= '<th>' . wfMessage( 'athena-view-probability-given' ) . '</th>';
+				$tableStr .= '<th>' . wfMessage( 'athena-view-probability-given-result' ) . '</th>';
+				$tableStr .= '</thead><tbody>';
+
+				$probSpam = $calc->ac_p_not_spam;
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-prob-not-spam' ) . '</td><td colspan="5">' . $probSpam . '</td></tr>';
+				$numerator = '';
+				$denominator = '';
+
+				$ageStr = AthenaHelper::secondsToString( $res->al_user_age );
+				if ( $ageStr === '' ) {
+					if ( $res->al_user_age == -1 ) {
+						$ageStr = wfMessage('athena-anon');
+					} else if ( $res->al_user_age == -2 ) {
+						$ageStr = wfMessage( 'athena-view-not-available' );
+					} else {
+						$ageStr = wfMessage( 'athena-view-imported' );
+					}
+				}
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user-age' ) . '</td><td>' . $ageStr . '</td>';
+
+				$p = $calc->ac_p_user;
+				$a = $calc->ac_p_userandnotspam;
+				$g = $calc->ac_p_usergivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+				// TODO remove these
 				$numerator .= "$g * ";
-				$denominator .= $p;
+				$denominator .= "$p * ";
+
+				$linkPercentage = $res->al_link_percentage * 100;
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-link-percentage' ) . '</td><td>' . $linkPercentage . '% (' . $res->al_links . ' ' . wfMessage( 'athena-view-links' ) . ')</td>';
+
+				$p = $calc->ac_p_links;
+				$a = $calc->ac_p_linksandnotspam;
+				$g = $calc->ac_p_linksgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$numerator .= "$g * ";
+				$denominator .= "$p * ";
+
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-syntax' ) . '</td><td>' . AthenaHelper::syntaxTypeToString( $res->al_syntax ) . '</td>';
+
+				$p = $calc->ac_p_syntax;
+				$a = $calc->ac_p_syntaxandnotspam;
+				$g = $calc->ac_p_syntaxgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$numerator .= "$g * ";
+				$denominator .= "$p * ";
+
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-lang' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_language ) . '</td>';
+
+				$p = $calc->ac_p_lang;
+				$a = $calc->ac_p_langandnotspam;
+				$g = $calc->ac_p_langgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$numerator .= "$g * ";
+				$denominator .= "$p * ";
+
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-wanted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_wanted ) . '</td>';
+
+				$p = $calc->ac_p_wanted;
+				$a = $calc->ac_p_wantedandnotspam;
+				$g = $calc->ac_p_wantedgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$numerator .= "$g * ";
+				$denominator .= "$p * ";
+
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-deleted' ) . '</td><td>' . AthenaHelper::boolToString( $res->al_deleted ) . '</td>';
+
+				$p = $calc->ac_p_deleted;
+				$a = $calc->ac_p_deletedandnotspam;
+				$g = $calc->ac_p_deletedgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$numerator .= "$g * ";
+				$denominator .= "$p * ";
+
+				$titleLength = strlen( $title->getText() );
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-title-length' ) . '</td><td>' . $titleLength . '</td>';
+
+				$p = $calc->ac_p_titlelength;
+				$a = $calc->ac_p_titlelengthandnotspam;
+				$g = $calc->ac_p_titlelengthgivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
+
+				$namespace = MWNamespace::getCanonicalName( $title->getNamespace() );
+				// Main will return an empty string
+				if ( $namespace === '' ) {
+					$namespace = wfMessage( 'athena-view-namespace-0' );
+				}
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-namespace' ) . '</td><td>' . $namespace . '</td>';
+
+				$p = $calc->ac_p_namespace;
+				$a = $calc->ac_p_namespaceandnotspam;
+				$g = $calc->ac_p_namespacegivennotspam;
+				$gr = ($g*$probSpam)/$p;
+
+				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr></tbody></table>";
 
 				$tableStr .= '<table class="wikitable"><tbody>';
-				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-probability-spam' ) . "</td><td>$probSpam</td></tr>";
-				$numerator .= $probSpam;
-				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-probability-calc' ) . "</td><td>$numerator<br/><hr/>$denominator</td></tr>";
-				$tableStr .= '<tr><td><b>' . wfMessage( 'athena-view-athena-value' ) . '</b></td><td><b>' . $res->al_value . '</b></td></tr>';
+				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-athena-value' ) . "</td><td>$res->al_value</td></tr>";
 				$tableStr .= '</tbody></table>';
 				$output->addHTML( $tableStr );
 			} else {

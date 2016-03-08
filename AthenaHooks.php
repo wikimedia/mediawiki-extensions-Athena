@@ -24,8 +24,10 @@ class AthenaHooks
             $redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
             if ( $redirect !== 1 ) {
                 $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
-
-                if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
+				
+				// This version of Bayes is based around it being greater than 0 or not
+                //if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
+                if ( !$wgAthenaTraining && $prob > 0 ) {
                     $error =
                         '<div class="errorbox">' .
                         wfMessage( 'athena-blocked-error' ) .
