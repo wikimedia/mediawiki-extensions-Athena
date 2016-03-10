@@ -724,12 +724,20 @@ class AthenaHelper
      * @return string
      */
     static function getTextLanguage( $text ) {
-        if( strlen( $text ) == 0 ) {
+        wfErrorLog( "getTextLanguage called", '/var/www/html/test/extensions/Athena/data/debug.log' );
+        
+if( strlen( $text ) == 0 ) {
             $code = null;
         } else {
+        wfErrorLog( "BEFORE TEMP", '/var/www/html/test/extensions/Athena/data/debug.log' );
+
             file_put_contents( "temp", $text );
-            $code = system( "franc < temp" );
-        }
+        wfErrorLog( "AFTER TEMP", '/var/www/html/test/extensions/Athena/data/debug.log' );
+            
+$code = system( "franc < temp" );
+            wfErrorLog( "Language code is $code", '/var/www/html/test/extensions/Athena/data/debug.log' );
+( $code );
+	}
         return AthenaHelper::convertISOCode($code);
     }
 
