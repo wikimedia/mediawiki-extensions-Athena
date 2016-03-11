@@ -140,9 +140,9 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
 		}
 
-		if ( $type === $this::TRAINING ) {
+		//if ( $type === $this::TRAINING ) {
 			$tableStr .= '<th>' . wfMessage( 'athena-view-overridden' ) . '</th>';
-		}
+		//}
 
 		$tableStr .= '<th>' . wfMessage( 'athena-log-view' ) . '</th></thead><tbody>';
 
@@ -194,7 +194,13 @@ class SpecialAthena extends SpecialPage {
 					$tableStr .= '<td>' . wfMessage('athena-no') . '</td>';
 				}
 
-			}
+            } else {
+                if ( $row->al_overridden ) {
+                   $tableStr .= '<td>' . wfMessage('athena-true') . '</td>';
+                } else {
+                    $tableStr .= '<td>' . wfMessage('athena-false') . '</td>';
+                }
+            }
 
 			$link = $output->parse( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' .  wfMessage( 'athena-id' ) . '/' . $row->al_id . '|' . wfMessage( 'athena-log-view' ) . ']]' );
 			$tableStr .= '<td>' . $link . '</td>';
