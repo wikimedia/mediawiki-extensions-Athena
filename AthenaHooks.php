@@ -124,7 +124,7 @@ class AthenaHooks
      * @param $logEntry LogEntry
      */
     static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
-        $pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
+        /*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
         //echo($pos);
         if ( $pos !== false ) {
             $dbw = wfGetDB( DB_SLAVE );
@@ -147,6 +147,6 @@ class AthenaHooks
 
                 AthenaHelper::reinforceDelete( $res->al_id );
             }
-        }
+        }*/
     }
 }

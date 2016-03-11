@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Special:Athena, provides a way to monitor and review Athena activity
  *
@@ -293,12 +293,12 @@ class SpecialAthena extends SpecialPage {
 					$output->addWikiText( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
 				} else {
 					// Page has been deleted, but not within Athena's remit
-					if ( $title->getArticleID() != $res->page_id ) {
+					//if ( $title->getArticleID() != $res->page_id ) {
 						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-delete-url' ) . '/' . $res->al_id .
 								'|' . wfMessage( 'athena-view-not-blocked-reinforce' ) . ']]' );
-					} else {
+					/*} else {
 						$output->addHTML('<a href=' . $title->getFullURL(array('action' => 'delete')) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>');
-					}
+					}*/
 				}
 			} else if ( $res->al_success == 0 ) {
 				if ( $res->al_overridden ) {
@@ -827,11 +827,11 @@ class SpecialAthena extends SpecialPage {
 				if ( $res->al_overridden == 0 ) {
 					$title = Title::newFromText( stripslashes( $res->apd_title ), $res->apd_namespace );
 
-					if ( $title->exists() ) {
+					/*if ( $title->exists() ) {
 						// Page exists - point them to delete instead
 						$output->addWikiMsg( 'athena-delete-still-exists' );
 						$output->addHTML('<a href=' . $title->getFullURL(array('action' => 'delete')) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>');
-					} else {
+					} else {*/
 						// At this point, we want to reinforce Athena if we've confirmed it.
 						if ($confirmed) {
 							// Reinforce the system
@@ -849,7 +849,7 @@ class SpecialAthena extends SpecialPage {
 							$output->addWikiText('[[{{NAMESPACE}}:' . wfMessage('athena-title') . '/' . wfMessage('athena-delete-url') . '/' . $res->al_id .
 									'/' . wfMessage('athena-create-confirm-url') . '|' . wfMessage('athena-create-confirm') . ']]');
 						}
-					}
+					//}
 
 				} else {
 					$output->addWikiMsgArray( 'athena-delete-error-overridden', $id );
