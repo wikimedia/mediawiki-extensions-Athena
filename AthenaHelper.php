@@ -731,10 +731,10 @@ if( strlen( $text ) == 0 ) {
         } else {
         wfErrorLog( "BEFORE TEMP", '/var/www/html/test/extensions/Athena/data/debug.log' );
 
-            file_put_contents( "temp", $text );
+            file_put_contents( "/var/www/html/test/extensions/Athena/data/temp", $text );
         wfErrorLog( "AFTER TEMP", '/var/www/html/test/extensions/Athena/data/debug.log' );
             
-$code = system( "franc < temp" );
+$code = system( "franc < /var/www/html/test/extensions/Athena/data/temp" );
             wfErrorLog( "Language code is $code", '/var/www/html/test/extensions/Athena/data/debug.log' );
 ( $code );
 	}
