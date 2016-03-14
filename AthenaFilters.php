@@ -157,7 +157,7 @@ class AthenaFilters {
                 // Check for alternative syntax
                 $count += preg_match_all( "/<strong>(.*)<\/strong>/", $text );
                 $count += preg_match_all( "/<a(.*)>(.*)<\/a>/", $text );
-                $count += preg_match_all( "/[url]/", $text );
+                $count += preg_match_all( "/\[url\]/", $text );
                 if ( $count > 1 ) {
                     return 1;
                 }
