@@ -29,7 +29,7 @@ class Erichthonius extends Maintenance {
 
     public function execute() {
         global $wgServer, $wgScriptPath, $session_name, $url;
-        $session_name = 'test_session';
+        $session_name = 'fh_session';
 
         $file = fopen( $this->getArg(), 'r' );
 
@@ -44,7 +44,7 @@ class Erichthonius extends Maintenance {
         $url = $wgServer . $wgScriptPath . '/api.php';
         $count = 1;
         foreach ( $json as $page ) {
-            if( $count >= 1 ) {
+            if( $count >= 4876 ) {
                 // echo 'Namespace: ' . $page['namespace'] . "\n";
                 // echo 'Title: ' . $page['title'] . "\n";
                 // echo 'Comment: ' . $page['comment'] . "\n";
