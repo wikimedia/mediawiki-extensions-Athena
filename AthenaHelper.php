@@ -510,13 +510,13 @@ class AthenaHelper
      */
     static function calculateProbability_Namespace( $namespace, &$stats, &$probabilityArray ) {
         $var = 'nsother';
-        if ($namespace === 0)
+        if ($namespace == 0)
             $var = 'nsmain';
-        else if ($namespace === 1)
+        else if ($namespace == 1)
             $var = 'nstalk';
-        else if ($namespace === 2)
+        else if ($namespace == 2)
             $var = 'nsuser';
-        else if ($namespace === 3)
+        else if ($namespace == 3)
             $var = 'nsusertalk';
         else if ( $namespace == 6 )
             $var = 'nsfile';
@@ -561,11 +561,11 @@ class AthenaHelper
     static function calculateProbability_Syntax( $type, &$stats, &$probabilityArray ) {
 
         $var = 'syntaxnone';
-        if ( $type === 1 )
+        if ( $type == 1 )
             $var = 'syntaxbasic';
-        else if ( $type === 2 )
+        else if ( $type == 2 )
             $var = 'syntaxcomplex';
-        else if ( $type === 3 )
+        else if ( $type == 3 )
             $var = 'brokenspambot';
 
         $syntax = $stats[$var] + 2;
@@ -900,17 +900,17 @@ $code = system( "franc < /var/www/html/a/extensions/Athena/data/temp" );
         }
 
         $syntax = $array['al_syntax'];
-        if ( $syntax === 1 ) {
+        if ( $syntax == 1 ) {
             $sql .= " OR `as_name`='syntaxbasic' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandsyntaxbasic' ";
             }
-        } else if ( $syntax === 2 ) {
+        } else if ( $syntax == 2 ) {
             $sql .= " OR `as_name`='syntaxcomplex' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
             }
-        } else if ( $syntax === 3 ) {
+        } else if ( $syntax == 3 ) {
             $sql .= " OR `as_name`='brokenspambot' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandbrokenspambot' ";
