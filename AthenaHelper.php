@@ -1211,7 +1211,7 @@ $code = system( "franc < /var/www/html/a/extensions/Athena/data/temp" );
                     $sql .= " OR `as_name`='spamanduserother' ";
                 }
             } else if ($userAge != -1) {
-                $sql .= " OR `as_name`='spamanduserothe' ";
+                $sql .= " OR `as_name`='spamanduserother' ";
             } else {
                 $sql .= " OR `as_name`='spamandanon' ";
             }
