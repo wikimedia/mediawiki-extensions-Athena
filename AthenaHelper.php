@@ -1107,11 +1107,11 @@ $code = system( "franc < /var/www/html/a/extensions/Athena/data/temp" );
         }
 
         $syntax = $res->al_syntax;
-        if ( $syntax === 1 ) {
+        if ( $syntax == 1 ) {
             $sql .= " OR `as_name`='spamandsyntaxbasic' ";
-        } else if ( $syntax === 2 ) {
+        } else if ( $syntax == 2 ) {
             $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
-        } else if ( $syntax === 3 ) {
+        } else if ( $syntax == 3 ) {
             $sql .= " OR `as_name`='spamandbrokenspambot' ";
         } else {
             $sql .= " OR `as_name`='spamandsyntaxnone' ";
