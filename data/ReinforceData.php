@@ -69,7 +69,7 @@ class ReinforceData extends Maintenance {
                    // echo( "We need to create this");
                     $script .= "delete";
              }
-                $script .= "/$row->al_id/confirm');";
+                $script .= "/$row->al_id/confirm');\n";
             } else {
                 //echo ("We good");
             }
