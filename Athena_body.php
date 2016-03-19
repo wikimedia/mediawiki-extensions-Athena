@@ -330,7 +330,7 @@ class SpecialAthena extends SpecialPage {
 
 			$output->addWikiText( '== ' . wfMessage( 'athena-view-content' ) . ' ==' );
 			$output->addWikiText( '<h3>' . wfMessage( 'athena-view-wikitext' ) . '</h3>' );
-			$output->addHTML( '<div class="toccolours mw-collapsible mw-collapsed">' );
+			$output->addHTML( '<div class="toccolours mw-collapsible">' );
 			$output->addHTML( '<pre>' . $content . '</pre>' );
 			$output->addHTML( '</div>' );
 
