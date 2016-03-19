@@ -64,10 +64,10 @@ class ReinforceData extends Maintenance {
                     // Then this is not spam at the moment
                     // So delete
                    // echo ("We need to delete this");
-                    $script .= "delete";
+                    $script .= "create";
                 } else {
                    // echo( "We need to create this");
-                    $script .= "create";
+                    $script .= "delete";
              }
                 $script .= "/$row->al_id/confirm');";
             } else {
