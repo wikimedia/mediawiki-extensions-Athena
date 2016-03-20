@@ -15,7 +15,7 @@ class getSpamData extends Maintenance {
         $res = $dbw->select(
             array( 'athena_log' ),
             array( 'al_id', 'al_success', 'al_overridden' ),
-            array(  'al_id < 5104'),
+            array(  'al_id < 7333'),
             __METHOD__,
             array(),
             array( )
