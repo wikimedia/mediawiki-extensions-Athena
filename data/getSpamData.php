@@ -15,7 +15,7 @@ class getSpamData extends Maintenance {
         $res = $dbw->select(
             array( 'athena_log' ),
             array( 'al_id', 'al_success', 'al_overridden' ),
-            array(  'al_id < 7333'),
+            array( ),
             __METHOD__,
             array(),
             array( )
@@ -27,8 +27,13 @@ class getSpamData extends Maintenance {
             if( $row->al_overridden ) {
                 $spam = abs($spam-=1);
             }
-            
-            echo( "$row->al_id, $spam\n" );
+
+	 if( $row->al_id > 7333 ) {
+		$id = ($row->al_id)-1;
+            } else {
+		$id = $row->al_id;
+	}
+            echo( "$id, $spam\n" );
         }
 
     }
