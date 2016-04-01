@@ -40,7 +40,7 @@
             $count++;
             
     }
-    file_put_contents( 'page_data/wikipedia.json', json_encode( $output ) );*/
+    file_put_contents( 'page_data/wikipedia.json', json_encode( $output ) );
 
 
 // Below is original - above is one to merge the file with 8990 pages with 10 new ones
