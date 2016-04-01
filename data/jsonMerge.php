@@ -1,6 +1,6 @@
 <?php
 // TODO provide file instead of hardcode
-$wikiname = 'hub2';
+$wikiname = 'appunti2';
 $normal = file_get_contents( 'page_data/' . $wikiname . 'Normal.json' );
 $deleted = file_get_contents( 'page_data/' . $wikiname . 'Deleted.json' );
 
