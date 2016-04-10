@@ -1,4 +1,5 @@
 <?php
+ /**
     $file = file_get_contents("page_data/wikipedia.json");
     $output = json_decode($file);
     
@@ -42,16 +43,15 @@
     }
     file_put_contents( 'page_data/wikipedia.json', json_encode( $output ) );
 
-
+*/
 // Below is original - above is one to merge the file with 8990 pages with 10 new ones
-/**<?php
         $list = file_get_contents("https://en.wikipedia.org/w/api.php?action=query&list=random&rnlimit=500&format=json");
     $json = json_decode($list, true);
     $json = $json["query"]["random"];
     
     $count = 0;
     $output = array();
-    for( $i = 0; $i < 18; $i++) {
+    for( $i = 0; $i < 1; $i++) {
         foreach( $json as $page ) {
             echo("Page #$count is " . $page["title"] . "\n");
             $title = urlencode($page["title"]);
@@ -86,5 +86,5 @@
             
         }
     }
-    file_put_contents( 'page_data/wikipedia.json', json_encode( $output ) );
-**/
+    file_put_contents( 'page_data/wikipedia-5.json', json_encode( $output ) );
+
