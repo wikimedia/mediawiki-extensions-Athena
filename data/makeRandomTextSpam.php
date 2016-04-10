@@ -2,11 +2,11 @@
     $count = 0;
     $output = array();
     for( $count = 0; $count < 50; $count++) {
-        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand(5, 20));
+        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), 0, rand(5, 50));
         echo("Count is $count\n");
         $title = urlencode($title);
         
-        $title = urlencode('User:' . $title);
+        //$title = urlencode('User:' . $title);
         date_default_timezone_set('UTC');
         
        $content = file_get_contents("http://www.randomtext.me/api/gibberish/p7/20-100");
@@ -59,4 +59,4 @@
         
         sleep(2);
     }
-    file_put_contents( 'page_data/spam-3.json', json_encode( $output ) );
+    file_put_contents( 'page_data/spam-7.json', json_encode( $output ) );

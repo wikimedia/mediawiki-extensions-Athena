@@ -8,9 +8,9 @@
 
     $output = array();
     for( $count = 0; $count < 125; $count++) {
-        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand(10, 50));
+        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), 0, rand(10, 50));
         echo("Count is $count\n");
-        $title = urlencode($title);
+        //$title = urlencode($title);
         
         //$title = urlencode("User:" . $title);
         date_default_timezone_set('UTC');

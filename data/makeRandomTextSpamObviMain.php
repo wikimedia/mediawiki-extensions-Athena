@@ -1,16 +1,16 @@
 <?php
     $count = 0;
     
-    $urls = array('http://s-e-x.com/what-s-the-role-of-an-audiologist activair hearing aid batteries', 'https://casino-online.com lap dog', 'https://lesbiansexmafia.org/ https://facebook.loginreminder.org/', 'http://www.page.to/ visit', 'http://cheapairfares.co.uk/item.php?id=348139&mode=1 powerball result',
+    $urls = array('http://s-e-x.com/what-s-the-role-of-an-audiologist activair hearing aid batteries', 'https://casino-online.com lap dog', 'https://lesbiansex.org/ https://facebook.loginreminder.org/', 'http://www.page.to/ visit', 'http://cheap-airfares.co.uk/item.php?id=348139&mode=1 powerball result',
                   'http://www.putinbay.com/seo-services-usa/ visit the following site', 'https://putlocker.ml/ aol.loginreminder.org', 'https://teenporn.com/ my aol mail login', 'https://spycam.org/watch?v=JYBj2iD35mY ketosis weight loss', 'http://reebok-jerseys.com/api/query?datasource=uploads&search_type=all&sort=rank&search=wrinkles%20aren%27t&lic=by,sa,s,splus,pd,zero wrinkles aren',
-                  'http://fans-jerseys.us/tag/twarzy kolagen na oczy', 'http://xxxporn.com/videos-porno-de-cumlouder-gratis homepage', 'http://camgirl.org.uk/tagculo/cumlouder-com webpage', 'http://adultporn.com/ Leesa Shapiro', 'http://adultweblaw.com/search?q=misspell&s_it=header_form_v1 misspell',
-                  'http://www.zoofilla.com/watch?v=eHQgcDNbymc http://www.pacific-pictures.com/watch?v=eHQgcDNbymc','http://www.link.co/ mebel jepara antik', 'http://buyanessay.org injustice gods among us cheats', 'http://www.freesexshows.com/search?q=cellulite&btnI=lucky cellulite', 'http://xxxbloggers.com yuan penting');
+                  'http://fans-jerseys.us/tag/twarzy kolagen na oczy', 'http://xxxporn.com/videos-porno-de-cumlouder-gratis homepage', 'http://camgirl.org.uk/tagculo/cumlouder-com webpage', 'http://adultporn.com/ Leesa Shapiro', 'http://adultweb.com/search?q=misspell&s_it=header_form_v1 misspell',
+                  'http://www.zoofilia.com/watch?v=eHQgcDNbymc http://www.pacific-pictures.com/watch?v=eHQgcDNbymc','http://www.kpop.fr/ mebel jepara antik', 'http://buyanessay.org injustice gods among us cheats', 'http://www.freesexshows.com/search?q=cellulite&btnI=lucky cellulite', 'http://xxxbloggers.com yuan penting');
     
     $output = array();
     for( $count = 0; $count < 50; $count++) {
-        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand(10, 50));
+        $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), 0, rand(10, 50));
         echo("Count is $count\n");
-        $title = urlencode($title);
+        //$title = urlencode($title);
         
         //$title = urlencode("User:" . $title);
         date_default_timezone_set('UTC');
