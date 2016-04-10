@@ -61,7 +61,9 @@
         $content = str_replace("<p>", "", $content);
         $content = str_replace("</p>", "", $content);
         $content = str_replace("/r", "", $content);
-        for( $i = 0; $i < rand(0,3); $i) {
+        $n = rand(1,3);
+        for( $i = 0; $i < $n ; $i++) {
+            
             $content = $content . " [" . $urls[rand(0,19)] . "] <br/>";
         }
         

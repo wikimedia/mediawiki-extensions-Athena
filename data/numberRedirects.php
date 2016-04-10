@@ -1,6 +1,6 @@
 <?php
         // TODO provide file instead of hardcode
-        $file = file_get_contents( 'page_data/spam-8.json' );
+        $file = file_get_contents( 'page_data/spam-6.json' );
         
         $json = json_decode( $file, true );
         
