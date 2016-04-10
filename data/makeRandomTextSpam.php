@@ -1,12 +1,12 @@
 <?php
     $count = 0;
     $output = array();
-    for( $count = 0; $count < 100; $count++) {
+    for( $count = 0; $count < 50; $count++) {
         $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand(5, 20));
         echo("Count is $count\n");
         $title = urlencode($title);
         
-        $title = urlencode("User:" . $title);
+        $title = urlencode('User:' . $title);
         date_default_timezone_set('UTC');
         
        $content = file_get_contents("http://www.randomtext.me/api/gibberish/p7/20-100");
@@ -16,29 +16,37 @@
         $curTime = date('YmdHis');
         $pagetimestamp = date_create($curTime);
         
-        if( $count % 100 < 73 ){
-            if( $count % 100 > 63 ) {
+        if( $count % 50 < 37 ){
+            if( $count % 50 > 32 ) {
                 $account = date_sub($pagetimestamp, new DateInterval("P1Y"));
                 $userTimestamp = date_format($account, 'YmdHis');
+                echo("user year\n");
             } else {
-                if( $count % 100 < 31 ) {
-                    $age = 60;
-                } else if ( $count % 100 < 41 ) { // 5
+                if( $count % 50 < 15 ) {
+                    $age = 30;
+                    echo("user minute\n");
+          } else if ( $count % 50 < 20 ) { // 5
                     $age = 180;
-                }  else if ( $count % 100 < 47 ) { // 30
+              echo("user 3 mins\n");
+   }  else if ( $count % 50 < 23 ) { // 30
                     $age = 60 * 15;
-                } else if ( $count % 100 < 51 ) {
+       echo("user 15 mins\n");
+    } else if ( $count % 50 < 26 ) {
                     $age = 60 * 45;
-                } else if ( $count % 100 < 62 ) {
+        echo("user 45 mins\n");
+ } else if ( $count % 50 < 31 ) {
                     $age = 60 * 60 * 5;
-                } else if ( $count % 100 < 63 ) {
+     echo("user 5 hours\n");
+  } else {
                     $age = 60 * 60 * 15;
-                }
+      echo("user 15 hours\n");
+ }
                 $account = date_sub($pagetimestamp, new DateInterval("PT" . $age . "S"));
                 $userTimestamp = date_format($account, 'YmdHis');
             }
             
         } else {
+            echo("user ANON\n");
             $userTimestamp = 0;
         }
         
@@ -51,4 +59,4 @@
         
         sleep(2);
     }
-    file_put_contents( 'page_data/spam2.json', json_encode( $output ) );
+    file_put_contents( 'page_data/spam-3.json', json_encode( $output ) );

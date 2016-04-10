@@ -7,7 +7,7 @@
                   'http://www.youtube.com/watch?v=eHQgcDNbymc http://www.youtube.com/watch?v=eHQgcDNbymc','http://www.ashifajati.com/ mebel jepara antik', 'http://injusticegodsamongushack14.wordpress.com injustice gods among us cheats', 'http://www.google.com/search?q=cellulite&btnI=lucky cellulite', 'http://indonesianeconomicnews.blogspot.com yuan penting');
 
     $output = array();
-    for( $count = 0; $count < 250; $count++) {
+    for( $count = 0; $count < 125; $count++) {
         $title = substr(substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand(10, 50));
         echo("Count is $count\n");
         $title = urlencode($title);
@@ -22,22 +22,30 @@
         $curTime = date('YmdHis');
         $pagetimestamp = date_create($curTime);
         
-        if( $count % 100 < 73 ){
-            if( $count % 100 > 63 ) {
+        if( $count % 25 < 19 ){
+            if( $count % 25 > 16 ) {
                 $account = date_sub($pagetimestamp, new DateInterval("P1Y"));
                 $userTimestamp = date_format($account, 'YmdHis');
-            } else {
-                if( $count % 100 < 31 ) {
-                    $age = 60;
-                } else if ( $count % 100 < 41 ) { // 5
-                    $age = 180;
-                }  else if ( $count % 100 < 47 ) { // 30
-                    $age = 60 * 15;
-                } else if ( $count % 100 < 51 ) {
-                    $age = 60 * 45;
-                } else if ( $count % 100 < 62 ) {
-                    $age = 60 * 60 * 5;
-                } else if ( $count % 100 < 63 ) {
+                echo("user 1 year\n");
+   } else {
+                if( $count % 25 < 8 ) {
+                    echo("user 30 secs\n");
+   $age = 30;
+                } else if ( $count % 25 < 10 ) { // 5
+                    echo("user 3 mins\n");
+  $age = 180;
+                }  else if ( $count % 25 < 12 ) { // 30
+                    echo("user 15 mins\n");
+   $age = 60 * 15;
+                } else if ( $count % 25 < 13 ) {
+                    echo("user 45 mins\n");
+   $age = 60 * 45;
+                } else if ( $count % 25 < 16 ) {
+                    echo("user 5 hours\n");
+   $age = 60 * 60 * 5;
+                } else {
+                    echo("user 15 hours\n");
+
                     $age = 60 * 60 * 15;
                 }
                 $account = date_sub($pagetimestamp, new DateInterval("PT" . $age . "S"));
@@ -45,7 +53,8 @@
             }
             
         } else {
-            $userTimestamp = 0;
+            echo("user anon\n");
+    $userTimestamp = 0;
         }
         
        $content = str_replace("</p>\r<p>", "<br/>", $content);
@@ -62,4 +71,4 @@
         
         sleep(2);
     }
-    file_put_contents( 'page_data/spam4.json', json_encode( $output ) );
+    file_put_contents( 'page_data/spam-6.json', json_encode( $output ) );
