@@ -29,7 +29,7 @@ class Erichthonius extends Maintenance {
 
     public function execute() {
         global $wgServer, $wgScriptPath, $session_name, $url;
-        $session_name = 'a_session';
+        $session_name = 'z_session';
 
         $file = fopen( $this->getArg(), 'r' );
 
@@ -44,7 +44,7 @@ class Erichthonius extends Maintenance {
         $url = $wgServer . $wgScriptPath . '/api.php';
         $count = 1;
         foreach ( $json as $page ) {
-            if( $count >= 2277 ) {
+            if( $count >= 0 ) {
                 // echo 'Namespace: ' . $page['namespace'] . "\n";
                 // echo 'Title: ' . $page['title'] . "\n";
                 // echo 'Comment: ' . $page['comment'] . "\n";
@@ -55,8 +55,8 @@ class Erichthonius extends Maintenance {
                 // echo "\n\n\n";
 
                 // Can't use edit.php as it doesn't let you specify anon
-                $title = urlencode(Erichthonius::getNamespace($page['namespace']) . $page['title']);
-
+//                $title = urlencode(/*Erichthonius::getNamespace($page['namespace']) . */$page['title']);
+$title = $page['title'];
                 echo("Page #" . $count . ": " . $title);
                 echo("\n\n");
 
@@ -106,10 +106,12 @@ class Erichthonius extends Maintenance {
 
                 $count++;
                 echo($count . " pages completed.\n ------------------------------------------------------------------------\n\n");
-
+               file_put_contents("output.txt", "\nPage #$count - $title\n", FILE_APPEND);
+                file_put_contents("output.txt", $response, FILE_APPEND);
+              
                 /* if( $count === 100)
                      break;*/
-                sleep(1);
+                sleep(2);
                 // Can't use below code as cookies
 
                 /*$apiCall = array('action' => 'edit',
