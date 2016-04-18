@@ -29,7 +29,7 @@ class Erichthonius extends Maintenance {
 
     public function execute() {
         global $wgServer, $wgScriptPath, $session_name, $url;
-        $session_name = 'spam2_session';
+        $session_name = 'z_session';
 
         $file = fopen( $this->getArg(), 'r' );
 
@@ -42,106 +42,113 @@ class Erichthonius extends Maintenance {
         // $json = array_reverse($json);
 
         $url = $wgServer . $wgScriptPath . '/api.php';
-        $count = 0;
+        $count = 1;
         foreach ( $json as $page ) {
-           // echo 'Namespace: ' . $page['namespace'] . "\n";
-            // echo 'Title: ' . $page['title'] . "\n";
-            // echo 'Comment: ' . $page['comment'] . "\n";
-            // echo 'Content: ' . $page['content'] . "\n";
-            // echo 'Timestamp: ' . $page['timestamp'] . "\n";
-            // echo 'User timestamp: ' . $page['user-timestamp'] . "\n";
-           // echo 'Lang: ' . $page['lang'] . "\n";
-            // echo "\n\n\n";
+            if( $count >= 0 ) {
+                // echo 'Namespace: ' . $page['namespace'] . "\n";
+                // echo 'Title: ' . $page['title'] . "\n";
+                // echo 'Comment: ' . $page['comment'] . "\n";
+                // echo 'Content: ' . $page['content'] . "\n";
+                // echo 'Timestamp: ' . $page['timestamp'] . "\n";
+                // echo 'User timestamp: ' . $page['user-timestamp'] . "\n";
+                // echo 'Lang: ' . $page['lang'] . "\n";
+                // echo "\n\n\n";
 
-            // Can't use edit.php as it doesn't let you specify anon
-            $title = urlencode( Erichthonius::getNamespace( $page['namespace'] ) . $page['title'] );
+                // Can't use edit.php as it doesn't let you specify anon
+//                $title = urlencode(/*Erichthonius::getNamespace($page['namespace']) . */$page['title']);
+$title = $page['title'];
+                echo("Page #" . $count . ": " . $title);
+                echo("\n\n");
 
-            echo( "Page #" . $count . ": " . $title );
-            echo( "\n\n" );
+                $apiCall = 'action=edit&format=json&title=' .
+                    $title
+                    . '&text=' . urlencode($page['content']);
 
-            $apiCall = 'action=edit&format=json&title=' .
-                $title
-                . '&text=' . urlencode( $page['content'] );
+                if (!empty($page['comment']))
+                    $apiCall .= '&summary=' . urlencode($page['comment']);
 
-            if ( !empty( $page['comment'] ) )
-                $apiCall .= '&summary=' . urlencode( $page['comment'] );
+                // Using CURL as need sessions, which file_get_contents can't provide
+                $ch = curl_init();
 
-            // Using CURL as need sessions, which file_get_contents can't provide
-            $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                // curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+                // Header needed for cookies
+                // curl_setopt( $ch, CURLOPT_HEADER, 1 );
 
-            curl_setopt( $ch, CURLOPT_URL, $url );
-            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-            // curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
-            // Header needed for cookies
-            // curl_setopt( $ch, CURLOPT_HEADER, 1 );
+                // User time
+                if ($page['user-timestamp'] === 0) {
+                    $apiCall .= '&token=' . urlencode('+\\');
+                } else {
+                    // Cookies for the login
+                    // Calculate how old the account was when it was created
+                    $pagetimestamp = wfTimestamp(TS_UNIX, $page['timestamp']);
+                    $usertimestamp = wfTimestamp(TS_UNIX, $page['user-timestamp']);
+                    $age = $pagetimestamp - $usertimestamp;
+                    $cookieString = Erichthonius::createUser($age);
+                    curl_setopt($ch, CURLOPT_COOKIE, $cookieString);
 
-            // User time
-            if ( $page['user-timestamp'] === 0 ) {
-                $apiCall .= '&token=' . urlencode( '+\\' );
+                    // Get an edit token
+                    $token = Erichthonius::getEditToken($cookieString);
+                    $apiCall .= '&token=' . urlencode($token);
+                }
+
+                Erichthonius::existsCheck($title);
+
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $apiCall);
+
+                echo("Attempting to create the page\n\n");
+                // echo($apiCall."\n\n\n\n");
+                $response = curl_exec($ch);
+                echo($response);
+                echo("\n\n");
+                curl_close($ch);
+
+                $count++;
+                echo($count . " pages completed.\n ------------------------------------------------------------------------\n\n");
+               file_put_contents("output.txt", "\nPage #$count - $title\n", FILE_APPEND);
+                file_put_contents("output.txt", $response, FILE_APPEND);
+              
+                /* if( $count === 100)
+                     break;*/
+                sleep(2);
+                // Can't use below code as cookies
+
+                /*$apiCall = array('action' => 'edit',
+                                'format' => 'json',
+                                'title' => AthenaBot::getNamespace($page['namespace']) . $page['title'],
+                                'text' => $page['content']
+                );
+                if( !empty($page['comment']) )
+                    $apiCall['summary'] = $page['comment'];
+
+                // User time
+                if( $page['user-timestamp'] === 0 ) {
+                    $apiCall['token'] = '+\\';
+                } else {
+                    $apiCall['token'] = AthenaBot::createUser($url);
+
+                }
+                $options = array(
+                    'http' => array(
+                        'header'  => "Content-type: application/x-www-form-urlencoded",
+                        'method'  => 'POST',
+                        // this should handle all the urlencoding for us
+                        'content' => http_build_query($apiCall),
+                    ),
+                );
+
+                print_r($apiCall);
+                print_r($options);
+
+                $response = file_get_contents($url, false, stream_context_create($options));
+                echo($response);
+                echo("\n\n");
+                sleep(5);*/
             } else {
-                // Cookies for the login
-                // Calculate how old the account was when it was created
-                $pagetimestamp = wfTimestamp( TS_UNIX, $page['timestamp'] );
-                $usertimestamp = wfTimestamp( TS_UNIX, $page['user-timestamp'] );
-                $age = $pagetimestamp - $usertimestamp;
-                $cookieString = Erichthonius::createUser( $age );
-                curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
-
-                // Get an edit token
-                $token = Erichthonius::getEditToken( $cookieString );
-                $apiCall .= '&token=' . urlencode( $token );
+                $count++;
             }
 
-            Erichthonius::existsCheck( $title );
-
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
-
-            echo( "Attempting to create the page\n\n" );
-            // echo($apiCall."\n\n\n\n");
-            $response = curl_exec( $ch );
-            echo( $response );
-            echo( "\n\n" );
-            curl_close( $ch );
-
-            $count++;
-            echo( $count . " pages completed.\n ------------------------------------------------------------------------\n\n" );
-
-           /* if( $count === 100)
-                break;*/
-            sleep( 1 );
-            // Can't use below code as cookies
-
-            /*$apiCall = array('action' => 'edit',
-                            'format' => 'json',
-                            'title' => AthenaBot::getNamespace($page['namespace']) . $page['title'],
-                            'text' => $page['content']
-            );
-            if( !empty($page['comment']) )
-                $apiCall['summary'] = $page['comment'];
-
-            // User time
-            if( $page['user-timestamp'] === 0 ) {
-                $apiCall['token'] = '+\\';
-            } else {
-                $apiCall['token'] = AthenaBot::createUser($url);
-
-            }
-            $options = array(
-                'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded",
-                    'method'  => 'POST',
-                    // this should handle all the urlencoding for us
-                    'content' => http_build_query($apiCall),
-                ),
-            );
-
-            print_r($apiCall);
-            print_r($options);
-
-            $response = file_get_contents($url, false, stream_context_create($options));
-            echo($response);
-            echo("\n\n");
-            sleep(5);*/
         }
 
         fclose( $file );
@@ -394,7 +401,7 @@ class Erichthonius extends Maintenance {
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
             curl_setopt( $ch, CURLOPT_HEADER, 1 );
 
-            $apiCall = 'action=login&format=json&lgname=root&lgpassword=123456789';
+            $apiCall = 'action=login&format=json&lgname=root&lgpassword=LittleGirlBlue';
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
             $response = curl_exec( $ch );
 

@@ -1,66 +1,16 @@
 <?php
 
-
 /**
- * Class AthenaHelper
- *
  * Various helper functions for Athena
+ *
+ * @file
+ * @author Richard Cook
+ * @copyright ©2016 Richard Cook
+ * @license GNU General Public License v3.0
  */
+    
 class AthenaHelper
 {
-
-    /**
-     * Load the probabilities related to the given variable
-     *
-     * @param $var string
-     * @param $varFlag 0|1
-     * @param $given string
-     * @param $givenFlag 0|1
-     * @return double|bool
-     */
-    static function loadProbabilities( $var, $varFlag, $given, $givenFlag )
-    {
-        $dbr = wfGetDB( DB_MASTER );
-
-        $whereStatement = " `ap_variable`='$var'";
-        $debugStatement = 'Probability of ';
-
-        if ( $varFlag ) {
-            $whereStatement .= ' AND `ap_variable_not`=1';
-            $debugStatement .= ' NOT ';
-        }
-        $debugStatement .= $var;
-
-        if ( $given ) {
-            $whereStatement .= " AND `ap_given`='$given'";
-            $debugStatement .= ' given ';
-        }
-
-        if ( $givenFlag ) {
-            $whereStatement .= ' AND `ap_given_not`=1';
-            $debugStatement .= ' NOT ';
-        }
-
-        if( $given ) {
-            $debugStatement .= $given;
-        }
-
-        $debugStatement .= ' is ';
-
-
-        $sql = "SELECT ap_value FROM {$dbr->tableName( 'athena_probability' )} WHERE {$whereStatement};";
-
-        $res = $dbr->query( $sql, __METHOD__ );
-        $row = $dbr->fetchObject( $res );
-
-        if ( $row ) {
-            wfErrorLog( $debugStatement . $row->ap_value, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-            return $row->ap_value;
-        }
-
-        return false;
-    }
 
     /**
      * Log information about the attempted page creation
@@ -70,6 +20,7 @@ class AthenaHelper
      * @param $calcArray array
      */
     static function logAttempt( $logArray, $detailsArray, $calcArray ) {
+        global $wgAthenaTraining;
         $dbw = wfGetDB( DB_MASTER );
 
         $dbw->insert( 'athena_log', $logArray, __METHOD__, null );
@@ -82,13 +33,13 @@ class AthenaHelper
         $id = $row->id;
 
         $detailsArray['al_id'] = $id;
-        $calcArray['al_id'] = $id;
-
-        //print_r($calcArray);
 
         try {
             $dbw->insert( 'athena_page_details', $detailsArray, __METHOD__, null );
-            $dbw->insert( 'athena_calculations', $calcArray, __METHOD__, null );
+            if( !$wgAthenaTraining ) {
+                $calcArray['al_id'] = $id;
+                $dbw->insert( 'athena_calculations', $calcArray, __METHOD__, null );
+            }
         } catch ( Exception $e ) {
             print_r( $e );
         }
@@ -108,7 +59,7 @@ class AthenaHelper
      * @return array
      */
     static function prepareLogArray( $prob, $userAge, $links, $linkPercentage, $syntax, $language, $deleted, $wanted ) {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgAthenaTraining;
 
         if ( $deleted === false ) {
             $deleted = 0;
@@ -118,24 +69,31 @@ class AthenaHelper
             $wanted = 0;
         }
 
-        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_success' => 0, 'al_user_age' => $userAge,
+        $insertArray = array( 'al_id' => NULL, 'al_value' => $prob, 'al_user_age' => $userAge,
             'al_links' => $links, 'al_link_percentage' => $linkPercentage, 'al_syntax' => $syntax,
             'al_wanted' => $wanted, 'al_deleted' => $deleted );
 
         // Language could be null
-        // TODO check this works
         if ( $language != '' ) {
             if( $language === false ) {
                 $language = 0;
             }
             $insertArray['al_language'] = $language;
+        } else {
+            $insertArray['al_language'] = 0;
         }
 
-        if ( $prob > $wgAthenaSpamThreshold ) {
-            $insertArray['al_success'] = 0;
-        } else {
-            $insertArray['al_success'] = 1;
-        }
+		if( !$wgAthenaTraining ) {
+			// This version of Bayes is based around it being greater than 0 or not
+			if ( $prob > 0 ) {
+			//if ( $prob > $wgAthenaSpamThreshold ) {
+				$insertArray['al_success'] = 0;
+			} else {
+				$insertArray['al_success'] = 1;
+			}
+		} else {
+			$insertArray['al_success'] = 2;
+		}
 
         return $insertArray;
     }
@@ -143,7 +101,6 @@ class AthenaHelper
     /**
      * Prepare an array with the details we want to insert into the athena_page_details table
      *
-     * @param $prob double
      * @param $namespace int
      * @param $title string
      * @param $content string
@@ -168,38 +125,9 @@ class AthenaHelper
 
         $language = AthenaHelper::getTextLanguage( $content );
 
-        if( $language != '') {
-            $language = $dbw->strencode($language);
-            $insertArray['apd_language'] = $language;
-        }
+        $insertArray['apd_language'] = $dbw->strencode(Language::fetchLanguageName($language));
 
         return $insertArray;
-    }
-
-    /**
-     * Loading a given weight
-     *
-     * @param $var string
-     * @return double|bool
-     */
-    static function loadWeightings( $var )
-    {
-        $dbr = wfGetDB( DB_MASTER );
-
-        $whereStatement = " `aw_variable`='$var'";
-
-        $sql = "SELECT aw_value FROM {$dbr->tableName( 'athena_weighting' )} WHERE {$whereStatement};";
-
-        $res = $dbr->query( $sql, __METHOD__ );
-        $row = $dbr->fetchObject( $res );
-
-
-        if ( $row ) {
-            return $row->aw_value;
-        }
-
-        // else we are bork and so let's say false
-        return false;
     }
 
     /**
@@ -212,300 +140,510 @@ class AthenaHelper
      * @return double
      */
     static function calculateAthenaValue( $editPage, $text, $summary ) {
-        global $wgUser;
+        global $wgUser, $wgAthenaTraining;
 
-        // Array to store calculation info
-        $calcArray = array();
-
+        // Get title
         $titleObj = $editPage->getTitle();
         $title = $titleObj->getTitleValue()->getText();
 
-        /* start different language */
+        // Get filter results
         $diffLang = AthenaFilters::differentLanguage( $text );
-
-        $probDiffLang = AthenaHelper::calculateAthenaValue_Language( $diffLang, $calcArray );
-        /* end different language */
-
-        /* start deleted */
         $deleted = AthenaFilters::wasDeleted( $titleObj );
-
-        $probDeleted = AthenaHelper::calculateAthenaValue_Deleted( $deleted, $calcArray );
-        /* end deleted */
-
-        /* start wanted */
         $wanted = AthenaFilters::isWanted( $titleObj );
-
-        $probWanted = AthenaHelper::calculateAthenaValue_Wanted( $wanted, $calcArray );
-        /* end wanted */
-
-        /* start user type */
         $userAge = AthenaFilters::userAge();
-
-        $probUser = AthenaHelper::calculateAthenaValue_User( $userAge, $calcArray );
-        /* end user type */
-
-        /* start title length */
         $titleLength = AthenaFilters::titleLength( $titleObj );
-
-        $probLength = AthenaHelper::calculateAthenaValue_Length( $titleLength, $calcArray );
-        /* end title length */
-
-        /* start title length */
         $namespace = AthenaFilters::getNamespace( $titleObj );
-
-        $probNamespace = AthenaHelper::calculateAthenaValue_Namespace( $namespace, $calcArray );
-        /* end title length */
-
-        /* start syntax */
         $syntaxType = AthenaFilters::syntaxType( $text );
-
-        $probSyntax = AthenaHelper::calculateAthenaValue_Syntax( $syntaxType, $calcArray );
-        /* end syntax */
-
-        /* start syntax */
         $linksPercentage = AthenaFilters::linkPercentage( $text );
 
-        $probLinks = AthenaHelper::calculateAthenaValue_Links( $linksPercentage, $calcArray );
-        /* end syntax */
+        // If not training, work out probabilities
+        if( !$wgAthenaTraining ) {
+            // Array to store probability info
+            $probabilityArray = array();
 
-        $prob = $probDiffLang + $probDeleted + $probWanted + $probUser + $probLength + $probNamespace + $probSyntax + $probLinks;
+            $spam = null;
+            $notspam = null;
 
+            // Get the statistics table's contents
+            $stats = AthenaHelper::getStatistics();
+
+            // Calculate probability of spam
+            AthenaHelper::calculateProbability_Spam($stats, $probabilityArray);
+
+            $lnProbSpamNotSpam = log($probabilityArray['ac_p_spam'] / $probabilityArray['ac_p_not_spam']);
+
+            /* start different language */
+            AthenaHelper::calculateProbability_Language($diffLang, $stats, $probabilityArray);
+
+            $sigma = log($probabilityArray['ac_p_langgivenspam'] / $probabilityArray['ac_p_langgivennotspam']);
+            /* end different language */
+
+            /* start deleted */
+            AthenaHelper::calculateProbability_Deleted($deleted, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_deletedgivenspam'] / $probabilityArray['ac_p_deletedgivennotspam']);
+            /* end deleted */
+
+            /* start wanted */
+            AthenaHelper::calculateProbability_Wanted($wanted, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_wantedgivenspam'] / $probabilityArray['ac_p_wantedgivennotspam']);
+            /* end wanted */
+
+            /* start user type */
+            AthenaHelper::calculateProbability_User($userAge, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_usergivenspam'] / $probabilityArray['ac_p_usergivennotspam']);
+            /* end user type */
+
+            /* start title length */
+            AthenaHelper::calculateProbability_Length($titleLength, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_titlelengthgivenspam'] / $probabilityArray['ac_p_titlelengthgivennotspam']);
+            /* end title length */
+
+            /* start namespace */
+            AthenaHelper::calculateProbability_Namespace($namespace, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_namespacegivenspam'] / $probabilityArray['ac_p_namespacegivennotspam']);
+            /* end namespace */
+
+            /* start syntax */
+            AthenaHelper::calculateProbability_Syntax($syntaxType, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_syntaxgivenspam'] / $probabilityArray['ac_p_syntaxgivennotspam']);
+            /* end syntax */
+
+            /* start links */
+            AthenaHelper::calculateProbability_Links($linksPercentage, $stats, $probabilityArray);
+
+            $sigma += log($probabilityArray['ac_p_linksgivenspam'] / $probabilityArray['ac_p_linksgivennotspam']);
+            /* end links */
+			
+			$prob = $lnProbSpamNotSpam + $sigma;
+
+            wfErrorLog("------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log');
+            wfErrorLog("Probability is $prob", '/var/www/html/a/extensions/Athena/data/debug.log');
+        } else {
+            // al_value is double unsigned not null, so let's just set to 0 and let the code ignore it later on
+            $prob = 0;
+            $probabilityArray = null;
+        }
         $links = AthenaFilters::numberOfLinks( $text );
 
         $logArray = AthenaHelper::prepareLogArray( $prob, $userAge, $links, $linksPercentage, $syntaxType, $diffLang, $deleted, $wanted );
         $detailsArray = AthenaHelper::preparePageDetailsArray( $namespace, $title, $text, $summary, $wgUser->getId() );
 
-        AthenaHelper::logAttempt( $logArray, $detailsArray, $calcArray );
+        AthenaHelper::logAttempt( $logArray, $detailsArray, $probabilityArray );
         AthenaHelper::updateStats( $logArray, $titleObj );
-        AthenaHelper::updateProbabilities( );
 
         return $prob;
+    }
+
+    /**
+     * Calculates the probability of an article being spam
+     *
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
+     */
+    static function calculateProbability_Spam( &$stats, &$probabilityArray  ) {
+        $spam = $stats['spam'] + 2;
+        $pages = $stats['pages'] + 2;
+
+        $probSpam = $spam/$pages;
+
+        $probNotSpam = 1 - $probSpam;
+
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of spam is $spam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of spam is $probSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of not spam is $probNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+
+        $probabilityArray['ac_p_spam'] = $probSpam;
+        $probabilityArray['ac_p_not_spam'] = $probNotSpam;
     }
 
     /**
      * Calculates the probability related to the different language filter
      *
      * @param $diffLang bool
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Language( $diffLang, &$calcArray ) {
-        $notFlag = 0;
+    static function calculateProbability_Language( $diffLang, &$stats, &$probabilityArray ) {
+        $var = 'difflang';
         // Let's treat null as false for simplicity
         if ( !$diffLang ) {
-            $notFlag = 1;
+            $var = 'samelang';
         }
 
-        $probLang = AthenaHelper::loadProbabilities( 'spam', 0, 'difflang', $notFlag );
+        $lang = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $langAndSpam = $stats['spamand' . $var] + 1;
+        $langAndNotSpam = $lang - $langAndSpam;
 
-        $weightLang = AthenaHelper::loadWeightings( 'difflang' );
+        $probLang = $lang/$pages;
+        $probLangAndSpam = $langAndSpam/$pages;
+        $probLangGivenSpam = $probLangAndSpam/$probabilityArray['ac_p_spam'];
+        $probLangAndNotSpam = $langAndNotSpam/$pages;
+        $probLangGivenNotSpam = $probLangAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        //echo( "problang is " + $probLang);
-        //echo( "weightlang is " + $weightLang);
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Lang type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of lang is $lang", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of lang and spam is $langAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of lang and not spam is $langAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of lang is $probLang", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of lang and spam is $probLangAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of lang given spam is $probLangGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of lang and not spam is $probLangAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of lang given not spam is $probLangGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        $calcArray['ac_p_diff_lang'] = $probLang;
-        $calcArray['ac_w_diff_lang'] = $weightLang;
-
-        return $weightLang * $probLang;
+        $probabilityArray['ac_p_lang'] = $probLang;
+        $probabilityArray['ac_p_langandspam'] = $probLangAndSpam;
+        $probabilityArray['ac_p_langgivenspam'] = $probLangGivenSpam;
+        $probabilityArray['ac_p_langandnotspam'] = $probLangAndNotSpam;
+        $probabilityArray['ac_p_langgivennotspam'] = $probLangGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the deleted filter
      *
      * @param $wasDeleted bool
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Deleted( $wasDeleted, &$calcArray ) {
-        $notFlag = 0;
+    static function calculateProbability_Deleted( $wasDeleted, &$stats, &$probabilityArray ) {
+        $var = 'deleted';
         // Let's treat null as false for simplicity
         if ( !$wasDeleted ) {
-            $notFlag = 1;
+            $var = 'notdeleted';
         }
 
-        $probDeleted = AthenaHelper::loadProbabilities( 'spam', 0, 'deleted', $notFlag );
+        $deleted = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $deletedAndSpam = $stats['spamand' . $var] + 1;
+        $deletedAndNotSpam = $deleted - $deletedAndSpam;
 
-        $weightDeleted = AthenaHelper::loadWeightings( 'deleted' );
+        $probDeleted = $deleted/$pages;
+        $probDeletedAndSpam = $deletedAndSpam/$pages;
+        $probDeletedGivenSpam = $probDeletedAndSpam/$probabilityArray['ac_p_spam'];
+        $probDeletedAndNotSpam = $deletedAndNotSpam/$pages;
+        $probDeletedGivenNotSpam = $probDeletedAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_deleted'] = $probDeleted;
-        $calcArray['ac_w_deleted'] = $weightDeleted;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Delete type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of deleted is $deleted", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of deleted and spam is $deletedAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of deleted and Not spam is $deletedAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of deleted is $probDeleted", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of deleted and spam is $probDeletedAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of deleted given spam is $probDeletedGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of deleted and Not spam is $probDeletedAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of deleted given Not spam is $probDeletedGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightDeleted * $probDeleted;
+        $probabilityArray['ac_p_deleted'] = $probDeleted;
+        $probabilityArray['ac_p_deletedandspam'] = $probDeletedAndSpam;
+        $probabilityArray['ac_p_deletedgivenspam'] = $probDeletedGivenSpam;
+        $probabilityArray['ac_p_deletedandnotspam'] = $probDeletedAndNotSpam;
+        $probabilityArray['ac_p_deletedgivennotspam'] = $probDeletedGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the wanted filter
      *
      * @param $isWanted bool
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Wanted( $isWanted, &$calcArray ) {
-        $notFlag = 0;
+    static function calculateProbability_Wanted( $isWanted, &$stats, &$probabilityArray ) {
+        $var = 'wanted';
         // Let's treat null as false for simplicity
         if ( !$isWanted ) {
-            $notFlag = 1;
+            $var = 'notwanted';
         }
 
-        $probWanted = AthenaHelper::loadProbabilities( 'spam', 0, 'wanted', $notFlag );
+        $wanted = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $wantedAndSpam = $stats['spamand' . $var] + 1;
+        $wantedAndNotSpam = $wanted - $wantedAndSpam;
 
-        $weightWanted = AthenaHelper::loadWeightings( 'wanted' );
+        $probWanted = $wanted/$pages;
+        $probWantedAndSpam = $wantedAndSpam/$pages;
+        $probWantedGivenSpam = $probWantedAndSpam/$probabilityArray['ac_p_spam'];
+        $probWantedAndNotSpam = $wantedAndNotSpam/$pages;
+        $probWantedGivenNotSpam = $probWantedAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_wanted'] = $probWanted;
-        $calcArray['ac_w_wanted'] = $weightWanted;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Wanted type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of wanted is $wanted", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of wanted and spam is $wantedAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of wanted and Not spam is $wantedAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of wanted is $probWanted", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of wanted and spam is $probWantedAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of wanted given spam is $probWantedGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of wanted and Not spam is $probWantedAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of wanted given Not spam is $probWantedGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightWanted * $probWanted;
+        $probabilityArray['ac_p_wanted'] = $probWanted;
+        $probabilityArray['ac_p_wantedandspam'] = $probWantedAndSpam;
+        $probabilityArray['ac_p_wantedgivenspam'] = $probWantedGivenSpam;
+        $probabilityArray['ac_p_wantedandnotspam'] = $probWantedAndNotSpam;
+        $probabilityArray['ac_p_wantedgivennotspam'] = $probWantedGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the user type filter
      *
      * @param $userAge int
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_User( $userAge, &$calcArray ) {
+    static function calculateProbability_User( $userAge, &$stats, &$probabilityArray ) {
 
-        $varName = 'anon';
+        $var = 'anon';
         if ( $userAge >= 0 ) {
-            if ( $userAge < 1 )
-                $varName = 'user1';
-            else if ( $userAge < 5 )
-                $varName = 'user5';
-            else if ( $userAge < 30 )
-                $varName = 'user30';
-            else if ( $userAge < 60 )
-                $varName = 'user60';
-            else if ( $userAge < 60 * 12 )
-                $varName = 'user12';
-            else if ( $userAge < 60 * 24 )
-                $varName = 'user24';
+            if ( $userAge < 60 )
+                $var = 'user1';
+            else if ( $userAge < 5 * 60 )
+                $var = 'user5';
+            else if ( $userAge < 30 * 60 )
+                $var = 'user30';
+            else if ( $userAge < 60 * 60 )
+                $var = 'user60';
+            else if ( $userAge < 60 * 60 * 12 )
+                $var = 'user12';
+            else if ( $userAge < 60 * 60 * 24 )
+                $var = 'user24';
             else
-                $varName = 'userother';
+                $var = 'userother';
         } else {
             if ( $userAge != -1 ) {
                 // -2 is no registration details - we shouldn't have that problem though
                 // anything bigger will be imported content, so let's just assume they were greater than a day and do other
-                $varName = 'userother';
+                $var = 'userother';
             }
         }
 
-        $probUser = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
+        $user = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $userAndSpam = $stats['spamand' . $var] + 1;
+        $userAndNotSpam = $user - $userAndSpam;
 
-        $weightUser = AthenaHelper::loadWeightings( 'userage' );
+        $probUser = $user/$pages;
+        $probUserAndSpam = $userAndSpam/$pages;
+        $probUserGivenSpam = $probUserAndSpam/$probabilityArray['ac_p_spam'];
+        $probUserAndNotSpam = $userAndNotSpam/$pages;
+        $probUserGivenNotSpam = $probUserAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_user_age'] = $probUser;
-        $calcArray['ac_w_user_age'] = $weightUser;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "User type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of user is $user", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of user and spam is $userAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of user and Not spam is $userAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of user is $probUser", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of user and spam is $probUserAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of user given spam is $probUserGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of user and Not spam is $probUserAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of user given Not spam is $probUserGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightUser * $probUser;
+        $probabilityArray['ac_p_user'] = $probUser;
+        $probabilityArray['ac_p_userandspam'] = $probUserAndSpam;
+        $probabilityArray['ac_p_usergivenspam'] = $probUserGivenSpam;
+        $probabilityArray['ac_p_userandnotspam'] = $probUserAndNotSpam;
+        $probabilityArray['ac_p_usergivennotspam'] = $probUserGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the title length filter
      *
      * @param $length int
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Length( $length, &$calcArray ) {
-        $notFlag = 1;
+    static function calculateProbability_Length( $length, &$stats, &$probabilityArray ) {
+        $var = 'nottitlelength';
         // Let's treat null as false for simplicity
         if ( $length > 39 ) {
-            $notFlag = 0;
+            $var = 'titlelength';
         }
 
-        $probLength = AthenaHelper::loadProbabilities( 'spam', 0, 'titlelength', $notFlag );
+        $titleLength = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $titleLengthAndSpam = $stats['spamand' . $var] + 1;
+        $titleLengthAndNotSpam = $titleLength - $titleLengthAndSpam;
 
-        $weightLength = AthenaHelper::loadWeightings( 'titlelength' );
+        $probTitleLength = $titleLength/$pages;
+        $probTitleLengthAndSpam = $titleLengthAndSpam/$pages;
+        $probTitleLengthGivenSpam = $probTitleLengthAndSpam/$probabilityArray['ac_p_spam'];
+        $probTitleLengthAndNotSpam = $titleLengthAndNotSpam/$pages;
+        $probTitleLengthGivenNotSpam = $probTitleLengthAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_title_length'] = $probLength;
-        $calcArray['ac_w_title_length'] = $weightLength;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Title length type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of title length is $titleLength", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of title length and spam is $titleLengthAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of title length and Not spam is $titleLengthAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of title length is $probTitleLength", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of title length and spam is $probTitleLengthAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of title length given spam is $probTitleLengthGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of title length and Not spam is $probTitleLengthAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of title length given Not spam is $probTitleLengthGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightLength * $probLength;
+        $probabilityArray['ac_p_titlelength'] = $probTitleLength;
+        $probabilityArray['ac_p_titlelengthandspam'] = $probTitleLengthAndSpam;
+        $probabilityArray['ac_p_titlelengthgivenspam'] = $probTitleLengthGivenSpam;
+        $probabilityArray['ac_p_titlelengthandnotspam'] = $probTitleLengthAndNotSpam;
+        $probabilityArray['ac_p_titlelengthgivennotspam'] = $probTitleLengthGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the namespace filter
      *
      * @param $namespace int
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Namespace( $namespace, &$calcArray )
-    {
+    static function calculateProbability_Namespace( $namespace, &$stats, &$probabilityArray ) {
+        $var = 'nsother';
+        if ($namespace == 0)
+            $var = 'nsmain';
+        else if ($namespace == 1)
+            $var = 'nstalk';
+        else if ($namespace == 2)
+            $var = 'nsuser';
+        else if ($namespace == 3)
+            $var = 'nsusertalk';
+        else if ( $namespace == 6 )
+            $var = 'nsfile';
 
-        $varName = 'nsother';
-        if ($namespace === 0)
-            $varName = 'nsmain';
-        else if ($namespace === 1)
-            $varName = 'nstalk';
-        else if ($namespace === 2)
-            $varName = 'nsuser';
-        else if ($namespace === 3)
-            $varName = 'nsusertalk';
+        $namespace = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $namespaceAndSpam = $stats['spamand' . $var] + 1;
+        $namespaceAndNotSpam = $namespace - $namespaceAndSpam;
 
-        $probNamespace = AthenaHelper::loadProbabilities('spam', 0, $varName, 0);
+        $probNamespace = $namespace/$pages;
+        $probNamespaceAndSpam = $namespaceAndSpam/$pages;
+        $probNamespaceGivenSpam = $probNamespaceAndSpam/$probabilityArray['ac_p_spam'];
+        $probNamespaceAndNotSpam = $namespaceAndNotSpam/$pages;
+        $probNamespaceGivenNotSpam = $probNamespaceAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $weightNamespace = AthenaHelper::loadWeightings('namespace');
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Namespace type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of namespace is $namespace", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of namespace and spam is $namespaceAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of namespace and Not spam is $namespaceAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of namespace is $probNamespace", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of namespace and spam is $probNamespaceAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of namespace given spam is $probNamespaceGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of namespace and Not spam is $probNamespaceAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of namespace given Not spam is $probNamespaceGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        $calcArray['ac_p_namespace'] = $probNamespace;
-        $calcArray['ac_w_namespace'] = $weightNamespace;
-
-        return $weightNamespace * $probNamespace;
+        $probabilityArray['ac_p_namespace'] = $probNamespace;
+        $probabilityArray['ac_p_namespaceandspam'] = $probNamespaceAndSpam;
+        $probabilityArray['ac_p_namespacegivenspam'] = $probNamespaceGivenSpam;
+        $probabilityArray['ac_p_namespaceandnotspam'] = $probNamespaceAndNotSpam;
+        $probabilityArray['ac_p_namespacegivennotspam'] = $probNamespaceGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the syntax filter
      *
      * @param $type int
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Syntax( $type, &$calcArray ) {
+    static function calculateProbability_Syntax( $type, &$stats, &$probabilityArray ) {
 
-        $varName = 'syntaxnone';
-        if ( $type === 1 )
-            $varName = 'syntaxbasic';
-        else if ( $type === 2 )
-            $varName = 'syntaxcomplex';
-        else if ( $type === 3 )
-            $varName = 'brokenspambot';
+        $var = 'syntaxnone';
+        if ( $type == 1 )
+            $var = 'syntaxbasic';
+        else if ( $type == 2 )
+            $var = 'syntaxcomplex';
+        else if ( $type == 3 )
+            $var = 'brokenspambot';
 
-        $probSyntax = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
+        $syntax = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $syntaxAndSpam = $stats['spamand' . $var] + 1;
+        $syntaxAndNotSpam = $syntax - $syntaxAndSpam;
 
-        $weightSyntax = AthenaHelper::loadWeightings( 'syntax' );
+        $probSyntax = $syntax/$pages;
+        $probSyntaxAndSpam = $syntaxAndSpam/$pages;
+        $probSyntaxGivenSpam = $probSyntaxAndSpam/$probabilityArray['ac_p_spam'];
+        $probSyntaxAndNotSpam = $syntaxAndNotSpam/$pages;
+        $probSyntaxGivenNotSpam = $probSyntaxAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_syntax'] = $probSyntax;
-        $calcArray['ac_w_syntax'] = $weightSyntax;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Syntax type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of syntax is $syntax", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of syntax and spam is $syntaxAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of syntax and Not spam is $syntaxAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of syntax is $probSyntax", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of syntax and spam is $probSyntaxAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of syntax given spam is $probSyntaxGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of syntax and Not spam is $probSyntaxAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of syntax given Not spam is $probSyntaxGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightSyntax * $probSyntax;
+        $probabilityArray['ac_p_syntax'] = $probSyntax;
+        $probabilityArray['ac_p_syntaxandspam'] = $probSyntaxAndSpam;
+        $probabilityArray['ac_p_syntaxgivenspam'] = $probSyntaxGivenSpam;
+        $probabilityArray['ac_p_syntaxandnotspam'] = $probSyntaxAndNotSpam;
+        $probabilityArray['ac_p_syntaxgivennotspam'] = $probSyntaxGivenNotSpam;
     }
 
     /**
      * Calculates the probability related to the link filter
      *
      * @param $percentage double
-     * @param &$calcArray array stores details about calculations
-     * @return double
+     * @param &$stats array contents of the athena_stats table
+     * @param &$probabilityArray array stores details about probabilities calculated
      */
-    static function calculateAthenaValue_Links( $percentage, &$calcArray ) {
-
-        $varName = 'links0';
+    static function calculateProbability_Links( $percentage, &$stats, &$probabilityArray ) {
+        $var = 'links0';
         if ( $percentage > 0 && $percentage < 0.1 )
-            $varName = 'links5';
+            $var = 'links5';
         else if ( $percentage >= 0.1 && $percentage <= 0.35 )
-            $varName = 'links20';
+            $var = 'links20';
         else if ( $percentage > 0.35 )
-            $varName = 'links50';
+            $var = 'links50';
 
-        $probLinks = AthenaHelper::loadProbabilities( 'spam', 0, $varName, 0 );
+        $links = $stats[$var] + 2;
+        $pages = $stats['pages'] + 2;
+        $linksAndSpam = $stats['spamand' . $var] + 1;
+        $linksAndNotSpam = $links - $linksAndSpam;
 
-        $weightLinks = AthenaHelper::loadWeightings( 'links' );
+        $probLinks = $links/$pages;
+        $probLinksAndSpam = $linksAndSpam/$pages;
+        $probLinksGivenSpam = $probLinksAndSpam/$probabilityArray['ac_p_spam'];
+        $probLinksAndNotSpam = $linksAndNotSpam/$pages;
+        $probLinksGivenNotSpam = $probLinksAndNotSpam/$probabilityArray['ac_p_not_spam'];
 
-        $calcArray['ac_p_link'] = $probLinks;
-        $calcArray['ac_w_link'] = $weightLinks;
+        wfErrorLog( "------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Links type is $var ", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of links is $links", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of pages is $pages", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of links and spam is $linksAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Number of links and Not spam is $linksAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of links is $probLinks", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of links and spam is $probLinksAndSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of links given spam is $probLinksGivenSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of links and Not spam is $probLinksAndNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        wfErrorLog( "Probability of links given Not spam is $probLinksGivenNotSpam", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        return $weightLinks * $probLinks;
+        $probabilityArray['ac_p_links'] = $probLinks;
+        $probabilityArray['ac_p_linksandspam'] = $probLinksAndSpam;
+        $probabilityArray['ac_p_linksgivenspam'] = $probLinksGivenSpam;
+        $probabilityArray['ac_p_linksandnotspam'] = $probLinksAndNotSpam;
+        $probabilityArray['ac_p_linksgivennotspam'] = $probLinksGivenNotSpam;
     }
 
     /**
@@ -582,35 +720,26 @@ class AthenaHelper
     }
 
     /**
-     * Loads the language classifier
-     *
-     * @return TextLanguageDetect
-     */
-   /* static function getClassifier()
-    {
-        global $IP;
-
-        require_once( $IP . '\extensions\Athena\libs\text-language-detect-master\lib\TextLanguageDetect\TextLanguageDetect.php' );
-        $classifier = new \TextLanguageDetect\TextLanguageDetect();
-
-        // Set it to return ISO 639-1 (same format as MediaWiki)
-        $classifier->setNameMode(2);
-        foreach( $classifier->getLanguages() as $lang ) {
-            wfErrorLog( $lang, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug-lang.log');
-        }
-
-        return $classifier;
-    }*/
-
-    /**
      * Gets the language of a given text
      *
      * @param $text string
      * @return string
      */
     static function getTextLanguage( $text ) {
-        $code = system( "franc \"$text\"" );
+        wfErrorLog( "getTextLanguage called", '/var/www/html/a/extensions/Athena/data/debug.log' );
+        
+if( strlen( $text ) == 0 ) {
+            $code = null;
+        } else {
+        wfErrorLog( "BEFORE TEMP", '/var/www/html/a/extensions/Athena/data/debug.log' );
 
+            file_put_contents( "/var/www/html/a/extensions/Athena/data/temp", $text );
+        wfErrorLog( "AFTER TEMP", '/var/www/html/a/extensions/Athena/data/debug.log' );
+            
+$code = system( "franc < /var/www/html/a/extensions/Athena/data/temp" );
+            wfErrorLog( "Language code is $code", '/var/www/html/a/extensions/Athena/data/debug.log' );
+( $code );
+	}
         return AthenaHelper::convertISOCode($code);
     }
 
@@ -621,18 +750,24 @@ class AthenaHelper
      * @param $title Title
      */
     static function updateStats( $array, $title ) {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgAthenaTraining;
         $dbw = wfGetDB( DB_SLAVE );
 
         // TODO not the best way but get me incrementing with the better way and I'll use it
         $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages'";
 
-        if ( $array['al_value'] > $wgAthenaSpamThreshold ) {
-            $spam = true;
-            $sql .= " OR `as_name`='spam' ";
+        if( !$wgAthenaTraining ) {
+			// This version of Bayes is based around it being greater than 0 or not
+			if ( $array['al_value'] > 0 ) {
+			//if ($array['al_value'] > $wgAthenaSpamThreshold) {
+                $spam = true;
+                $sql .= " OR `as_name`='spam' ";
+            } else {
+                $spam = false;
+                $sql .= " OR `as_name`='notspam' ";
+            }
         } else {
             $spam = false;
-            $sql .= " OR `as_name`='notspam' ";
         }
 
         if ( $array['al_language'] ) {
@@ -673,32 +808,32 @@ class AthenaHelper
 
         $userAge = $array['al_user_age'];
           if ( $userAge >= 0 ) {
-              if ($userAge < 1) {
+              if ($userAge < 1 * 60 ) {
                   $sql .= " OR `as_name`='user1' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser1' ";
                   }
-              } else if ($userAge < 5) {
+              } else if ($userAge < 5 * 60 ) {
                   $sql .= " OR `as_name`='user5' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser5' ";
                   }
-              } else if ( $userAge < 30 ) {
+              } else if ( $userAge < 30 * 60 ) {
                   $sql .= " OR `as_name`='user30' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser30' ";
                   }
-              } else if ( $userAge < 60 ) {
+              } else if ( $userAge < 60 * 60 ) {
                   $sql .= " OR `as_name`='user60' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser60' ";
                   }
-              } else if ( $userAge < 60 * 12 ) {
+              } else if ( $userAge < 60 * 12 * 60 ) {
                 $sql .= " OR `as_name`='user12' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser12' ";
                   }
-              } else if ( $userAge < 60 * 24 ) {
+              } else if ( $userAge < 60 * 24 * 60 ) {
                    $sql .= " OR `as_name`='user24' ";
                   if( $spam ) {
                       $sql .= " OR `as_name`='spamanduser24' ";
@@ -712,7 +847,7 @@ class AthenaHelper
           } else if ( $userAge != -1 ) {
               $sql .= " OR `as_name`='userother' ";
               if( $spam ) {
-                  $sql .= " OR `as_name`='spamanduserothe' ";
+                  $sql .= " OR `as_name`='spamanduserother' ";
               }
           } else {
               $sql .= " OR `as_name`='anon' ";
@@ -751,8 +886,13 @@ class AthenaHelper
             }
         } else if ( $namespace == 3 ) {
             $sql .= " OR `as_name`='nsusertalk' ";
-            if( $spam ) {
+            if ($spam) {
                 $sql .= " OR `as_name`='spamandnsusertalk' ";
+            }
+        } else if ( $namespace == 6 ) {
+            $sql .= " OR `as_name`='nsfile' ";
+            if( $spam ) {
+                $sql .= " OR `as_name`='spamandnsfile' ";
             }
         } else {
             $sql .= " OR `as_name`='nsother' ";
@@ -762,17 +902,17 @@ class AthenaHelper
         }
 
         $syntax = $array['al_syntax'];
-        if ( $syntax === 1 ) {
+        if ( $syntax == 1 ) {
             $sql .= " OR `as_name`='syntaxbasic' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandsyntaxbasic' ";
             }
-        } else if ( $syntax === 2 ) {
+        } else if ( $syntax == 2 ) {
             $sql .= " OR `as_name`='syntaxcomplex' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
             }
-        } else if ( $syntax === 3 ) {
+        } else if ( $syntax == 3 ) {
             $sql .= " OR `as_name`='brokenspambot' ";
             if ($spam) {
                 $sql .= " OR `as_name`='spamandbrokenspambot' ";
@@ -810,380 +950,7 @@ class AthenaHelper
         $sql .= ";";
 
         $dbw->query( $sql );
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-    }
-
-    /**
-     * Updates the probability table based on the new stats
-     */
-    static function updateProbabilities( ) {
-        $dbw = wfGetDB( DB_SLAVE );
-
-        // Have to use ids, which is far from ideal but is efficient
-        $sql = "UPDATE `athena_probability` SET `ap_value` = CASE ";
-
-        $stats = AthenaHelper::getStatistics();
-
-        // Probability of spam
-        // # of spam / # of pages
-        $probSpam = $stats['spam'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=7 THEN $probSpam ";
-        wfErrorLog( "New spam probability is " . $probSpam, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $probSpam;
-        $sql .= " WHEN `ap_id`=8 THEN $notProb ";
-
-        // Probability of difflang
-        // # of difflang / # of pages
-        $prob = $stats['difflang'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=9 THEN $prob ";
-        wfErrorLog( "Diff lang probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $prob;
-        $sql .= " WHEN `ap_id`=10 THEN $notProb ";
-
-        // Probability of spam given difflang
-        $opposite = $stats['spamanddifflang'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=11 THEN $condProb ";
-        wfErrorLog( "spam given difflang probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given samelang
-        $opposite = $stats['spamandsamelang'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$notProb;
-        $sql .= " WHEN `ap_id`=12 THEN $condProb ";
-        wfErrorLog( "spam given samelang probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of brokenspambot
-        // # of brokenspambot / # of pages
-        $prob = $stats['brokenspambot'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=13 THEN $prob ";
-        wfErrorLog( "Brokenspambot probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $prob;
-        $sql .= " WHEN `ap_id`=14 THEN $notProb ";
-
-        // Probability of spam given brokenspambot
-        $opposite = $stats['spamandbrokenspambot'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=15 THEN $condProb ";
-        wfErrorLog( "spam given brokenspambot probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // TODO skipping 16 (spam and not broken spam bot) as don't have stats and don't think its used
-
-        // Probability of deleted
-        // # of deleted / # of pages
-        $prob = $stats['deleted'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=17 THEN $prob ";
-        wfErrorLog( "New deleted probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $prob;
-        $sql .= " WHEN `ap_id`=18 THEN $notProb ";
-
-        // Probability of spam given deleted
-        $opposite = $stats['spamanddeleted'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=19 THEN $condProb ";
-        wfErrorLog( "spam given deleted probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given not deleted
-        $opposite = $stats['spamandnotdeleted'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$notProb;
-        $sql .= " WHEN `ap_id`=20 THEN $condProb ";
-        wfErrorLog( "spam given notdeleted probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of wanted
-        // # of wanted / # of pages
-        $prob = $stats['wanted'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=21 THEN $prob ";
-        wfErrorLog( "New wanted probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $prob;
-        $sql .= " WHEN `ap_id`=22 THEN $notProb ";
-
-        // Probability of spam given wanted
-        $opposite = $stats['spamandwanted'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=23 THEN $condProb ";
-        wfErrorLog( "spam given wanted probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given not wanted
-        $opposite = $stats['spamandnotwanted'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$notProb;
-        $sql .= " WHEN `ap_id`=24 THEN $condProb ";
-        wfErrorLog( "spam given notwanted probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of anon
-        // # of anon / # of pages
-        $prob = $stats['anon'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=25 THEN $prob ";
-        wfErrorLog( "New anon probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given anon
-        $opposite = $stats['spamandanon'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=34 THEN $condProb ";
-        wfErrorLog( "spam given anon probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // TODO skipping 44 for now (spam and not anon) as no stats and don't think its used
-
-        // Probability of user1
-        // # of user1 / # of pages
-        $prob = $stats['user1'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=26 THEN $prob ";
-        wfErrorLog( "New spam probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user1
-        $opposite = $stats['spamanduser1'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=35 THEN $condProb ";
-        wfErrorLog( "spam given user1 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of user5
-        // # of user5 / # of pages
-        $prob = $stats['user5'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=27 THEN $prob ";
-        wfErrorLog( "New user5 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user5
-        $opposite = $stats['spamanduser5'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=36 THEN $condProb ";
-        wfErrorLog( "spam given user5 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of user30
-        // # of user30 / # of pages
-        $prob = $stats['user30'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=28 THEN $prob ";
-        wfErrorLog( "New user30 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user30
-        $opposite = $stats['spamanduser30'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=37 THEN $condProb ";
-        wfErrorLog( "spam given user30 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of user60
-        // # of user60 / # of pages
-        $prob = $stats['user60'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=29 THEN $prob ";
-        wfErrorLog( "New user60 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user60
-        $opposite = $stats['spamanduser60'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=38 THEN $condProb ";
-        wfErrorLog( "spam given user60 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of user12
-        // # of user12 / # of pages
-        $prob = $stats['user12'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=30 THEN $prob ";
-        wfErrorLog( "New user12 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user12
-        $opposite = $stats['spamanduser12'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=39 THEN $condProb ";
-        wfErrorLog( "spam given user12 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of user24
-        // # of user24 / # of pages
-        $prob = $stats['user24'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=42 THEN $prob ";
-        wfErrorLog( "New user24 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given user24
-        $opposite = $stats['spamanduser24'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=40 THEN $condProb ";
-        wfErrorLog( "spam given user24 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of userother
-        // # of userother / # of pages
-        $prob = $stats['userother'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=31 THEN $prob ";
-        wfErrorLog( "New userother probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given userother
-        $opposite = $stats['spamanduserother'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=41 THEN $condProb ";
-        wfErrorLog( "spam given userother probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of titlelength
-        // # of titlelength / # of pages
-        $prob = $stats['titlelength'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=45 THEN $prob ";
-        wfErrorLog( "New titlelength probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $notProb = 1 - $prob;
-        $sql .= " WHEN `ap_id`=46 THEN $notProb ";
-
-        // Probability of spam given titlelength
-        $opposite = $stats['spamandtitlelength'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=47 THEN $condProb ";
-        wfErrorLog( "spam given titlelength probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given not titlelength
-        $opposite = $stats['spamandnottitlelength'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$notProb;
-        $sql .= " WHEN `ap_id`=48 THEN $condProb ";
-        wfErrorLog( "spam given nottitlelength probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of nsmain
-        // # of nsmain / # of pages
-        $prob = $stats['nsmain'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=49 THEN $prob ";
-        wfErrorLog( "New nsmain probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given nsmain
-        $opposite = $stats['spamandnsmain'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=54 THEN $condProb ";
-        wfErrorLog( "spam given nsmain probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of nstalk
-        // # of nstalk / # of pages
-        $prob = $stats['nstalk'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=50 THEN $prob ";
-        wfErrorLog( "New nstalk probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given nstalk
-        $opposite = $stats['spamandnstalk'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=55 THEN $condProb ";
-        wfErrorLog( "spam given nstalk probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of nsuser
-        // # of nsuser / # of pages
-        $prob = $stats['nsuser'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=51 THEN $prob ";
-        wfErrorLog( "New nsuser probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given nsuser
-        $opposite = $stats['spamandnsuser'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=56 THEN $condProb ";
-        wfErrorLog( "spam given nsuser probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of nsusertalk
-        // # of nsusertalk / # of pages
-        $prob = $stats['nsusertalk'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=52 THEN $prob ";
-        wfErrorLog( "New nsusertalk probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given nsusertalk
-        $opposite = $stats['spamandnsusertalk'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=57 THEN $condProb ";
-        wfErrorLog( "spam given nsusertalk probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of nsother
-        // # of nsother / # of pages
-        $prob = $stats['nsother'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=53 THEN $prob ";
-        wfErrorLog( "New nsother probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given nsother
-        $opposite = $stats['spamandnsother'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=58 THEN $condProb ";
-        wfErrorLog( "spam given nsother probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of syntaxnone
-        // # of syntaxnone / # of pages
-        $prob = $stats['syntaxnone'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=59 THEN $prob ";
-        wfErrorLog( "New syntaxnone probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given syntaxnone
-        $opposite = $stats['spamandsyntaxnone'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=60 THEN $condProb ";
-        wfErrorLog( "spam given syntaxnone probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of syntaxbasic
-        // # of syntaxbasic / # of pages
-        $prob = $stats['syntaxbasic'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=61 THEN $prob ";
-        wfErrorLog( "New syntaxbasic probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given syntaxbasic
-        $opposite = $stats['spamandsyntaxbasic'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=62 THEN $condProb ";
-        wfErrorLog( "spam given syntaxbasic probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of syntaxcomplex
-        // # of syntaxcomplex / # of pages
-        $prob = $stats['syntaxcomplex'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=63 THEN $prob ";
-        wfErrorLog( "New syntaxcomplex probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given syntaxcomplex
-        $opposite = $stats['spamandsyntaxcomplex'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=64 THEN $condProb ";
-        wfErrorLog( "spam given syntaxcomplex probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of links0
-        // # of links0 / # of pages
-        $prob = $stats['links0'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=65 THEN $prob ";
-        wfErrorLog( "New links0 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given links0
-        $opposite = $stats['spamandlinks0'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=66 THEN $condProb ";
-        wfErrorLog( "spam given links0 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of links5
-        // # of links5 / # of pages
-        $prob = $stats['links5'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=67 THEN $prob ";
-        wfErrorLog( "New links5 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given links5
-        $opposite = $stats['spamandlinks5'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=68 THEN $condProb ";
-        wfErrorLog( "spam given links5 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of links20
-        // # of lins20 / # of pages
-        $prob = $stats['links20'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=69 THEN $prob ";
-        wfErrorLog( "New links20 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given links20
-        $opposite = $stats['spamandlinks20'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=70 THEN $condProb ";
-        wfErrorLog( "spam given links20 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of links50
-        // # of links50 / # of pages
-        $prob = $stats['links50'] /  $stats['pages'];
-        $sql .= " WHEN `ap_id`=71 THEN $prob ";
-        wfErrorLog( "New links50 probability is " . $prob, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        // Probability of spam given links50
-        $opposite = $stats['spamandlinks50'] / $stats['spam'];
-        $condProb = ($probSpam * $opposite)/$prob;
-        $sql .= " WHEN `ap_id`=72 THEN $condProb ";
-        wfErrorLog( "spam given links50 probability is " . $condProb, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $sql .= "END, `ap_updated`=CURRENT_TIMESTAMP;"; // don't need a where for efficiency as we are updating every row
-
-        // Hacky fix is hacky
-        $sql = str_replace( 'NAN', '0', $sql );
-
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
-
-        $dbw->query( $sql );
+        wfErrorLog( $sql, '/var/www/html/a/extensions/Athena/data/debug.log' );
     }
 
     /**
@@ -1208,10 +975,10 @@ class AthenaHelper
             $array[$row->as_name] = $row->as_value;
         }
 
-        foreach( $array as $name=>$val ) {
-            wfErrorLog( "Array has key " . $name . " and value " . $val, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+       // foreach( $array as $name=>$val ) {
+       //     wfErrorLog( "Array has key " . $name . " and value " . $val, '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        }
+       // }
 
         return $array;
     }
@@ -1225,10 +992,20 @@ class AthenaHelper
         // Get page details
         $res = AthenaHelper::getAthenaDetails( $id );
 
-        AthenaHelper::updateStatsDeleted( $res );
-        AthenaHelper::updateProbabilities();
+        AthenaHelper::updateStatsDeleted( $res, false );
     }
 
+    /**
+     * Reinforce during page deletion
+     *
+     * @param $id integer
+     */
+    static function reinforceDeleteTraining( $id ) {
+        // Get page details
+        $res = AthenaHelper::getAthenaDetails( $id );
+
+        AthenaHelper::updateStatsDeleted( $res, true );
+    }
     /**
      * Prepare the log array without any data already
      *
@@ -1236,7 +1013,6 @@ class AthenaHelper
      * @return StdClass - database query results
      */
     static function getAthenaDetails( $id ) {
-
         $dbr = wfGetDB( DB_SLAVE );
         // Get data from the database
         $res = $dbr->selectRow(
@@ -1255,17 +1031,19 @@ class AthenaHelper
      * Updates the stats table with information from this edit
      *
      * @param $res StdClass
+     * @param $training bool are we in training mode?
      */
-    static function updateStatsDeleted( $res ) {
+    static function updateStatsDeleted( $res, $training ) {
         $dbw = wfGetDB( DB_SLAVE );
 
         // Start by reducing the number of not spam
-        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
-        $dbw->query( $sql );
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        if( !$training ) {
+            $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
+            $dbw->query($sql);
+            wfErrorLog($sql, '/var/www/html/a/extensions/Athena/data/debug.log');
+        }
 
         // Now increment spam and all the spamands
-
         $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
 
         if ( $res->al_language ) {
@@ -1288,23 +1066,23 @@ class AthenaHelper
 
         $userAge = $res->al_user_age;
         if ( $userAge >= 0 ) {
-            if ($userAge < 1) {
+            if ($userAge < 1 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser1' ";
-            } else if ($userAge < 5) {
+            } else if ($userAge < 5 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser5' ";
-            } else if ( $userAge < 30 ) {
+            } else if ( $userAge < 30 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser30' ";
-            } else if ( $userAge < 60 ) {
+            } else if ( $userAge < 60 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser60' ";
-            } else if ( $userAge < 60 * 12 ) {
+            } else if ( $userAge < 60 * 12 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser12' ";
-            } else if ( $userAge < 60 * 24 ) {
+            } else if ( $userAge < 60 * 24 * 60 ) {
                 $sql .= " OR `as_name`='spamanduser24' ";
             }  else {
                 $sql .= " OR `as_name`='spamanduserother' ";
             }
         } else if ( $userAge != -1 ) {
-            $sql .= " OR `as_name`='spamanduserothe' ";
+            $sql .= " OR `as_name`='spamanduserother' ";
         } else {
             $sql .= " OR `as_name`='spamandanon' ";
         }
@@ -1324,16 +1102,18 @@ class AthenaHelper
             $sql .= " OR `as_name`='spamandnsuser' ";
         } else if ( $namespace == 3 ) {
             $sql .= " OR `as_name`='spamandnsusertalk' ";
+        } else if ( $namespace == 6 ) {
+            $sql .= " OR `as_name`='spamandnsfile' ";
         } else {
             $sql .= " OR `as_name`='spamandnsother' ";
         }
 
         $syntax = $res->al_syntax;
-        if ( $syntax === 1 ) {
+        if ( $syntax == 1 ) {
             $sql .= " OR `as_name`='spamandsyntaxbasic' ";
-        } else if ( $syntax === 2 ) {
+        } else if ( $syntax == 2 ) {
             $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
-        } else if ( $syntax === 3 ) {
+        } else if ( $syntax == 3 ) {
             $sql .= " OR `as_name`='spamandbrokenspambot' ";
         } else {
             $sql .= " OR `as_name`='spamandsyntaxnone' ";
@@ -1353,7 +1133,7 @@ class AthenaHelper
         $sql .= ";";
 
         $dbw->query( $sql );
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( $sql, '/var/www/html/a/extensions/Athena/data/debug.log' );
     }
 
     /**
@@ -1365,115 +1145,135 @@ class AthenaHelper
         // Get page details
         $res = AthenaHelper::getAthenaDetails( $id );
 
-        AthenaHelper::updateStatsCreated( $res );
-        AthenaHelper::updateProbabilities();
+        AthenaHelper::updateStatsCreated( $res, false );
     }
 
+    /**
+     * Reinforce during reinforcement page creation
+     *
+     * @param $id integer
+     */
+    static function reinforceCreateTraining( $id ) {
+        // Get page details
+        $res = AthenaHelper::getAthenaDetails( $id );
+
+        AthenaHelper::updateStatsCreated( $res, true );
+    }
     /**
      * Updates the stats table with information from this edit
      *
      * @param $res StdClass
+     * @param $training bool are we in training mode?
      */
-    static function updateStatsCreated( $res ) {
+    static function updateStatsCreated( $res, $training ) {
         $dbw = wfGetDB( DB_SLAVE );
 
-        // Start by reducing the number of not spam
+        // Start by increasing the number of not spam
         $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
         $dbw->query( $sql );
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+        wfErrorLog( $sql, '/var/www/html/a/extensions/Athena/data/debug.log' );
 
-        // Now increment spam and all the spamands
+        if ( !$training ) {
+            // Now decrement spam and all the spamands
+            $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
 
-        $sql = "UPDATE `athena_stats` SET `as_value`=`as_value`-1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'spam'";
-
-        if ( $res->al_language ) {
-            $sql .= " OR `as_name`='spamanddifflang' ";
-        } else {
-            $sql .= " OR `as_name`='spamandsamelang' ";
-        }
-
-        if ( $res->al_deleted ) {
-            $sql .= " OR `as_name`='spamanddeleted' ";
-        } else {
-            $sql .= " OR `as_name`='spamandnotdeleted' ";
-        }
-
-        if ( $res->al_wanted ) {
-            $sql .= " OR `as_name`='spamandwanted' ";
-        } else {
-            $sql .= " OR `as_name`='spamandnotwanted' ";
-        }
-
-        $userAge = $res->al_user_age;
-        if ( $userAge >= 0 ) {
-            if ($userAge < 1) {
-                $sql .= " OR `as_name`='spamanduser1' ";
-            } else if ($userAge < 5) {
-                $sql .= " OR `as_name`='spamanduser5' ";
-            } else if ( $userAge < 30 ) {
-                $sql .= " OR `as_name`='spamanduser30' ";
-            } else if ( $userAge < 60 ) {
-                $sql .= " OR `as_name`='spamanduser60' ";
-            } else if ( $userAge < 60 * 12 ) {
-                $sql .= " OR `as_name`='spamanduser12' ";
-            } else if ( $userAge < 60 * 24 ) {
-                $sql .= " OR `as_name`='spamanduser24' ";
-            }  else {
-                $sql .= " OR `as_name`='spamanduserother' ";
+            if ($res->al_language) {
+                $sql .= " OR `as_name`='spamanddifflang' ";
+            } else {
+                $sql .= " OR `as_name`='spamandsamelang' ";
             }
-        } else if ( $userAge != -1 ) {
-            $sql .= " OR `as_name`='spamanduserothe' ";
-        } else {
-            $sql .= " OR `as_name`='spamandanon' ";
-        }
 
-        if ( strlen( $res->apd_title ) > 39 ) {
-            $sql .= " OR `as_name`='spamandtitlelength' ";
-        } else {
-            $sql .= " OR `as_name`='spamandnottitlelength' ";
-        }
+            if ($res->al_deleted) {
+                $sql .= " OR `as_name`='spamanddeleted' ";
+            } else {
+                $sql .= " OR `as_name`='spamandnotdeleted' ";
+            }
 
-        $namespace = $res->apd_namespace;
-        if ( $namespace == 0 ) {
-            $sql .= " OR `as_name`='spamandnsmain' ";
-        } else if ( $namespace == 1 ) {
-            $sql .= " OR `as_name`='spamandnstalk' ";
-        } else if ( $namespace == 2 ) {
-            $sql .= " OR `as_name`='spamandnsuser' ";
-        } else if ( $namespace == 3 ) {
-            $sql .= " OR `as_name`='spamandnsusertalk' ";
-        } else {
-            $sql .= " OR `as_name`='spamandnsother' ";
-        }
+            if ($res->al_wanted) {
+                $sql .= " OR `as_name`='spamandwanted' ";
+            } else {
+                $sql .= " OR `as_name`='spamandnotwanted' ";
+            }
 
-        $syntax = $res->al_syntax;
-        if ( $syntax === 1 ) {
-            $sql .= " OR `as_name`='spamandsyntaxbasic' ";
-        } else if ( $syntax === 2 ) {
-            $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
-        } else if ( $syntax === 3 ) {
-            $sql .= " OR `as_name`='spamandbrokenspambot' ";
-        } else {
-            $sql .= " OR `as_name`='spamandsyntaxnone' ";
-        }
+            $userAge = $res->al_user_age;
+            if ($userAge >= 0) {
+                if ($userAge < 1 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser1' ";
+                } else if ($userAge < 5 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser5' ";
+                } else if ($userAge < 30 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser30' ";
+                } else if ($userAge < 60 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser60' ";
+                } else if ($userAge < 60 * 12 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser12' ";
+                } else if ($userAge < 60 * 24 * 60 ) {
+                    $sql .= " OR `as_name`='spamanduser24' ";
+                } else {
+                    $sql .= " OR `as_name`='spamanduserother' ";
+                }
+            } else if ($userAge != -1) {
+                $sql .= " OR `as_name`='spamanduserother' ";
+            } else {
+                $sql .= " OR `as_name`='spamandanon' ";
+            }
 
-        $percentage = $res->al_link_percentage;
-        // TODO why is this named like this...
-        if ( $percentage == 0 ) {
-            $sql .= " OR `as_name`='spamandlinks0' ";
-        } else if ( $percentage > 0 && $percentage < 0.1 ) {
-            $sql .= " OR `as_name`='spamandlinks5' ";
-        } else if ( $percentage >= 0.1 && $percentage <= 0.35 ) {
-            $sql .= " OR `as_name`='spamandlinks20' ";
-        } else {
-            $sql .= " OR `as_name`='spamandlinks50' ";
-        }
-        $sql .= ";";
+            if (strlen($res->apd_title) > 39) {
+                $sql .= " OR `as_name`='spamandtitlelength' ";
+            } else {
+                $sql .= " OR `as_name`='spamandnottitlelength' ";
+            }
 
-        $dbw->query( $sql );
-        wfErrorLog( $sql, 'D:/xampp2/htdocs/spam2/extensions/Athena/data/debug.log' );
+            $namespace = $res->apd_namespace;
+            if ($namespace == 0) {
+                $sql .= " OR `as_name`='spamandnsmain' ";
+            } else if ($namespace == 1) {
+                $sql .= " OR `as_name`='spamandnstalk' ";
+            } else if ($namespace == 2) {
+                $sql .= " OR `as_name`='spamandnsuser' ";
+            } else if ($namespace == 3) {
+                $sql .= " OR `as_name`='spamandnsusertalk' ";
+            } else if ($namespace == 6) {
+                $sql .= " OR `as_name`='spamandnsfile' ";
+            } else {
+                $sql .= " OR `as_name`='spamandnsother' ";
+            }
+
+            $syntax = $res->al_syntax;
+            if ($syntax == 1) {
+                $sql .= " OR `as_name`='spamandsyntaxbasic' ";
+            } else if ($syntax == 2) {
+                $sql .= " OR `as_name`='spamandsyntaxcomplex' ";
+            } else if ($syntax == 3) {
+                $sql .= " OR `as_name`='spamandbrokenspambot' ";
+            } else {
+                $sql .= " OR `as_name`='spamandsyntaxnone' ";
+            }
+
+            $percentage = $res->al_link_percentage;
+            // TODO why is this named like this...
+            if ($percentage == 0) {
+                $sql .= " OR `as_name`='spamandlinks0' ";
+            } else if ($percentage > 0 && $percentage < 0.1) {
+                $sql .= " OR `as_name`='spamandlinks5' ";
+            } else if ($percentage >= 0.1 && $percentage <= 0.35) {
+                $sql .= " OR `as_name`='spamandlinks20' ";
+            } else {
+                $sql .= " OR `as_name`='spamandlinks50' ";
+            }
+            $sql .= ";";
+
+            $dbw->query($sql);
+            wfErrorLog($sql, '/var/www/html/a/extensions/Athena/data/debug.log');
+        }
     }
 
+    /**
+     * Concerts a language code returned by franc into a language code used by MediaWiki
+     * 
+     * @param $code string
+     * @return string
+     */
     static function convertISOCode( $code ) {
         $array = array(
             'aar' => 'aa',
@@ -1829,6 +1629,9 @@ class AthenaHelper
             'zul' => 'zu'
         );
 
-        return $array[$code];
+        if( isset( $array[$code] ) ) {
+           return $array[$code];
+        }
+        return null;
     }
 }

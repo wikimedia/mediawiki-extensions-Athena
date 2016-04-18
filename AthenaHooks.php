@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * Hooks Athena uses to do it's thing
+ *
+ * @file
+ * @author Richard Cook
+ * @copyright ©2016 Richard Cook
+ * @license GNU General Public License v3.0
+ */
 class AthenaHooks
 {
 
@@ -15,7 +22,7 @@ class AthenaHooks
      */
     static function editFilter( $editPage, $text, $section, &$error, $summary )
     {
-        global $wgAthenaSpamThreshold;
+        global $wgAthenaSpamThreshold, $wgAthenaTraining;
 
         // Check if it's a new article or not
         if ( $editPage->getTitle()->getArticleID() === 0 ) {
@@ -24,8 +31,10 @@ class AthenaHooks
             $redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
             if ( $redirect !== 1 ) {
                 $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
-
-                if ( $prob > $wgAthenaSpamThreshold ) {
+				
+				// This version of Bayes is based around it being greater than 0 or not
+                //if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
+                if ( !$wgAthenaTraining && $prob > 0 ) {
                     $error =
                         '<div class="errorbox">' .
                         wfMessage( 'athena-blocked-error' ) .
@@ -41,7 +50,7 @@ class AthenaHooks
      * Updates the database with the new Athena tabled
      * Called when the update.php maintenance script is run.
      *
-     * TODO Auto-fill weighting and probability data
+     * TODO Auto-fill data
      * @param $updater DatabaseUpdater
      * @return bool
      */
@@ -112,6 +121,8 @@ class AthenaHooks
     }
 
     /**
+     * BUGGY - Temporarily disabled
+     *
      * Hooks into the delete action, so we can track if Athena logged pages have been deleted
      *
      * @param $article Article
@@ -122,8 +133,8 @@ class AthenaHooks
      * @param $logEntry LogEntry
      */
     static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
-        $pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
-        echo($pos);
+        /*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
+        //echo($pos);
         if ( $pos !== false ) {
             $dbw = wfGetDB( DB_SLAVE );
 
@@ -143,8 +154,8 @@ class AthenaHooks
                     __METHOD__,
                     null );
 
-                AthenaHelper::reinforceDelete( $id );
+                AthenaHelper::reinforceDelete( $res->al_id );
             }
-        }
+        }*/
     }
 }

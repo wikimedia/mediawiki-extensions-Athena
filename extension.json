@@ -37,13 +37,14 @@
     ]
 },
   "config": {
-    "AthenaSpamThreshold": 0.25
+    "AthenaSpamThreshold": 0.5,
+	"AthenaTraining": false
   },
   "AvailableRights": [
 	"athena"
   ],
   "GroupPermissions": {
-	"sysop": {
+	"*": {
 	  "athena": true
 	}
   }
