@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * Hooks Athena uses to do it's thing
+ *
+ * @file
+ * @author Richard Cook
+ * @copyright ©2016 Richard Cook
+ * @license GNU General Public License v3.0
+ */
 class AthenaHooks
 {
 
@@ -114,6 +121,8 @@ class AthenaHooks
     }
 
     /**
+     * BUGGY - Temporarily disabled
+     *
      * Hooks into the delete action, so we can track if Athena logged pages have been deleted
      *
      * @param $article Article

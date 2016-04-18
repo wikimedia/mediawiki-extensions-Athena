@@ -5,8 +5,8 @@
  * @file
  * @ingroup SpecialPage
  * @author Richard Cook
- * @copyright © 2016 Richard Cook
- * @license
+ * @copyright ©2016 Richard Cook
+ * @license GNU General Public License v3.0
  */
 
 class SpecialAthena extends SpecialPage {
@@ -827,6 +827,7 @@ class SpecialAthena extends SpecialPage {
 				if ( $res->al_overridden == 0 ) {
 					$title = Title::newFromText( stripslashes( $res->apd_title ), $res->apd_namespace );
 
+                    // Temporary disabling this
 					/*if ( $title->exists() ) {
 						// Page exists - point them to delete instead
 						$output->addWikiMsg( 'athena-delete-still-exists' );

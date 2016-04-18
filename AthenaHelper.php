@@ -1,11 +1,14 @@
 <?php
 
-
 /**
- * Class AthenaHelper
- *
  * Various helper functions for Athena
+ *
+ * @file
+ * @author Richard Cook
+ * @copyright ©2016 Richard Cook
+ * @license GNU General Public License v3.0
  */
+    
 class AthenaHelper
 {
 
@@ -98,7 +101,6 @@ class AthenaHelper
     /**
      * Prepare an array with the details we want to insert into the athena_page_details table
      *
-     * @param $prob double
      * @param $namespace int
      * @param $title string
      * @param $content string
@@ -1266,6 +1268,12 @@ $code = system( "franc < /var/www/html/a/extensions/Athena/data/temp" );
         }
     }
 
+    /**
+     * Concerts a language code returned by franc into a language code used by MediaWiki
+     * 
+     * @param $code string
+     * @return string
+     */
     static function convertISOCode( $code ) {
         $array = array(
             'aar' => 'aa',
