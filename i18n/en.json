@@ -109,5 +109,7 @@
   "athena-view-training-reinforce-done-spam": "Training item already reinforced as spam",
   "athena-view-training-reinforce-done-not-spam": "Training item already reinforced as not spam",
   "athena-view-training-spam": "Training data - spam",
-  "athena-view-training-not-spam": "Training data - not spam"
+  "athena-view-training-not-spam": "Training data - not spam",
+  "athena-yes-not-spam": "Yes - As not spam",
+  "athena-yes-spam": "Yes - As spam"
 }

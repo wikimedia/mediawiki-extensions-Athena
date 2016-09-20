@@ -10,152 +10,142 @@
 class AthenaHooks
 {
 
-    /**
-     * Called when the edit is about to be saved
-     *
-     * @param $editPage EditPage
-     * @param $text string
-     * @param $section string
-     * @param $error string
-     * @param $summary string
-     * @return bool
-     */
-    static function editFilter( $editPage, $text, $section, &$error, $summary )
-    {
-        global $wgAthenaSpamThreshold, $wgAthenaTraining;
+	/**
+	 * Called when the edit is about to be saved
+	 *
+	 * @param $editPage EditPage
+	 * @param $text string
+	 * @param $section string
+	 * @param $error string
+	 * @param $summary string
+	 * @return bool
+	 */
+	static function editFilter( $editPage, $text, $section, &$error, $summary ) {
+		global $wgAthenaSpamThreshold, $wgAthenaTraining;
 
-        // Check if it's a new article or not
-        if ( $editPage->getTitle()->getArticleID() === 0 ) {
+		// Check if it's a new article or not
+		if ( $editPage->getTitle()->getArticleID() === 0 ) {
 
-            // Let's skip redirects
-            $redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
-            if ( $redirect !== 1 ) {
-                $prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
+			// Let's skip redirects
+			$redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
+			if ( $redirect !== 1 ) {
+				$prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
 				
 				// This version of Bayes is based around it being greater than 0 or not
-                //if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
-                if ( !$wgAthenaTraining && $prob > 0 ) {
-                    $error =
-                        '<div class="errorbox">' .
-                        wfMessage( 'athena-blocked-error' ) .
-                        '</div>' .
-                        '<br clear="all" />';
-                }
-            }
-        }
-        return true;
-    }
+				//if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
+				if ( !$wgAthenaTraining && $prob > 0 ) {
+					$error =
+						'<div class="errorbox">' .
+						wfMessage( 'athena-blocked-error' ) .
+						'</div>' .
+						'<br clear="all" />';
+				}
+			}
+		}
+		return true;
+	}
 
-    /**
-     * Updates the database with the new Athena tabled
-     * Called when the update.php maintenance script is run.
-     *
-     * TODO Auto-fill data
-     * @param $updater DatabaseUpdater
-     * @return bool
-     */
-    static function createTables( $updater )
-    {
-        $updater->addExtensionUpdate( array( 'addTable', 'athena_weighting', __DIR__ . '/sql/athena_probability.sql', true ) );
-        $updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true ) );
+	/**
+	 * Updates the database with the new Athena tabled
+	 * Called when the update.php maintenance script is run.
+	 *
+	 * TODO Auto-fill data
+	 * @param $updater DatabaseUpdater
+	 * @return bool
+	 */
+	static function createTables( $updater ) {
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_weighting', __DIR__ . '/sql/athena_probability.sql', true ) );
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true ) );
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * If an article successfully saves, we want to take the page_id and rev_id and update our
-     * athena_page_details table
-     *
-     * @param $article WikiPage
-     * @param $user User
-     * @param $content Content
-     * @param $summary string
-     * @param $isMinor boolean
-     * @param $isWatch boolean
-     * @param $section Deprecated
-     * @param $flags integer
-     * @param $revision {Revision|null}
-     * @param $status Status
-     * @param $baseRevId integer
-     * @return boolean
-     */
-    static function successfulEdit( $article, $user, $content, $summary, $isMinor, $isWatch, $section,
-                                   $flags, $revision, $status, $baseRevId )
-    {
-        $dbw = wfGetDB( DB_MASTER );
+	/**
+	 * If an article successfully saves, we want to take the page_id and rev_id and update our
+	 * athena_page_details table
+	 *
+	 * @param $article WikiPage
+	 * @param $user User
+	 * @param $content Content
+	 * @param $summary string
+	 * @param $isMinor boolean
+	 * @param $isWatch boolean
+	 * @param $section Deprecated
+	 * @param $flags integer
+	 * @param $revision {Revision|null}
+	 * @param $status Status
+	 * @param $baseRevId integer
+	 * @return boolean
+	 */
+	static function successfulEdit( $article, $user, $content, $summary, $isMinor, $isWatch, $section,
+								   $flags, $revision, $status, $baseRevId ) {
+		$dbw = wfGetDB( DB_MASTER );
 
-        $page_id = $article->getId();
-        $rev_id = $article->getRevision()->getId();
+		$page_id = $article->getId();
+		$rev_id = $article->getRevision()->getId();
 
-        $title = $dbw->strencode( $article->getTitle()->getText() );
+		$title = $dbw->strencode( $article->getTitle()->getText() );
 
-        $whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
+		$whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
 
-        // TODO check multiple instances of the same title - maybe check user_id as well
-        $sql = "SELECT al_id FROM {$dbw->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
+		// TODO check multiple instances of the same title - maybe check user_id as well
+		$sql = "SELECT al_id FROM {$dbw->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
 
-        $res = $dbw->query( $sql, __METHOD__ );
-        $row = $dbw->fetchObject( $res );
+		$res = $dbw->query( $sql, __METHOD__ );
+		$row = $dbw->fetchObject( $res );
 
-        if ( $row ) {
+		if ( $row ) {
 
-            $id = $row->al_id;
+			$id = $row->al_id;
 
-            $dbw->update( 'athena_page_details',
-                array( 'page_id' => $page_id, 'rev_id' => $rev_id ),
-                array( 'al_id' => $id ),
-                __METHOD__,
-                null );
+			$dbw->update( 'athena_page_details',
+				array( 'page_id' => $page_id, 'rev_id' => $rev_id ),
+				array( 'al_id' => $id ),
+				__METHOD__,
+				null );
 
-            // Move this to initial log attempt
-           /* $dbw->update( 'athena_log',
-                array( 'al_success' => 1 ),
-                array( 'al_id' => $id ),
-                __METHOD__,
-                null );*/
+			return true;
+		}
 
-            return true;
-        }
+		return false;
+	}
 
-        return false;
-    }
+	/**
+	 * BUGGY - Temporarily disabled
+	 *
+	 * Hooks into the delete action, so we can track if Athena logged pages have been deleted
+	 *
+	 * @param $article Article
+	 * @param $user User
+	 * @param $reason string
+	 * @param $id int
+	 * @param null $content Content
+	 * @param $logEntry LogEntry
+	 */
+	static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
+		/*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
+		//echo($pos);
+		if ( $pos !== false ) {
+			$dbw = wfGetDB( DB_SLAVE );
 
-    /**
-     * BUGGY - Temporarily disabled
-     *
-     * Hooks into the delete action, so we can track if Athena logged pages have been deleted
-     *
-     * @param $article Article
-     * @param $user User
-     * @param $reason string
-     * @param $id int
-     * @param null $content Content
-     * @param $logEntry LogEntry
-     */
-    static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
-        /*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
-        //echo($pos);
-        if ( $pos !== false ) {
-            $dbw = wfGetDB( DB_SLAVE );
+			// Search Athena logs for the page id
+			$res = $dbw->selectRow(
+				array( 'athena_page_details' ),
+				array( 'al_id' ),
+				array( 'page_id' => $id ),
+				__METHOD__,
+				array()
+			);
 
-            // Search Athena logs for the page id
-            $res = $dbw->selectRow(
-                array( 'athena_page_details' ),
-                array( 'al_id' ),
-                array( 'page_id' => $id ),
-                __METHOD__,
-                array()
-            );
+			if ( $res ) {
+				$dbw->update( 'athena_log',
+					array( 'al_overridden' => 1 ),
+					array( 'al_id' => $res->al_id ),
+					__METHOD__,
+					null );
 
-            if ( $res ) {
-                $dbw->update( 'athena_log',
-                    array( 'al_overridden' => 1 ),
-                    array( 'al_id' => $res->al_id ),
-                    __METHOD__,
-                    null );
-
-                AthenaHelper::reinforceDelete( $res->al_id );
-            }
-        }*/
-    }
+				AthenaHelper::reinforceDelete( $res->al_id );
+			}
+		}*/
+	}
 }
