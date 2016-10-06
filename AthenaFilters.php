@@ -250,12 +250,12 @@ class AthenaFilters {
 	public static function isWanted( $title ) {
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select(
-			'pagelinks',                                  // $table
-			array( 'count' => 'COUNT(*)' ),            // $vars (columns of the table)
+			'pagelinks',
+			array( 'count' => 'COUNT(*)' ),
 			array( 'pl_title' => $title->getDBkey(),
-				  'pl_namespace' => $title->getNamespace() ),         // $conds
-			__METHOD__,                                   // $fname = 'Database::select',
-			null        // $options = array()
+				  'pl_namespace' => $title->getNamespace() ),
+			__METHOD__,
+			null
 		);
 
 		// hacky approach is hacky
