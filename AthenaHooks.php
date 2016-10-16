@@ -54,7 +54,6 @@ class AthenaHooks
 	 * @return bool
 	 */
 	static function createTables( $updater ) {
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_weighting', __DIR__ . '/sql/athena_probability.sql', true ) );
 		$updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true ) );
 
 		return true;
