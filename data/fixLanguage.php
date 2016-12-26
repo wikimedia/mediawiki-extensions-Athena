@@ -15,6 +15,7 @@ require_once( 'Maintenance.php' );
 class fixLanguage extends Maintenance {
     public function __construct() {
         parent::__construct();
+        $this->requireExtension( 'Athena' );
         $this->mDescription = 'Fixes a bug that caused al_language to be the wrong value';
     }
 

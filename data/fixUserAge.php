@@ -15,6 +15,7 @@ require_once( 'Maintenance.php' );
 class fixUserAge extends Maintenance {
 	public function __construct() {
 		parent::__construct();
+    $this->requireExtension( 'Athena' );
 		$this->mDescription = 'Fixes a bug that caused user and spamanduser stats to classify the same thing differently';
 	}
 

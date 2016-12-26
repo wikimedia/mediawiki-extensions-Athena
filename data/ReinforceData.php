@@ -6,6 +6,7 @@ require_once( 'Maintenance.php' );
 class ReinforceData extends Maintenance {
     public function __construct() {
         parent::__construct();
+        $this->requireExtension( 'Athena' );
         $this->mDescription = 'Reinforces based on existing data';
     }
 

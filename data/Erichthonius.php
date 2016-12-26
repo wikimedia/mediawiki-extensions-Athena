@@ -25,6 +25,7 @@ class Erichthonius extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
+		$this->requireExtension( 'Athena' );
 		$this->mDescription = 'Adds the new pages in the given json file to the site, with the given user and language contexts';
 	}
 

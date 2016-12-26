@@ -6,6 +6,7 @@ require_once( 'Maintenance.php' );
 class getSpamData extends Maintenance {
     public function __construct() {
         parent::__construct();
+        $this->requireExtension( 'Athena' );
         $this->mDescription = 'Gets final spam declarations for different values';
     }
 

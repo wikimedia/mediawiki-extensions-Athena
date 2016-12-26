@@ -16,6 +16,7 @@ require_once( 'Maintenance.php' );
 class generateSyntaxes extends Maintenance {
     public function __construct() {
         parent::__construct();
+        $this->requireExtension( 'Athena' );
         $this->mDescription = 'Generate syntax field for variables';
     }
 
