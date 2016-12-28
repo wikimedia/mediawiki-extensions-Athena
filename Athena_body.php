@@ -80,7 +80,7 @@ class SpecialAthena extends SpecialPage
 	public function showAthenaHome() {
 		$output = $this->getOutput();
 		$this->setHeaders();
-		$output->setPagetitle( wfMessage( 'athena-title' ) );
+		$output->setPageTitle( wfMessage( 'athena-title' ) );
 
 		$output->addWikiMsg( 'athena-pagetext' );
 
@@ -649,7 +649,7 @@ class SpecialAthena extends SpecialPage
 		$output = $this->getOutput();
 		$this->setHeaders();
 
-		$output->setPagetitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
+		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
 		$dbw = wfGetDB( DB_SLAVE );
 		$res = $dbw->selectRow( 
