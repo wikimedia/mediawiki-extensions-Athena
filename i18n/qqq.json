@@ -8,7 +8,7 @@
 	"athena-anon": "Anonymous user",
 	"athena-blocked": "Blocked",
 	"athena-blocked-error": "Message that appears when an edit has been blocked by Athena",
-	"athena-desc": "Description for Special:Version",
+	"athena-desc": "{{desc|name=Athena|url=https://www.mediawiki.org/wiki/Extension:Athena}}",
 	"athena-false": "False",
 	"athena-id": "id",
 	"athena-log-date": "Date",
