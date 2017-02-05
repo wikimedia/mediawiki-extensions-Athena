@@ -16,6 +16,9 @@
 		"i18n"
 	]
    },
+  "ExtensionMessagesFiles": {
+    "AthenaAlias": "Athena.alias.php"
+  },
   "AutoloadClasses": {
     "AthenaFilters": "AthenaFilters.php",
     "AthenaHooks": "AthenaHooks.php",
