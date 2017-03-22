@@ -1,54 +1,54 @@
 {
-  "name": "Athena",
-  "version": "0.0.3",
-  "author": [
-    "Richard Cook"
-  ],
-  "url": "https://www.mediawiki.org/wiki/Extension:Athena",
-  "descriptionmsg": "athena-desc",
-  "type": "antispam",
-  "manifest_version": 1,
-  "SpecialPages": {
+	"name": "Athena",
+	"version": "0.0.3",
+	"author": [
+		"Richard Cook"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Athena",
+	"descriptionmsg": "athena-desc",
+	"type": "antispam",
+	"manifest_version": 1,
+	"SpecialPages": {
 		"Athena": "SpecialAthena"
 	},
-  "MessagesDirs": {
-	"Athena": [
-		"i18n"
-	]
-   },
-  "ExtensionMessagesFiles": {
-    "AthenaAlias": "Athena.alias.php"
-  },
-  "AutoloadClasses": {
-    "AthenaFilters": "AthenaFilters.php",
-    "AthenaHooks": "AthenaHooks.php",
-    "AthenaHelper": "AthenaHelper.php",
-	"SpecialAthena": "Athena_body.php"
-  },
-  "Hooks": {
-    "EditFilter": [
-      "AthenaHooks::editFilter"
-    ],
-    "LoadExtensionSchemaUpdates": [
-      "AthenaHooks::createTables"
-    ],
-    "PageContentSaveComplete": [
-      "AthenaHooks::successfulEdit"
-    ],
-    "ArticleDeleteComplete": [
-      "AthenaHooks::pageDeleted"
-    ]
-},
-  "config": {
-    "AthenaSpamThreshold": 0.5,
-	"AthenaTraining": false
-  },
-  "AvailableRights": [
-	"athena"
-  ],
-  "GroupPermissions": {
-	"sysop": {
-	  "athena": true
+	"MessagesDirs": {
+		"Athena": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"AthenaAlias": "Athena.alias.php"
+	},
+	"AutoloadClasses": {
+		"AthenaFilters": "AthenaFilters.php",
+		"AthenaHooks": "AthenaHooks.php",
+		"AthenaHelper": "AthenaHelper.php",
+		"SpecialAthena": "Athena_body.php"
+	},
+	"Hooks": {
+		"EditFilter": [
+			"AthenaHooks::editFilter"
+		],
+		"LoadExtensionSchemaUpdates": [
+			"AthenaHooks::createTables"
+		],
+		"PageContentSaveComplete": [
+			"AthenaHooks::successfulEdit"
+		],
+		"ArticleDeleteComplete": [
+			"AthenaHooks::pageDeleted"
+		]
+	},
+	"config": {
+		"AthenaSpamThreshold": 0.5,
+		"AthenaTraining": false
+	},
+	"AvailableRights": [
+		"athena"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"athena": true
+		}
 	}
-  }
 }
