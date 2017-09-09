@@ -248,7 +248,7 @@ class AthenaFilters {
 	 * @return bool
 	 */
 	public static function isWanted( $title ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select(
 			'pagelinks',
 			array( 'count' => 'COUNT(*)' ),
@@ -277,7 +277,7 @@ class AthenaFilters {
 	 * @return bool
 	 */
 	public static function wasDeleted( $title ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select(
 			'archive',
 			array( 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ),

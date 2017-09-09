@@ -117,7 +117,7 @@ class SpecialAthena extends SpecialPage
 			$conds = 'al_success = 2 OR al_success = 3 OR al_success = 4';
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success', 'al_overridden' ),
@@ -225,7 +225,7 @@ class SpecialAthena extends SpecialPage
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-viewing', $id ) );
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->selectRow( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success',
@@ -651,7 +651,7 @@ class SpecialAthena extends SpecialPage
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
-		$dbw = wfGetDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_REPLICA );
 		$res = $dbw->selectRow( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
@@ -736,7 +736,7 @@ class SpecialAthena extends SpecialPage
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-reinforce-title', $id ) );
 
 		if ( $wgAthenaTraining ) {
-			$dbw = wfGetDB( DB_SLAVE );
+			$dbw = wfGetDB( DB_REPLICA );
 			$res = $dbw->selectRow( 
 				array( 'athena_log', 'athena_page_details' ),
 				array( 'athena_log.al_id', 'al_value', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
@@ -800,7 +800,7 @@ class SpecialAthena extends SpecialPage
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-delete-title', $id ) );
 
-		$dbw = wfGetDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_REPLICA );
 		$res = $dbw->selectRow( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),

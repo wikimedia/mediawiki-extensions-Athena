@@ -235,7 +235,7 @@ class Erichthonius extends Maintenance {
 		$newTime = time() - $age;
 		$newTime = wfTimestamp( TS_MW, $newTime );
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$dbr->update( 'user', array( 'user_registration' => $newTime ), array( 'user_id' => $json['createaccount']['userid'] ) );
 
 		echo( "User register timestamp altered\n\n" );

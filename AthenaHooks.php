@@ -125,7 +125,7 @@ class AthenaHooks
 		/*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
 		//echo($pos);
 		if ( $pos !== false ) {
-			$dbw = wfGetDB( DB_SLAVE );
+			$dbw = wfGetDB( DB_REPLICA );
 
 			// Search Athena logs for the page id
 			$res = $dbw->selectRow(

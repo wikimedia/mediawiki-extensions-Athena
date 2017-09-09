@@ -57,7 +57,7 @@ class Reinforce extends Maintenance {
                 curl_close($ch);
 
 
-            $dbr = wfGetDB( DB_SLAVE );
+            $dbr = wfGetDB( DB_REPLICA );
             $res = $dbr->selectRow(
                                 'athena_log',                                   // $table
                                 '*',            // $vars (columns of the table)

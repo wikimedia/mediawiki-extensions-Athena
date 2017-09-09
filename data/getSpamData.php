@@ -11,7 +11,7 @@ class getSpamData extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_SLAVE );
+        $dbw = wfGetDB( DB_REPLICA );
 
         $res = $dbw->select(
             array( 'athena_log' ),

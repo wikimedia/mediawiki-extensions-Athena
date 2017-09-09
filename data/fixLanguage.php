@@ -20,7 +20,7 @@ class fixLanguage extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_SLAVE );
+        $dbw = wfGetDB( DB_REPLICA );
 
         // Get all Athena logs
         $res = $dbw->select(

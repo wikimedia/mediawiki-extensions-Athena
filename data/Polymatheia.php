@@ -31,7 +31,7 @@ class Polymatheia extends Maintenance {
 	public function execute() {
 		global $wgLanguageCode;
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		// For users
 		$res = $dbr->select(

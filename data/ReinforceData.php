@@ -11,7 +11,7 @@ class ReinforceData extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_SLAVE );
+        $dbw = wfGetDB( DB_REPLICA );
 
         $array = array();
         

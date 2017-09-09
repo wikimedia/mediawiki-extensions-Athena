@@ -749,7 +749,7 @@ class AthenaHelper
 	 */
 	static function updateStats( $array, $title ) {
 		global $wgAthenaTraining;
-		$dbw = wfGetDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_REPLICA );
 
 		// TODO not the best way but get me incrementing with the better way and I'll use it
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages'";
@@ -957,7 +957,7 @@ class AthenaHelper
 	 * @return array() containing all the stats
 	 */
 	static function getStatistics() {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$res = $dbr->select(
 			array( 'athena_stats' ),
@@ -1011,7 +1011,7 @@ class AthenaHelper
 	 * @return StdClass - database query results
 	 */
 	static function getAthenaDetails( $id ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		// Get data from the database
 		$res = $dbr->selectRow(
 			array( 'athena_log', 'athena_page_details' ),
@@ -1032,7 +1032,7 @@ class AthenaHelper
 	 * @param $training bool are we in training mode?
 	 */
 	static function updateStatsDeleted( $res, $training ) {
-		$dbw = wfGetDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_REPLICA );
 
 		// Start by reducing the number of not spam
 		if( !$training ) {
@@ -1164,7 +1164,7 @@ class AthenaHelper
 	 * @param $training bool are we in training mode?
 	 */
 	static function updateStatsCreated( $res, $training ) {
-		$dbw = wfGetDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_REPLICA );
 
 		// Start by increasing the number of not spam
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";
