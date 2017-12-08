@@ -63,7 +63,9 @@ class AthenaHooks
 	 * If an article successfully saves, we want to take the page_id and rev_id and update our
 	 * athena_page_details table
 	 *
-	 * @param $article WikiPage
+	 * PageContentSaveComplete hook handler
+	 *
+	 * @param WikiPage $wikiPage
 	 * @param $user User
 	 * @param $content Content
 	 * @param $summary string
@@ -74,18 +76,20 @@ class AthenaHooks
 	 * @param $revision {Revision|null}
 	 * @param $status Status
 	 * @param $baseRevId integer
+	 *
 	 * @return boolean
 	 */
-	static function successfulEdit( $article, $user, $content, $summary, $isMinor, $isWatch, $section,
+	static function successfulEdit(
+		WikiPage $wikiPage, $user, $content, $summary, $isMinor, $isWatch, $section,
 								   $flags, $revision, $status, $baseRevId ) {
 		$dbw = wfGetDB( DB_MASTER );
 
-		$page_id = $article->getId();
-		$rev_id = $article->getRevision()->getId();
+		$page_id = $wikiPage->getId();
+		$rev_id = $wikiPage->getRevision()->getId();
 
-		$title = $dbw->strencode( $article->getTitle()->getText() );
+		$title = $dbw->strencode( $wikiPage->getTitle()->getText() );
 
-		$whereStatement = " apd_title='{$title}' AND apd_namespace={$article->getTitle()->getNamespace()}";
+		$whereStatement = " apd_title='{$title}' AND apd_namespace={$wikiPage->getTitle()->getNamespace()}";
 
 		// TODO check multiple instances of the same title - maybe check user_id as well
 		$sql = "SELECT al_id FROM {$dbw->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
