@@ -219,7 +219,7 @@ class AthenaHelper
 
 			$sigma += log($probabilityArray['ac_p_linksgivenspam'] / $probabilityArray['ac_p_linksgivennotspam']);
 			/* end links */
-			
+
 			$prob = $lnProbSpamNotSpam + $sigma;
 
 			//wfErrorLog("------------------------------------------------", '/var/www/html/a/extensions/Athena/data/debug.log');
@@ -1268,7 +1268,7 @@ class AthenaHelper
 
 	/**
 	 * Concerts a language code returned by franc into a language code used by MediaWiki
-     * 
+	 *
 	 * @param $code string
 	 * @return string
 	 */
