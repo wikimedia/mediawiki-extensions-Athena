@@ -111,5 +111,7 @@
 	"athena-view-training-spam": "Training data - spam",
 	"athena-view-training-not-spam": "Training data - not spam",
 	"athena-yes-not-spam": "Training data reinforced as not spam",
-	"athena-yes-spam": "Training data reinforced as spam"
+	"athena-yes-spam": "Training data reinforced as spam",
+	"right-athena": "{{doc-right|athena}}",
+	"action-athena": "{{doc-action|athena}}"
 }

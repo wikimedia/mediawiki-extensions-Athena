@@ -111,5 +111,7 @@
 	"athena-view-training-spam": "Training data - spam",
 	"athena-view-training-not-spam": "Training data - not spam",
 	"athena-yes-not-spam": "Yes - As not spam",
-	"athena-yes-spam": "Yes - As spam"
+	"athena-yes-spam": "Yes - As spam",
+	"right-athena": "Administer Athena",
+	"action-athena": "administer Athena"
 }
