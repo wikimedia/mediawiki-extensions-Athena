@@ -84,10 +84,10 @@ class SpecialAthena extends SpecialPage
 
 		$output->addWikiMsg( 'athena-pagetext' );
 
-		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-0' ) . '|' . wfMessage( 'athena-type-desc-0' ) . ']]' );
-		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-1' ) . '|' . wfMessage( 'athena-type-desc-1' ) . ']]' );
-		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-2' ) . '|' . wfMessage( 'athena-type-desc-2' ) . ']]' );
-		$output->addWikiText( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-3' ) . '|' . wfMessage( 'athena-type-desc-3' ) . ']]' );
+		$output->addWikiTextAsInterface( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-0' ) . '|' . wfMessage( 'athena-type-desc-0' ) . ']]' );
+		$output->addWikiTextAsInterface( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-1' ) . '|' . wfMessage( 'athena-type-desc-1' ) . ']]' );
+		$output->addWikiTextAsInterface( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-2' ) . '|' . wfMessage( 'athena-type-desc-2' ) . ']]' );
+		$output->addWikiTextAsInterface( '*[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-type-3' ) . '|' . wfMessage( 'athena-type-desc-3' ) . ']]' );
 	}
 
 	/**
@@ -289,11 +289,11 @@ class SpecialAthena extends SpecialPage
 			// Reinforcement button
 			if ( $res->al_success == 1 ) {
 				if ( $res->al_overridden ) {
-					$output->addWikiText( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
+					$output->addWikiTextAsInterface( wfMessage( 'athena-view-not-blocked-reinforce-done' ) );
 				} else {
 					// Page has been deleted, but not within Athena's remit
 					//if ( $title->getArticleID() != $res->page_id ) {
-					$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-delete-url' ) . '/' . $res->al_id .
+					$output->addWikiTextAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-delete-url' ) . '/' . $res->al_id .
 						'|' . wfMessage( 'athena-view-not-blocked-reinforce' ) . ']]' );
 					/*} else {
 						$output->addHTML( '<a href=' . $title->getFullURL( array( 'action' => 'delete' ) ) . '>' . wfMessage( 'athena-view-not-blocked-reinforce' ) . '</a>' );
@@ -301,21 +301,21 @@ class SpecialAthena extends SpecialPage
 				}
 			} else if ( $res->al_success == 0 ) {
 				if ( $res->al_overridden ) {
-					$output->addWikiText( wfMessage( 'athena-view-blocked-reinforce-done' ) );
+					$output->addWikiTextAsInterface( wfMessage( 'athena-view-blocked-reinforce-done' ) );
 				} else {
-					$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
+					$output->addWikiTextAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
 						'|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
 				}
 			} else {
 				if ( $wgAthenaTraining ) {
 					if ( $res->al_overridden ) {
 						if ( $res->al_success == 3 ) {
-							$output->addWikiText( wfMessage( 'athena-view-training-reinforce-done-spam' ) );
+							$output->addWikiTextAsInterface( wfMessage( 'athena-view-training-reinforce-done-spam' ) );
 						} else {
-							$output->addWikiText( wfMessage( 'athena-view-training-reinforce-done-not-spam' ) );
+							$output->addWikiTextAsInterface( wfMessage( 'athena-view-training-reinforce-done-not-spam' ) );
 						}
 					} else {
-						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-reinforce-url' ) . '/' . wfMessage( 'athena-reinforce-spam-url' ) . '/' . $res->al_id .
+						$output->addWikiTextAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-reinforce-url' ) . '/' . wfMessage( 'athena-reinforce-spam-url' ) . '/' . $res->al_id .
 							'|<span style="color:red;">' . wfMessage( 'athena-view-training-reinforce-spam' ) . '</span>]] [[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-reinforce-url' ) . '/' . wfMessage( 'athena-reinforce-not-spam-url' ) . '/' . $res->al_id .
 							'|<span style="color:green;">' . wfMessage( 'athena-view-training-reinforce-not-spam' ) . '</span>]]' );
 					}
@@ -327,8 +327,8 @@ class SpecialAthena extends SpecialPage
 			// Replace \n with new line, remove slashes
 			$content = stripslashes( str_replace( '\\n', PHP_EOL, $res->apd_content ) );
 
-			$output->addWikiText( '== ' . wfMessage( 'athena-view-content' ) . ' ==' );
-			$output->addWikiText( '<h3>' . wfMessage( 'athena-view-wikitext' ) . '</h3>' );
+			$output->addWikiTextAsInterface( '== ' . wfMessage( 'athena-view-content' ) . ' ==' );
+			$output->addWikiTextAsInterface( '<h3>' . wfMessage( 'athena-view-wikitext' ) . '</h3>' );
 			$output->addHTML( '<div class="toccolours mw-collapsible">' );
 			$output->addHTML( '<pre>' . $content . '</pre>' );
 			$output->addHTML( '</div>' );
@@ -337,9 +337,9 @@ class SpecialAthena extends SpecialPage
 			// TODO magic words are language dependant
 			$content = str_replace( '{{PAGENAME}}', $title, $content );
 
-			$output->addWikiText( '<h3>' . wfMessage( 'athena-view-preview' ) . '</h3>' );
+			$output->addWikiTextAsInterface( '<h3>' . wfMessage( 'athena-view-preview' ) . '</h3>' );
 			$output->addHTML( '<div class="toccolours mw-collapsible mw-collapsed">' );
-			$output->addWikiText( $content );
+			$output->addWikiTextAsInterface( $content );
 			$output->addHTML( '</div>' );
 
 			if ( $res->al_success < 2 ) {
@@ -352,7 +352,7 @@ class SpecialAthena extends SpecialPage
 				 );
 
 				// Display Athena scores
-				$output->addWikiText( '== ' . wfMessage( 'athena-view-results' ) . ' ==' );
+				$output->addWikiTextAsInterface( '== ' . wfMessage( 'athena-view-results' ) . ' ==' );
 				$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th>';
 				$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
 				$tableStr .= '<th>' . wfMessage( 'athena-view-probability' ) . '</th>';
@@ -594,7 +594,7 @@ class SpecialAthena extends SpecialPage
 				$output->addHTML( $tableStr );
 			} else {
 				// Display filter values
-				$output->addWikiText( '== ' . wfMessage( 'athena-view-results' ) . ' ==' );
+				$output->addWikiTextAsInterface( '== ' . wfMessage( 'athena-view-results' ) . ' ==' );
 				$tableStr = '<table class="wikitable"><thead><th>' . wfMessage( 'athena-view-metric' ) . '</th>';
 				$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
 				$tableStr .= '</thead><tbody>';
@@ -688,7 +688,7 @@ class SpecialAthena extends SpecialPage
 								$wikiPage->doEditContent( $content, $comment );
 							}
 
-							$output->addWikiText( '[[' . $title->getFullText() . '|' . wfMessage( 'athena-create-go-page' ) . ']]' );
+							$output->addWikiTextAsInterface( '[[' . $title->getFullText() . '|' . wfMessage( 'athena-create-go-page' ) . ']]' );
 
 						}
 						// Reinforce the system
@@ -707,7 +707,7 @@ class SpecialAthena extends SpecialPage
 						} else {
 							$output->addWikiMsg( 'athena-create-text', $id );
 						}
-						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
+						$output->addWikiTextAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-create-url' ) . '/' . $res->al_id .
 							'/' . wfMessage( 'athena-create-confirm-url' ) . '|' . wfMessage( 'athena-create-confirm' ) . ']]' );
 					}
 				} else {
@@ -837,7 +837,7 @@ class SpecialAthena extends SpecialPage
 					} else {
 						$output->addWikiMsg( 'athena-delete-text', $id );
 
-						$output->addWikiText( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-delete-url' ) . '/' . $res->al_id .
+						$output->addWikiTextAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-delete-url' ) . '/' . $res->al_id .
 							'/' . wfMessage( 'athena-create-confirm-url' ) . '|' . wfMessage( 'athena-create-confirm' ) . ']]' );
 					}
 					//}
