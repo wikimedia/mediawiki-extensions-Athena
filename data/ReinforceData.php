@@ -7,7 +7,7 @@ class ReinforceData extends Maintenance {
     public function __construct() {
         parent::__construct();
         $this->requireExtension( 'Athena' );
-        $this->mDescription = 'Reinforces based on existing data';
+        $this->addDescription( 'Reinforces based on existing data' );
     }
 
     public function execute() {

@@ -17,7 +17,7 @@ class generateSyntaxes extends Maintenance {
     public function __construct() {
         parent::__construct();
         $this->requireExtension( 'Athena' );
-        $this->mDescription = 'Generate syntax field for variables';
+        $this->addDescription( 'Generate syntax field for variables' );
     }
 
     public function execute() {

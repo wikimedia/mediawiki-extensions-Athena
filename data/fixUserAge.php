@@ -16,7 +16,7 @@ class fixUserAge extends Maintenance {
 	public function __construct() {
 		parent::__construct();
     $this->requireExtension( 'Athena' );
-		$this->mDescription = 'Fixes a bug that caused user and spamanduser stats to classify the same thing differently';
+		$this->addDescription( 'Fixes a bug that caused user and spamanduser stats to classify the same thing differently' );
 	}
 
 	public function execute() {

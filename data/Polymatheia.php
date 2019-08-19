@@ -25,7 +25,7 @@ class Polymatheia extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->requireExtension( 'Athena' );
-		$this->mDescription = 'Gets all the new page info for a given site';
+		$this->addDescription( 'Gets all the new page info for a given site' );
 	}
 
 	public function execute() {

@@ -17,7 +17,7 @@ class generateLanguages extends Maintenance {
     public function __construct() {
         parent::__construct();
         $this->requireExtension( 'Athena' );
-        $this->mDescription = 'Fixes a bug that caused al_language to be the wrong value';
+        $this->addDescription( 'Fixes a bug that caused al_language to be the wrong value' );
     }
 
     public function execute() {
