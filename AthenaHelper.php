@@ -140,17 +140,18 @@ class AthenaHelper
 	 * @return double
 	 */
 	static function calculateAthenaValue( $editPage, $text, $summary ) {
-		global $wgUser, $wgAthenaTraining;
+		global $wgAthenaTraining;
 
 		// Get title
 		$titleObj = $editPage->getTitle();
 		$title = $titleObj->getTitleValue()->getText();
+		$user = $editPage->getContext()->getUser();
 
 		// Get filter results
 		$diffLang = AthenaFilters::differentLanguage( $text );
 		$deleted = AthenaFilters::wasDeleted( $titleObj );
 		$wanted = AthenaFilters::isWanted( $titleObj );
-		$userAge = AthenaFilters::userAge();
+		$userAge = AthenaFilters::userAge( $user );
 		$titleLength = AthenaFilters::titleLength( $titleObj );
 		$namespace = AthenaFilters::getNamespace( $titleObj );
 		$syntaxType = AthenaFilters::syntaxType( $text );
@@ -232,7 +233,7 @@ class AthenaHelper
 		$links = AthenaFilters::numberOfLinks( $text );
 
 		$logArray = AthenaHelper::prepareLogArray( $prob, $userAge, $links, $linksPercentage, $syntaxType, $diffLang, $deleted, $wanted );
-		$detailsArray = AthenaHelper::preparePageDetailsArray( $namespace, $title, $text, $summary, $wgUser->getId() );
+		$detailsArray = AthenaHelper::preparePageDetailsArray( $namespace, $title, $text, $summary, $user->getId() );
 
 		AthenaHelper::logAttempt( $logArray, $detailsArray, $probabilityArray );
 		AthenaHelper::updateStats( $logArray, $titleObj );

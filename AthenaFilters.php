@@ -13,13 +13,12 @@ class AthenaFilters {
 	 * Checks type of user and their age
 	 * Returns -1 if anon, -2 if info not available, or otherwise returns the age of the account in minutes
 	 *
+	 * @param $user User
 	 * @return int user age / type
 	 */
-	public static function userAge() {
-		global $wgUser;
-
+	public static function userAge( User $user ) {
 		// check anon
-		$registration = $wgUser->getRegistration();
+		$registration = $user->getRegistration();
 
 		if ( $registration === false ) {
 			// if false, user is anon
