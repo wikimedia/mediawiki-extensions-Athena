@@ -152,13 +152,13 @@ class SpecialAthena extends SpecialPage
 
 			// Make a pretty title
 			$title = Title::newFromText( stripslashes( $row->apd_title ), $row->apd_namespace );
-			$link = $output->parse( '[[:' . $title->getFullText() . ']]' );
+			$link = $output->parseAsInterface( '[[:' . $title->getFullText() . ']]' );
 			$tableStr .= '<td>' . $link . '</td>';
 
 			// Get the user
 			if ( $row->apd_user != 0 ) {
 				$user = User::newFromId( $row->apd_user );
-				$link = $output->parse( '[[' . $user->getUserPage() . '|' . $user->getName() . ']]' );
+				$link = $output->parseAsInterface( '[[' . $user->getUserPage() . '|' . $user->getName() . ']]' );
 				$tableStr .= '<td>' . $link . '</td>';
 			} else {
 				$tableStr .= '<td>' . wfMessage( 'athena-anon' ) . '</td>';
@@ -201,7 +201,7 @@ class SpecialAthena extends SpecialPage
 				}
 			}
 
-			$link = $output->parse( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-id' ) . '/' . $row->al_id . '|' . wfMessage( 'athena-log-view' ) . ']]' );
+			$link = $output->parseAsInterface( '[[{{NAMESPACE}}:' . wfMessage( 'athena-title' ) . '/' . wfMessage( 'athena-id' ) . '/' . $row->al_id . '|' . wfMessage( 'athena-log-view' ) . ']]' );
 			$tableStr .= '<td>' . $link . '</td>';
 
 			$tableStr .= '</tr>';
@@ -243,13 +243,13 @@ class SpecialAthena extends SpecialPage
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-title' ) . '</td>';
 			// Make a pretty title
 			$title = Title::newFromText( stripslashes( $res->apd_title ), $res->apd_namespace );
-			$tableStr .= '<td>' . $output->parse( '[[:' . $title->getFullText() . ']]' ) . '</td></tr>';
+			$tableStr .= '<td>' . $output->parseAsInterface( '[[:' . $title->getFullText() . ']]' ) . '</td></tr>';
 
 			// Get the user
 			$tableStr .= '<tr><td>' . wfMessage( 'athena-view-user' ) . '</td>';
 			if ( $res->apd_user != 0 ) {
 				$user = User::newFromId( $res->apd_user );
-				$link = $output->parse( '[[' . $user->getUserPage() . '|' . $user->getName() . ']]' );
+				$link = $output->parseAsInterface( '[[' . $user->getUserPage() . '|' . $user->getName() . ']]' );
 				$tableStr .= '<td>' . $link . '</td>';
 			} else {
 				$tableStr .= '<td>' . wfMessage( 'athena-anon' ) . '</td>';
