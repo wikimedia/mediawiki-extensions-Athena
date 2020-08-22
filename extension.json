@@ -29,10 +29,10 @@
 		"AthenaHelper": "AthenaHelper.php",
 		"SpecialAthena": "Athena_body.php"
 	},
+	"callback": "AthenaHooks::registerExtension",
 	"Hooks": {
 		"EditFilter": "AthenaHooks::editFilter",
 		"LoadExtensionSchemaUpdates": "AthenaHooks::createTables",
-		"PageContentSaveComplete": "AthenaHooks::successfulEdit",
 		"ArticleDeleteComplete": "AthenaHooks::pageDeleted"
 	},
 	"config": {
