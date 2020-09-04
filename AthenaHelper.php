@@ -34,14 +34,10 @@ class AthenaHelper
 
 		$detailsArray['al_id'] = $id;
 
-		try {
-			$dbw->insert( 'athena_page_details', $detailsArray );
-			if ( !$wgAthenaTraining ) {
-				$calcArray['al_id'] = $id;
-				$dbw->insert( 'athena_calculations', $calcArray );
-			}
-		} catch ( Exception $e ) {
-			print_r( $e );
+		$dbw->insert( 'athena_page_details', $detailsArray );
+		if ( !$wgAthenaTraining ) {
+			$calcArray['al_id'] = $id;
+			$dbw->insert( 'athena_calculations', $calcArray );
 		}
 	}
 
@@ -109,23 +105,13 @@ class AthenaHelper
 	 * @return array
 	 */
 	static function preparePageDetailsArray( $namespace, $title, $content, $comment, $user ) {
-		$dbw = wfGetDB( DB_MASTER );
-
-		$title = $dbw->strencode( $title );
-		$content = $dbw->strencode( $content );
-
 		$insertArray = array( 'apd_namespace' => $namespace, 'apd_title' => $title,
 			'apd_content' => $content, 'apd_user' => $user,
-			'page_id' => 'NULL', 'rev_id' => 'NULL' );
-
-		if ( $comment != '' ) {
-			$comment = $dbw->strencode( $comment );
-			$insertArray['apd_comment'] = $comment;
-		}
+			'page_id' => 0, 'rev_id' => 0, 'apd_comment' => $comment );
 
 		$language = AthenaHelper::getTextLanguage( $content );
 
-		$insertArray['apd_language'] = $dbw->strencode(Language::fetchLanguageName($language));
+		$insertArray['apd_language'] = Language::fetchLanguageName($language);
 
 		return $insertArray;
 	}
@@ -772,7 +758,7 @@ class AthenaHelper
 	 */
 	static function updateStats( $array, $title ) {
 		global $wgAthenaTraining;
-		$dbw = wfGetDB( DB_REPLICA );
+		$dbw = wfGetDB( DB_MASTER );
 
 		// TODO not the best way but get me incrementing with the better way and I'll use it
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages'";
@@ -1055,7 +1041,7 @@ class AthenaHelper
 	 * @param $training bool are we in training mode?
 	 */
 	static function updateStatsDeleted( $res, $training ) {
-		$dbw = wfGetDB( DB_REPLICA );
+		$dbw = wfGetDB( DB_MASTER );
 
 		// Start by reducing the number of not spam
 		if( !$training ) {
@@ -1187,7 +1173,7 @@ class AthenaHelper
 	 * @param $training bool are we in training mode?
 	 */
 	static function updateStatsCreated( $res, $training ) {
-		$dbw = wfGetDB( DB_REPLICA );
+		$dbw = wfGetDB( DB_MASTER );
 
 		// Start by increasing the number of not spam
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";

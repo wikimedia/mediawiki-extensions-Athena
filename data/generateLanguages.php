@@ -21,7 +21,7 @@ class generateLanguages extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_REPLICA );
+        $dbw = wfGetDB( DB_MASTER );
 
         // Get all Athena logs
         $res = $dbw->select(
