@@ -11,7 +11,7 @@ class ReinforceData extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_REPLICA );
+        $dbr = wfGetDB( DB_REPLICA );
 
         $array = array();
         
@@ -32,7 +32,7 @@ class ReinforceData extends Maintenance {
 
         
         
-        $res = $dbw->select(
+        $res = $dbr->select(
             array( 'athena_log' ),
             array( 'athena_log.al_id', 'al_success' ),
             array(  ),

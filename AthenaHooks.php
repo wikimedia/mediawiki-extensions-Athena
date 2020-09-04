@@ -59,17 +59,16 @@ class AthenaHooks
 	}
 
 	/**
-	 * Updates the database with the new Athena tabled
+	 * Updates the database with the new Athena table
 	 * Called when the update.php maintenance script is run.
 	 *
-	 * TODO Auto-fill data
-	 * @param $updater DatabaseUpdater
-	 * @return bool
+	 * @param DatabaseUpdater
 	 */
-	static function createTables( $updater ) {
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_logs.sql', true ) );
-
-		return true;
+	static function createTables( DatabaseUpdater $updater ) {
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_log.sql', true ) );
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_calculations', __DIR__ . '/sql/athena_calculations.sql', true ) );
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_page_details', __DIR__ . '/sql/athena_page_details.sql', true ) );
+		$updater->addExtensionUpdate( array( 'addTable', 'athena_stats', __DIR__ . '/sql/athena_stats.sql', true ) );
 	}
 
 	/**
@@ -116,8 +115,8 @@ class AthenaHooks
 			$dbw->update( 'athena_page_details',
 				array( 'page_id' => $page_id, 'rev_id' => $rev_id ),
 				array( 'al_id' => $id ),
-				__METHOD__,
-				null );
+				__METHOD__
+			);
 
 			return true;
 		}
@@ -141,7 +140,7 @@ class AthenaHooks
 		/*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
 		//echo($pos);
 		if ( $pos !== false ) {
-			$dbw = wfGetDB( DB_REPLICA );
+			$dbw = wfGetDB( DB_MASTER );
 
 			// Search Athena logs for the page id
 			$res = $dbw->selectRow(
