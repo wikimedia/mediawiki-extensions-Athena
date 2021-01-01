@@ -11,6 +11,19 @@ class AthenaHooks
 {
 
 	/**
+	 * Register hooks depending on version
+	 */
+	public static function registerExtension() {
+		global $wgHooks;
+		if ( class_exists( MediaWiki\HookContainer\HookContainer::class ) ) {
+			// MW 1.35+
+			$wgHooks['PageSaveComplete'][] = 'AthenaHooks::successfulEdit';
+		} else {
+			$wgHooks['PageContentSaveComplete'][] = 'AthenaHooks::successfulEdit';
+		}
+	}
+
+	/**
 	 * Called when the edit is about to be saved
 	 *
 	 * @param $editPage EditPage
@@ -79,12 +92,11 @@ class AthenaHooks
 	 * @return boolean
 	 */
 	static function successfulEdit(
-		WikiPage $wikiPage, $user, $content, $summary, $isMinor, $isWatch, $section,
-								   $flags, $revision, $status, $baseRevId ) {
+		WikiPage $wikiPage, $user ) {
 		$dbw = wfGetDB( DB_MASTER );
 
 		$page_id = $wikiPage->getId();
-		$rev_id = $wikiPage->getRevision()->getId();
+		$rev_id = $wikiPage->getRevisionRecord()->getId();
 
 		$title = $dbw->strencode( $wikiPage->getTitle()->getText() );
 
