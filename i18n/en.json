@@ -15,7 +15,7 @@
 	"athena-log-id": "ID",
 	"athena-log-view": "View",
 	"athena-not-blocked": "Not blocked",
-	"athena-pagetext":"Select what Athena logs you want to view below.",
+	"athena-pagetext": "Select what Athena logs you want to view below.",
 	"athena-pagetext-0": "Showing all pages Athena has encountered.",
 	"athena-pagetext-1": "Showing all pages Athena has blocked.",
 	"athena-pagetext-2": "Showing all pages Athena has not blocked.",

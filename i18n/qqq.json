@@ -15,7 +15,7 @@
 	"athena-log-id": "ID",
 	"athena-log-view": "View",
 	"athena-not-blocked": "Not blocked",
-	"athena-pagetext":"Text for Special:Athena page.",
+	"athena-pagetext": "Text for Special:Athena page.",
 	"athena-pagetext-0": "Link text for all Athena logs.",
 	"athena-pagetext-1": "Link text for all blocked pages in the Athena logs.",
 	"athena-pagetext-2": "Link text for all not blocked pages in the Athena logs.",
