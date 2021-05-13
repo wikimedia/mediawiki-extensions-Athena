@@ -651,7 +651,7 @@ class SpecialAthena extends SpecialPage
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$res = $dbw->selectRow( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
@@ -736,7 +736,7 @@ class SpecialAthena extends SpecialPage
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-reinforce-title', $id ) );
 
 		if ( $wgAthenaTraining ) {
-			$dbw = wfGetDB( DB_MASTER );
+			$dbw = wfGetDB( DB_PRIMARY );
 			$res = $dbw->selectRow( 
 				array( 'athena_log', 'athena_page_details' ),
 				array( 'athena_log.al_id', 'al_value', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),
@@ -800,7 +800,7 @@ class SpecialAthena extends SpecialPage
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-delete-title', $id ) );
 
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$res = $dbw->selectRow( 
 			array( 'athena_log', 'athena_page_details' ),
 			array( 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ),

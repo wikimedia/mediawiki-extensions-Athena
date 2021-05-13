@@ -20,7 +20,7 @@ class fixUserAge extends Maintenance {
 	}
 
 	public function execute() {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 
 		// Get all Athena logs
 		$res = $dbw->select(

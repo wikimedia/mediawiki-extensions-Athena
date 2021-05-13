@@ -21,7 +21,7 @@ class generateSyntaxes extends Maintenance {
     }
 
     public function execute() {
-        $dbw = wfGetDB( DB_MASTER );
+    	$dbw = wfGetDB( DB_PRIMARY );
 
         $res = $dbw->select(
             array( 'athena_log', 'athena_page_details' ),
