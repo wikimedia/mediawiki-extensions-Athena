@@ -20,10 +20,16 @@ class SpecialAthena extends SpecialPage {
 	const TRAINING = 3;
 
 	/**
-	 * Constructor
+	 * @var NamespaceInfo
 	 */
-	function __construct() {
+	private $namespaceInfo;
+
+	/**
+	 * @param NamespaceInfo $namespaceInfo
+	 */
+	function __construct( NamespaceInfo $namespaceInfo ) {
 		parent::__construct( 'Athena', 'athena', true );
+		$this->namespaceInfo = $namespaceInfo;
 	}
 
 	/**
@@ -460,7 +466,7 @@ class SpecialAthena extends SpecialPage {
 
 				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
-				$namespace = MWNamespace::getCanonicalName( $title->getNamespace() );
+				$namespace = $this->namespaceInfo->getCanonicalName( $title->getNamespace() );
 				// Main will return an empty string
 				if ( $namespace === '' ) {
 					$namespace = wfMessage( 'athena-view-namespace-0' );
@@ -574,7 +580,7 @@ class SpecialAthena extends SpecialPage {
 
 				$tableStr .= "<td>$p</td><td>$a</td><td>$g</td><td>$gr</td></tr>";
 
-				$namespace = MWNamespace::getCanonicalName( $title->getNamespace() );
+				$namespace = $this->namespaceInfo->getCanonicalName( $title->getNamespace() );
 				// Main will return an empty string
 				if ( $namespace === '' ) {
 					$namespace = wfMessage( 'athena-view-namespace-0' );
@@ -625,7 +631,7 @@ class SpecialAthena extends SpecialPage {
 				$titleLength = strlen( $title->getText() );
 				$tableStr .= '<tr><td>' . wfMessage( 'athena-view-title-length' ) . '</td><td>' . $titleLength . '</td></tr>';
 
-				$namespace = MWNamespace::getCanonicalName( $title->getNamespace() );
+				$namespace = $this->namespaceInfo->getCanonicalName( $title->getNamespace() );
 				// Main will return an empty string
 				if ( $namespace === '' ) {
 					$namespace = wfMessage( 'athena-view-namespace-0' );

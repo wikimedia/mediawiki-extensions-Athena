@@ -13,7 +13,12 @@
 		"MediaWiki": ">= 1.36.0"
 	},
 	"SpecialPages": {
-		"Athena": "SpecialAthena"
+		"Athena": {
+			"class": "SpecialAthena",
+			"services": [
+				"NamespaceInfo"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"Athena": [
