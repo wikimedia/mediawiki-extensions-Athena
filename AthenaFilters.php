@@ -112,7 +112,7 @@ class AthenaFilters {
 
 		$charCountNoLinks = strlen( $textNoLinks );
 
-		return 1 - ($charCountNoLinks / $charCount);
+		return 1 - ( $charCountNoLinks / $charCount );
 	}
 
 	/**
@@ -121,11 +121,10 @@ class AthenaFilters {
 	 * 3 is broken spam bot
 	 *
 	 * @param $text string
-	 * @return integer 0|1|2|3
+	 * @return int 0|1|2|3
 	 */
 	public static function syntaxType( $text ) {
-
-		if ( AthenaFilters::brokenSpamBot( $text ) ) {
+		if ( self::brokenSpamBot( $text ) ) {
 			return 3;
 		} else {
 			// Start with headings
@@ -142,14 +141,14 @@ class AthenaFilters {
 			// Tables
 			$count += preg_match_all( "/\{\|([^\{\|\}])+\|\}/", $text );
 			// Templates
-			$count += preg_match_all("/\{\{([^\{\}])+\}\}/", $text);
+			$count += preg_match_all( "/\{\{([^\{\}])+\}\}/", $text );
 			if ( $count > 1 ) {
 				return 2;
 			} else {
 				// Basic wiki syntax (bold, brs, links)
 				$count = 0;
 				// Links
-				$count += AthenaFilters::numberOfLinks( $text );
+				$count += self::numberOfLinks( $text );
 				// Line breaks
 				$count += preg_match_all( "/<br\/>|<br>/", $text );
 				// Bold
@@ -214,10 +213,11 @@ class AthenaFilters {
 		$count += preg_match_all( "/#file_links<>/", $text );
 
 		// Let's be reasonable, for now
-		if ( $count > 1 )
+		if ( $count > 1 ) {
 			return true;
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -250,9 +250,9 @@ class AthenaFilters {
 		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select(
 			'pagelinks',
-			array( 'count' => 'COUNT(*)' ),
-			array( 'pl_title' => $title->getDBkey(),
-				  'pl_namespace' => $title->getNamespace() ),
+			[ 'count' => 'COUNT(*)' ],
+			[ 'pl_title' => $title->getDBkey(),
+				  'pl_namespace' => $title->getNamespace() ],
 			__METHOD__,
 			null
 		);
@@ -264,8 +264,9 @@ class AthenaFilters {
 			break;
 		}
 
-		if ( $count > 0 )
+		if ( $count > 0 ) {
 			return true;
+		}
 		return false;
 	}
 
@@ -279,9 +280,9 @@ class AthenaFilters {
 		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select(
 			'archive',
-			array( 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ),
-			array( 'ar_title' => $title->getDBkey(),
-				'ar_namespace' => $title->getNamespace() ),
+			[ 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ],
+			[ 'ar_title' => $title->getDBkey(),
+				'ar_namespace' => $title->getNamespace() ],
 			null,
 			__METHOD__,
 			null
@@ -294,8 +295,9 @@ class AthenaFilters {
 			break;
 		}
 
-		if ( $count > 0 )
+		if ( $count > 0 ) {
 			return true;
+		}
 
 		return false;
 	}

@@ -17,9 +17,9 @@
  * $IP/extensions/Athena and we don't need to move this file to
  * $IP/maintenance/.
  */
-ini_set( 'include_path', dirname( __FILE__ ) . '/../../../maintenance' );
+ini_set( 'include_path', __DIR__ . '/../../../maintenance' );
 
-require_once( 'Maintenance.php' );
+require_once 'Maintenance.php';
 
 class Polymatheia extends Maintenance {
 	public function __construct() {
@@ -35,59 +35,57 @@ class Polymatheia extends Maintenance {
 
 		// For users
 		$res = $dbr->select(
-			array( 'revision', 'page', 'text', 'user' ),
-			array( 'page_namespace', 'page_title', 'rev_comment', 'old_text', 'rev_timestamp', 'user_registration' ),
-			array( 'rev_parent_id=0', 'rev_user != 0' ),
+			[ 'revision', 'page', 'text', 'user' ],
+			[ 'page_namespace', 'page_title', 'rev_comment', 'old_text', 'rev_timestamp', 'user_registration' ],
+			[ 'rev_parent_id=0', 'rev_user != 0' ],
 			__METHOD__,
-			array(),
-			array( 'page' => array( 'INNER JOIN', array(
-					'rev_page=page_id' ) ),
-					'text' => array( 'INNER JOIN', array(
-					'rev_text_id=old_id' ) ),
-					'user' => array( 'INNER JOIN', array(
-					'rev_user=user_id' ) ) )
+			[],
+			[ 'page' => [ 'INNER JOIN', [
+					'rev_page=page_id' ] ],
+					'text' => [ 'INNER JOIN', [
+					'rev_text_id=old_id' ] ],
+					'user' => [ 'INNER JOIN', [
+					'rev_user=user_id' ] ] ]
 		);
 
-		$output = array();
+		$output = [];
 		foreach ( $res as $row ) {
-			$output[] = array( 'namespace' => $row->page_namespace,
+			$output[] = [ 'namespace' => $row->page_namespace,
 								'title' => $row->page_title,
 								'comment' => $row->rev_comment,
 								'content' => $row->old_text,
 								'timestamp' => $row->rev_timestamp,
 								'user-timestamp' => $row->user_registration,
-								'lang' => $wgLanguageCode );
+								'lang' => $wgLanguageCode ];
 		}
 
 		// For anons
 		$res = $dbr->select(
-			array( 'revision', 'page', 'text' ),
-			array( 'page_namespace', 'page_title', 'rev_comment', 'old_text', 'rev_timestamp' ),
-			array( 'rev_parent_id=0', 'rev_user = 0' ),
+			[ 'revision', 'page', 'text' ],
+			[ 'page_namespace', 'page_title', 'rev_comment', 'old_text', 'rev_timestamp' ],
+			[ 'rev_parent_id=0', 'rev_user = 0' ],
 			__METHOD__,
-			array(),
-			array( 'page' => array( 'INNER JOIN', array(
-					'rev_page=page_id' ) ),
-					'text' => array( 'INNER JOIN', array(
-					'rev_text_id=old_id' ) ) )
+			[],
+			[ 'page' => [ 'INNER JOIN', [
+					'rev_page=page_id' ] ],
+					'text' => [ 'INNER JOIN', [
+					'rev_text_id=old_id' ] ] ]
 		);
 
 		foreach ( $res as $row ) {
-				$output[] = array( 'namespace' => $row->page_namespace,
+				$output[] = [ 'namespace' => $row->page_namespace,
 								'title' => $row->page_title,
 								'comment' => $row->rev_comment,
 								'content' => $row->old_text,
 								'timestamp' => $row->rev_timestamp,
 								'user-timestamp' => 0,
-								'lang' => $wgLanguageCode );
+								'lang' => $wgLanguageCode ];
 		}
 		$outputStr = json_encode( $output );
 
 		$this->output( $outputStr );
-
-
 	}
 }
 
 $maintClass = 'Polymatheia';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

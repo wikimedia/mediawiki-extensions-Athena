@@ -7,8 +7,7 @@
  * @copyright ©2016 Richard Cook
  * @license GNU General Public License v3.0
  */
-class AthenaHooks
-{
+class AthenaHooks {
 
 	/**
 	 * Register hooks depending on version
@@ -29,7 +28,7 @@ class AthenaHooks
 	 * @param $editPage EditPage
 	 * @param $text string
 	 * @param $section string
-	 * @param $error string
+	 * @param &$error string
 	 * @param $summary string
 	 * @return bool
 	 */
@@ -43,7 +42,7 @@ class AthenaHooks
 			$redirect = preg_match_all( "/^#REDIRECT(\s)?\[\[([^\[\]])+\]\]$/", $text );
 			if ( $redirect !== 1 ) {
 				$prob = AthenaHelper::calculateAthenaValue( $editPage, $text, $summary );
-				
+
 				// This version of Bayes is based around it being greater than 0 or not
 				//if ( !$wgAthenaTraining && $prob > $wgAthenaSpamThreshold ) {
 				if ( !$wgAthenaTraining && $prob > 0 ) {
@@ -65,10 +64,10 @@ class AthenaHooks
 	 * @param DatabaseUpdater
 	 */
 	static function createTables( DatabaseUpdater $updater ) {
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_log', __DIR__ . '/sql/athena_log.sql', true ) );
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_calculations', __DIR__ . '/sql/athena_calculations.sql', true ) );
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_page_details', __DIR__ . '/sql/athena_page_details.sql', true ) );
-		$updater->addExtensionUpdate( array( 'addTable', 'athena_stats', __DIR__ . '/sql/athena_stats.sql', true ) );
+		$updater->addExtensionUpdate( [ 'addTable', 'athena_log', __DIR__ . '/sql/athena_log.sql', true ] );
+		$updater->addExtensionUpdate( [ 'addTable', 'athena_calculations', __DIR__ . '/sql/athena_calculations.sql', true ] );
+		$updater->addExtensionUpdate( [ 'addTable', 'athena_page_details', __DIR__ . '/sql/athena_page_details.sql', true ] );
+		$updater->addExtensionUpdate( [ 'addTable', 'athena_stats', __DIR__ . '/sql/athena_stats.sql', true ] );
 	}
 
 	/**
@@ -89,7 +88,7 @@ class AthenaHooks
 	 * @param $status Status
 	 * @param $baseRevId integer
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	static function successfulEdit(
 		WikiPage $wikiPage, $user ) {
@@ -113,8 +112,8 @@ class AthenaHooks
 			$id = $row->al_id;
 
 			$dbw->update( 'athena_page_details',
-				array( 'page_id' => $page_id, 'rev_id' => $rev_id ),
-				array( 'al_id' => $id ),
+				[ 'page_id' => $page_id, 'rev_id' => $rev_id ],
+				[ 'al_id' => $id ],
 				__METHOD__
 			);
 
@@ -129,8 +128,8 @@ class AthenaHooks
 	 *
 	 * Hooks into the delete action, so we can track if Athena logged pages have been deleted
 	 *
-	 * @param $article Article
-	 * @param $user User
+	 * @param &$article Article
+	 * @param &$user User
 	 * @param $reason string
 	 * @param $id int
 	 * @param null $content Content

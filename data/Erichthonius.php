@@ -17,9 +17,9 @@
  * $IP/extensions/Athena and we don't need to move this file to
  * $IP/maintenance/.
  */
-ini_set( 'include_path', dirname( __FILE__ ) . '/../../../maintenance' );
+ini_set( 'include_path', __DIR__ . '/../../../maintenance' );
 
-require_once( 'Maintenance.php' );
+require_once 'Maintenance.php';
 
 class Erichthonius extends Maintenance {
 
@@ -59,15 +59,16 @@ class Erichthonius extends Maintenance {
 				// Can't use edit.php as it doesn't let you specify anon
 				//$title = urlencode(/*Erichthonius::getNamespace($page['namespace']) . */$page['title']);
 				$title = $page['title'];
-				echo("Page #" . $count . ": " . $title);
-				echo("\n\n");
+				echo( "Page #" . $count . ": " . $title );
+				echo( "\n\n" );
 
 				$apiCall = 'action=edit&format=json&title=' .
 					$title
-					. '&text=' . urlencode($page['content']);
+					. '&text=' . urlencode( $page['content'] );
 
-				if ( !empty( $page['comment'] ) )
-					$apiCall .= '&summary=' . urlencode($page['comment']);
+				if ( !empty( $page['comment'] ) ) {
+					$apiCall .= '&summary=' . urlencode( $page['comment'] );
+				}
 
 				// Using CURL as need sessions, which file_get_contents can't provide
 				$ch = curl_init();
@@ -80,22 +81,22 @@ class Erichthonius extends Maintenance {
 
 				// User time
 				if ( $page['user-timestamp'] === 0 ) {
-					$apiCall .= '&token=' . urlencode('+\\');
+					$apiCall .= '&token=' . urlencode( '+\\' );
 				} else {
 					// Cookies for the login
 					// Calculate how old the account was when it was created
 					$pagetimestamp = wfTimestamp( TS_UNIX, $page['timestamp'] );
 					$usertimestamp = wfTimestamp( TS_UNIX, $page['user-timestamp'] );
 					$age = $pagetimestamp - $usertimestamp;
-					$cookieString = Erichthonius::createUser( $age );
+					$cookieString = self::createUser( $age );
 					curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
 
 					// Get an edit token
-					$token = Erichthonius::getEditToken( $cookieString );
+					$token = self::getEditToken( $cookieString );
 					$apiCall .= '&token=' . urlencode( $token );
 				}
 
-				Erichthonius::existsCheck( $title );
+				self::existsCheck( $title );
 
 				curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 
@@ -108,7 +109,7 @@ class Erichthonius extends Maintenance {
 
 				$count++;
 				echo( $count . " pages completed.\n ------------------------------------------------------------------------\n\n" );
-			    file_put_contents( "output.txt", "\nPage #$count - $title\n", FILE_APPEND );
+				file_put_contents( "output.txt", "\nPage #$count - $title\n", FILE_APPEND );
 				file_put_contents( "output.txt", $response, FILE_APPEND );
 
 				/* if ( $count === 100 )
@@ -169,10 +170,10 @@ class Erichthonius extends Maintenance {
 	}
 
 	 /**
-	 * Creates a new user. Returns their session cookies
-	 * @param $age int
-	 * @return string
-	 */
+	  * Creates a new user. Returns their session cookies
+	  * @param $age int
+	  * @return string
+	  */
 	public static function createUser( $age ) {
 		global $session_name, $url;
 		// Let's create a new user
@@ -201,7 +202,7 @@ class Erichthonius extends Maintenance {
 
 		// From http://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
 		preg_match_all( '/^Set-Cookie:\s*([^;]*)/mi', $response, $matches );
-		$cookies = array();
+		$cookies = [];
 		foreach ( $matches[1] as $item ) {
 			parse_str( $item, $cookie );
 			$cookies = array_merge( $cookies, $cookie );
@@ -236,7 +237,7 @@ class Erichthonius extends Maintenance {
 		$newTime = wfTimestamp( TS_MW, $newTime );
 
 		$dbr = wfGetDB( DB_REPLICA );
-		$dbr->update( 'user', array( 'user_registration' => $newTime ), array( 'user_id' => $json['createaccount']['userid'] ) );
+		$dbr->update( 'user', [ 'user_registration' => $newTime ], [ 'user_id' => $json['createaccount']['userid'] ] );
 
 		echo( "User register timestamp altered\n\n" );
 		// START LOGIN
@@ -247,7 +248,6 @@ class Erichthonius extends Maintenance {
 		$response = curl_exec( $ch );
 		echo( $response );
 		echo( "\n\n" );
-
 
 		$json = json_decode( $response, true );
 		// print_r($json);
@@ -271,6 +271,7 @@ class Erichthonius extends Maintenance {
 
 		return $cookieString;
 	}
+
 	/**
 	 * Gets an edit token for a user
 	 *
@@ -294,7 +295,6 @@ class Erichthonius extends Maintenance {
 		echo( $response );
 		echo( "\n\n" );
 
-
 		$json = json_decode( $response, true );
 	   // print_r($json);
 
@@ -316,14 +316,10 @@ class Erichthonius extends Maintenance {
 		$response = file_get_contents( $urlCall );
 		$json = json_decode( $response, true );
 
-
-
-
 		// -1 means it doesn't exist
 		if ( array_key_exists( '-1', $json['query']['pages'] ) ) {
 			return;
-		}
-		else {
+		} else {
 			echo( "Page exists - deleting it \n\n" );
 
 			$ch = curl_init();
@@ -336,10 +332,9 @@ class Erichthonius extends Maintenance {
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 			$response = curl_exec( $ch );
 
-
 			// From http://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
 			preg_match_all( '/^Set-Cookie:\s*([^;]*)/mi', $response, $matches );
-			$cookies = array();
+			$cookies = [];
 			foreach ( $matches[1] as $item ) {
 				parse_str( $item, $cookie );
 				$cookies = array_merge( $cookies, $cookie );
@@ -355,7 +350,7 @@ class Erichthonius extends Maintenance {
 			$json = json_decode( $body, true );
 			$apiCall .= '&lgtoken=' . $json['login']['token'];
 
-			//print_r($apiCall);
+			// print_r($apiCall);
 
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
 			curl_setopt( $ch, CURLOPT_HEADER, 0 );
@@ -363,7 +358,7 @@ class Erichthonius extends Maintenance {
 			$response = curl_exec( $ch );
 			$json = json_decode( $response, true );
 
-			//print_r( $json );
+			// print_r( $json );
 
 			$cookieString = $json['login']['cookieprefix'] . '_session=' . $json['login']['sessionid'] . ';' .
 				$json['login']['cookieprefix'] . 'UserName=' . $json['login']['lgusername'] . ';' .
@@ -372,7 +367,7 @@ class Erichthonius extends Maintenance {
 			// echo($cookieString);
 			// Delete time
 			// We need a token
-			$token = Erichthonius::getEditToken( $cookieString );
+			$token = self::getEditToken( $cookieString );
 			$apiCall = 'action=delete&format=json&title=' . $title . '&token=' . urlencode( $token );
 			curl_setopt( $ch, CURLOPT_COOKIE, $cookieString );
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $apiCall );
@@ -387,4 +382,4 @@ class Erichthonius extends Maintenance {
 }
 
 $maintClass = 'Erichthonius';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;
