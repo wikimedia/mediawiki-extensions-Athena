@@ -6,7 +6,7 @@
  * @file
  * @author Richard Cook
  * @copyright ©2016 Richard Cook
- * @license GNU General Public License v3.0
+ * @license GPL-3.0-only
  */
 
 class AthenaHelper {

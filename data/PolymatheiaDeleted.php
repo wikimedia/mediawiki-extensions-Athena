@@ -21,7 +21,7 @@ ini_set( 'include_path', __DIR__ . '/../../../maintenance' );
 
 require_once 'Maintenance.php';
 
-class Polymatheia extends Maintenance {
+class PolymatheiaDeleted extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->requireExtension( 'Athena' );
@@ -81,5 +81,5 @@ class Polymatheia extends Maintenance {
 	}
 }
 
-$maintClass = 'Polymatheia';
+$maintClass = 'PolymatheiaDeleted';
 require_once RUN_MAINTENANCE_IF_MAIN;

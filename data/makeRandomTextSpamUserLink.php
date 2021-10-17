@@ -2,6 +2,7 @@
 	$count = 0;
 	$output = [];
 
+	// phpcs:disable Generic.Files.LineLength
 	$names = [ 'Shari', 'Bree', 'Bette', 'Catalina', 'Timmy', 'Oscar', 'Steve Fischer', 'Gloria', 'Francesca', 'Glen Taverner', 'Brady Wharton', 'Tamie Turriff', 'Richard', 'Ellie', 'Frank Sinatra', 'Muhammad', 'Polly Pearson', 'Uscar', 'Mckenzie', 'Angus' ];
 	$date = [ '10 December 1984', '20 November 1999', '12 January 1987', '1 March 1977', '6 April 1976',
 			'15 October 2000', '4 April 1965', '28 Feburary 1968', 'May 30 1986', 'June 7, 1937',
@@ -11,6 +12,7 @@
 			'http://www.ukjayseo.com/seo-services-usa/ visit the following site', 'https://aol.loginreminder.org/ aol.loginreminder.org', 'https://aol.loginreminder.org/ my aol mail login', 'https://www.youtube.com/watch?v=JYBj2iD35mY ketosis weight loss', 'http://Ccmixter.org/api/query?datasource=uploads&search_type=all&sort=rank&search=wrinkles%20aren%27t&lic=by,sa,s,splus,pd,zero wrinkles aren',
 			'http://clammyhangover703.soup.io/tag/twarzy kolagen na oczy', 'http://culossalidos.com/tagculo/videos-porno-de-cumlouder-gratis homepage', 'http://Culossalidos.com/tagculo/cumlouder-com webpage', 'http://leesa-shapiro.webnode.com/ Leesa Shapiro', 'http://search.huffingtonpost.com/search?q=misspell&s_it=header_form_v1 misspell',
 			'http://www.youtube.com/watch?v=eHQgcDNbymc http://www.youtube.com/watch?v=eHQgcDNbymc','http://www.ashifajati.com/ mebel jepara antik', 'http://injusticegodsamongushack14.wordpress.com injustice gods among us cheats', 'http://www.google.com/search?q=cellulite&btnI=lucky cellulite', 'http://indonesianeconomicnews.blogspot.com yuan penting' ];
+	// phpcs:enable
 
 	for ( $count = 0; $count < 125; $count++ ) {
 		$title = substr( substr( str_shuffle( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" ), 0, 1 ) . substr( md5( time() ), 1 ), rand( 10, 20 ) );

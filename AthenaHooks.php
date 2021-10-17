@@ -5,7 +5,7 @@
  * @file
  * @author Richard Cook
  * @copyright ©2016 Richard Cook
- * @license GNU General Public License v3.0
+ * @license GPL-3.0-only
  */
 class AthenaHooks {
 
@@ -61,7 +61,7 @@ class AthenaHooks {
 	 * Updates the database with the new Athena table
 	 * Called when the update.php maintenance script is run.
 	 *
-	 * @param DatabaseUpdater
+	 * @param DatabaseUpdater $updater
 	 */
 	static function createTables( DatabaseUpdater $updater ) {
 		$updater->addExtensionUpdate( [ 'addTable', 'athena_log', __DIR__ . '/sql/athena_log.sql', true ] );
@@ -78,16 +78,6 @@ class AthenaHooks {
 	 *
 	 * @param WikiPage $wikiPage
 	 * @param $user User
-	 * @param $content Content
-	 * @param $summary string
-	 * @param $isMinor boolean
-	 * @param $isWatch boolean
-	 * @param $section Deprecated
-	 * @param $flags integer
-	 * @param $revision {Revision|null}
-	 * @param $status Status
-	 * @param $baseRevId integer
-	 *
 	 * @return bool
 	 */
 	static function successfulEdit(

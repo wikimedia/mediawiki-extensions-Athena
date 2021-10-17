@@ -9,7 +9,7 @@
  * @ingroup Maintenance
  * @author Richard Cook <cook879@shoutwiki.com>
  * @date 28 November 2015
- * @license GNU General Public License v3.0
+ * @license GPL-3.0-only
  */
 
 /**

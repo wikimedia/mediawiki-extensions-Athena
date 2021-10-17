@@ -1,5 +1,5 @@
 <?php
- /**
+ /*
 	$file = file_get_contents("page_data/wikipedia.json");
 	$output = json_decode($file);
 
