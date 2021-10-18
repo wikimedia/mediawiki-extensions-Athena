@@ -14,10 +14,10 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Class constants for types of log viewing
 	 */
-	const ALL = 0;
-	const SPAM = 1;
-	const NOTSPAM = 2;
-	const TRAINING = 3;
+	private const ALL = 0;
+	private const SPAM = 1;
+	private const NOTSPAM = 2;
+	private const TRAINING = 3;
 
 	/**
 	 * @var NamespaceInfo
@@ -35,7 +35,7 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Main execution function
 	 *
-	 * @param $par array Parameters passed to the page
+	 * @param array $par Parameters passed to the page
 	 */
 	function execute( $par ) {
 		// Check user has the rights to access this page
@@ -50,13 +50,13 @@ class SpecialAthena extends SpecialPage {
 
 		if ( count( $parts ) === 1 ) {
 			if ( $parts[0] == wfMessage( 'athena-type-0' ) ) {
-				$this->showAthenaLogs( $this::ALL );
+				$this->showAthenaLogs( self::ALL );
 			} elseif ( $parts[0] == wfMessage( 'athena-type-1' ) ) {
-				$this->showAthenaLogs( $this::SPAM );
+				$this->showAthenaLogs( self::SPAM );
 			} elseif ( $parts[0] == wfMessage( 'athena-type-2' ) ) {
-				$this->showAthenaLogs( $this::NOTSPAM );
+				$this->showAthenaLogs( self::NOTSPAM );
 			} elseif ( $parts[0] == wfMessage( 'athena-type-3' ) ) {
-				$this->showAthenaLogs( $this::TRAINING );
+				$this->showAthenaLogs( self::TRAINING );
 			} else {
 				$this->showAthenaHome();
 			}
@@ -98,7 +98,7 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Shows the Athena logs of the given type
 	 *
-	 * @param $type integer the log type the user wants to see
+	 * @param int $type the log type the user wants to see
 	 */
 	public function showAthenaLogs( $type ) {
 		$output = $this->getOutput();
@@ -108,13 +108,13 @@ class SpecialAthena extends SpecialPage {
 		$conds = '';
 		$showStatus = false;
 
-		if ( $type === $this::ALL ) {
+		if ( $type === self::ALL ) {
 			$output->addWikiMsg( 'athena-pagetext-0' );
 			$showStatus = true;
-		} elseif ( $type === $this::SPAM ) {
+		} elseif ( $type === self::SPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-1' );
 			$conds = 'al_success = 0';
-		} elseif ( $type === $this::NOTSPAM ) {
+		} elseif ( $type === self::NOTSPAM ) {
 			$output->addWikiMsg( 'athena-pagetext-2' );
 			$conds = 'al_success = 1';
 		} else {
@@ -137,7 +137,7 @@ class SpecialAthena extends SpecialPage {
 		$tableStr .= '<th>' . wfMessage( 'athena-view-user' ) . '</th>';
 		$tableStr .= '<th>' . wfMessage( 'athena-log-date' ) . '</th>';
 
-		if ( $type !== $this::TRAINING ) {
+		if ( $type !== self::TRAINING ) {
 			$tableStr .= '<th>' . wfMessage( 'athena-view-athena-value' ) . '</th>';
 		}
 
@@ -145,7 +145,7 @@ class SpecialAthena extends SpecialPage {
 			$tableStr .= '<th>' . wfMessage( 'athena-view-result' ) . '</th>';
 		}
 
-		// if ( $type === $this::TRAINING ) {
+		// if ( $type === self::TRAINING ) {
 		$tableStr .= '<th>' . wfMessage( 'athena-view-overridden' ) . '</th>';
 		// }
 
@@ -170,7 +170,7 @@ class SpecialAthena extends SpecialPage {
 			}
 			$tableStr .= '<td>' . $row->apd_timestamp . '</td>';
 
-			if ( $type !== $this::TRAINING ) {
+			if ( $type !== self::TRAINING ) {
 				if ( $row->al_success >= 2 ) {
 					$tableStr .= '<td>' . wfMessage( 'athena-not-available' ) . '</td>';
 				} else {
@@ -188,7 +188,7 @@ class SpecialAthena extends SpecialPage {
 				}
 			}
 
-			if ( $type === $this::TRAINING ) {
+			if ( $type === self::TRAINING ) {
 				if ( $row->al_overridden ) {
 					if ( $row->al_success == 4 ) {
 						$tableStr .= '<td>' . wfMessage( 'athena-yes-not-spam' ) . '</td>';
@@ -221,11 +221,9 @@ class SpecialAthena extends SpecialPage {
 	 * Shows the details for a given Athena ID
 	 * TODO add back buttons
 	 *
-	 * @param $id integer the id of the page they want to see
+	 * @param int $id the id of the page they want to see
 	 */
 	public function showAthenaPage( $id ) {
-		global $wgAthenaTraining;
-
 		$output = $this->getOutput();
 		$this->setHeaders();
 
@@ -313,7 +311,7 @@ class SpecialAthena extends SpecialPage {
 						'|' . wfMessage( 'athena-view-blocked-reinforce' ) . ']]' );
 				}
 			} else {
-				if ( $wgAthenaTraining ) {
+				if ( $this->getConfig()->get( 'AthenaTraining' ) ) {
 					if ( $res->al_overridden ) {
 						if ( $res->al_success == 3 ) {
 							$output->addWikiTextAsInterface( wfMessage( 'athena-view-training-reinforce-done-spam' ) );
@@ -648,8 +646,8 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Creates the page with the given Athena ID
 	 *
-	 * @param $id integer the id of the page they want to create
-	 * @param $confirmed boolean whether they have clicked confirm of not
+	 * @param int $id the id of the page they want to create
+	 * @param bool $confirmed whether they have clicked confirm of not
 	 */
 	public function createAthenaPage( $id, $confirmed ) {
 		$output = $this->getOutput();
@@ -730,18 +728,16 @@ class SpecialAthena extends SpecialPage {
 	/**
 	 * Reinforces an Athena training page
 	 *
-	 * @param $id integer
-	 * @param $spam boolean - whether its been marked for spam or not
+	 * @param int $id
+	 * @param bool $spam - whether its been marked for spam or not
 	 */
 	public function reinforceAthenaPage( $id, $spam ) {
-		global $wgAthenaTraining;
-
 		$output = $this->getOutput();
 		$this->setHeaders();
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-reinforce-title', $id ) );
 
-		if ( $wgAthenaTraining ) {
+		if ( $this->getConfig()->get( 'AthenaTraining' ) ) {
 			$dbw = wfGetDB( DB_PRIMARY );
 			$res = $dbw->selectRow(
 				[ 'athena_log', 'athena_page_details' ],
@@ -797,8 +793,8 @@ class SpecialAthena extends SpecialPage {
 	 *
 	 * Well that's technically a lie - really this is only used on pages that have already been deleted but not Athena reinforced
 	 *
-	 * @param $id integer the id of the page they want to delete
-	 * @param $confirmed boolean whether they have clicked confirm of not
+	 * @param int $id the id of the page they want to delete
+	 * @param bool $confirmed whether they have clicked confirm of not
 	 */
 	public function deleteAthenaPage( $id, $confirmed ) {
 		$output = $this->getOutput();

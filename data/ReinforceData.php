@@ -18,7 +18,10 @@ class ReinforceData extends Maintenance {
 		$script = "<html><head></head><body><script>window.onload = function() {";
 
 		// Get data from file
-		$file = fopen( "data.out", "r" ) or exit( "Unable to open file!" );
+		$file = fopen( 'data.out', 'r' );
+		if ( !$file ) {
+			exit( 'Unable to open file!' );
+		}
 		// Output a line of the file until the end is reached
 		while ( !feof( $file ) ) {
 			$data = ( explode( ", ", fgets( $file ) ) );

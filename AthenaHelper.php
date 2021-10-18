@@ -14,9 +14,9 @@ class AthenaHelper {
 	/**
 	 * Log information about the attempted page creation
 	 *
-	 * @param $logArray array
-	 * @param $detailsArray array
-	 * @param $calcArray array
+	 * @param array $logArray
+	 * @param array $detailsArray
+	 * @param array $calcArray
 	 */
 	static function logAttempt( $logArray, $detailsArray, $calcArray ) {
 		global $wgAthenaTraining;
@@ -43,18 +43,18 @@ class AthenaHelper {
 	/**
 	 * Prepare an array with the details we want to insert into the athena_log table
 	 *
-	 * @param $prob double
-	 * @param $userAge integer
-	 * @param $links integer
-	 * @param $linkPercentage double
-	 * @param $syntax double
-	 * @param $language boolean
-	 * @param $deleted boolean
-	 * @param $wanted boolean
+	 * @param double $prob
+	 * @param int $userAge
+	 * @param int $links
+	 * @param double $linkPercentage
+	 * @param double $syntax
+	 * @param bool $language
+	 * @param bool $deleted
+	 * @param bool $wanted
 	 * @return array
 	 */
 	static function prepareLogArray( $prob, $userAge, $links, $linkPercentage, $syntax, $language, $deleted, $wanted ) {
-		global $wgAthenaSpamThreshold, $wgAthenaTraining;
+		global $wgAthenaTraining;
 
 		if ( $deleted === false ) {
 			$deleted = 0;
@@ -96,11 +96,11 @@ class AthenaHelper {
 	/**
 	 * Prepare an array with the details we want to insert into the athena_page_details table
 	 *
-	 * @param $namespace int
-	 * @param $title string
-	 * @param $content string
-	 * @param $comment string
-	 * @param $user int
+	 * @param int $namespace
+	 * @param string $title
+	 * @param string $content
+	 * @param string $comment
+	 * @param int $user
 	 * @return array
 	 */
 	static function preparePageDetailsArray( $namespace, $title, $content, $comment, $user ) {
@@ -119,9 +119,9 @@ class AthenaHelper {
 	 * Calculates the Athena value
 	 * Calls all the filters, works out the probability of each contributing to the spam level, and combines them
 	 *
-	 * @param $editPage EditPage
-	 * @param $text string
-	 * @param $summary string
+	 * @param EditPage $editPage
+	 * @param string $text
+	 * @param string $summary
 	 * @return double
 	 */
 	static function calculateAthenaValue( $editPage, $text, $summary ) {
@@ -250,8 +250,8 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability of an article being spam
 	 *
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Spam( array $stats, array &$probabilityArray ) {
 		$spam = $stats['spam'] + 2;
@@ -274,9 +274,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the different language filter
 	 *
-	 * @param $diffLang bool
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param bool $diffLang
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Language( $diffLang, array $stats, array &$probabilityArray ) {
 		$var = 'difflang';
@@ -318,9 +318,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the deleted filter
 	 *
-	 * @param $wasDeleted bool
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param bool $wasDeleted
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Deleted( $wasDeleted, array $stats, array &$probabilityArray ) {
 		$var = 'deleted';
@@ -362,9 +362,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the wanted filter
 	 *
-	 * @param $isWanted bool
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param bool $isWanted
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Wanted( $isWanted, array $stats, array &$probabilityArray ) {
 		$var = 'wanted';
@@ -406,9 +406,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the user type filter
 	 *
-	 * @param $userAge int
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param int $userAge
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_User( $userAge, array $stats, array &$probabilityArray ) {
 		$var = 'anon';
@@ -469,9 +469,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the title length filter
 	 *
-	 * @param $length int
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param int $length
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Length( $length, array $stats, array &$probabilityArray ) {
 		$var = 'nottitlelength';
@@ -513,9 +513,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the namespace filter
 	 *
-	 * @param $namespace int
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param int $namespace
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Namespace( $namespace, array $stats, array &$probabilityArray ) {
 		$var = 'nsother';
@@ -564,9 +564,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the syntax filter
 	 *
-	 * @param $type int
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param int $type
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Syntax( $type, array $stats, array &$probabilityArray ) {
 		$var = 'syntaxnone';
@@ -611,9 +611,9 @@ class AthenaHelper {
 	/**
 	 * Calculates the probability related to the link filter
 	 *
-	 * @param $percentage double
-	 * @param $stats array contents of the athena_stats table
-	 * @param &$probabilityArray array stores details about probabilities calculated
+	 * @param double $percentage
+	 * @param array $stats contents of the athena_stats table
+	 * @param array &$probabilityArray stores details about probabilities calculated
 	 */
 	static function calculateProbability_Links( $percentage, array $stats, array &$probabilityArray ) {
 		$var = 'links0';
@@ -658,7 +658,7 @@ class AthenaHelper {
 	/**
 	 * Makes a number of seconds look nice and pretty
 	 *
-	 * @param $seconds integer
+	 * @param int $seconds
 	 * @return string
 	 */
 	static function secondsToString( $seconds ) {
@@ -697,7 +697,7 @@ class AthenaHelper {
 	/**
 	 * Takes a syntax type and returns its string equivalent
 	 *
-	 * @param $type integer
+	 * @param int $type
 	 * @return string
 	 */
 	static function syntaxTypeToString( $type ) {
@@ -718,7 +718,7 @@ class AthenaHelper {
 	/**
 	 * Takes a boolean (be it of type boolean or integer) and returns the equivalent string
 	 *
-	 * @param $val boolean|integer
+	 * @param bool|int $val
 	 * @return string
 	 */
 	static function boolToString( $val ) {
@@ -731,7 +731,7 @@ class AthenaHelper {
 	/**
 	 * Gets the language of a given text
 	 *
-	 * @param $text string
+	 * @param string $text
 	 * @return string
 	 */
 	static function getTextLanguage( $text ) {
@@ -754,8 +754,8 @@ class AthenaHelper {
 	/**
 	 * Updates the stats table with information from this edit
 	 *
-	 * @param $array array (logArray - contains details of the edit to be inserted into the athena_log table)
-	 * @param $title Title
+	 * @param array $array (logArray - contains details of the edit to be inserted into the athena_log table)
+	 * @param Title $title
 	 */
 	static function updateStats( $array, $title ) {
 		global $wgAthenaTraining;
@@ -994,7 +994,7 @@ class AthenaHelper {
 	/**
 	 * Reinforce during page deletion
 	 *
-	 * @param $id integer
+	 * @param int $id
 	 */
 	static function reinforceDelete( $id ) {
 		// Get page details
@@ -1006,7 +1006,7 @@ class AthenaHelper {
 	/**
 	 * Reinforce during page deletion
 	 *
-	 * @param $id integer
+	 * @param int $id
 	 */
 	static function reinforceDeleteTraining( $id ) {
 		// Get page details
@@ -1018,8 +1018,8 @@ class AthenaHelper {
 	/**
 	 * Prepare the log array without any data already
 	 *
-	 * @param $id integer
-	 * @return StdClass - database query results
+	 * @param int $id
+	 * @return stdClass - database query results
 	 */
 	static function getAthenaDetails( $id ) {
 		$dbr = wfGetDB( DB_REPLICA );
@@ -1039,8 +1039,8 @@ class AthenaHelper {
 	/**
 	 * Updates the stats table with information from this edit
 	 *
-	 * @param $res StdClass
-	 * @param $training bool are we in training mode?
+	 * @param stdClass $res
+	 * @param bool $training are we in training mode?
 	 */
 	static function updateStatsDeleted( $res, $training ) {
 		$dbw = wfGetDB( DB_PRIMARY );
@@ -1148,7 +1148,7 @@ class AthenaHelper {
 	/**
 	 * Reinforce during reinforcement page creation
 	 *
-	 * @param $id integer
+	 * @param int $id
 	 */
 	static function reinforceCreate( $id ) {
 		// Get page details
@@ -1160,7 +1160,7 @@ class AthenaHelper {
 	/**
 	 * Reinforce during reinforcement page creation
 	 *
-	 * @param $id integer
+	 * @param int $id
 	 */
 	static function reinforceCreateTraining( $id ) {
 		// Get page details
@@ -1172,8 +1172,8 @@ class AthenaHelper {
 	/**
 	 * Updates the stats table with information from this edit
 	 *
-	 * @param $res StdClass
-	 * @param $training bool are we in training mode?
+	 * @param stdClass $res
+	 * @param bool $training are we in training mode?
 	 */
 	static function updateStatsCreated( $res, $training ) {
 		$dbw = wfGetDB( DB_PRIMARY );
@@ -1281,7 +1281,7 @@ class AthenaHelper {
 	/**
 	 * Concerts a language code returned by franc into a language code used by MediaWiki
 	 *
-	 * @param $code string
+	 * @param string $code
 	 * @return string
 	 */
 	static function convertISOCode( $code ) {

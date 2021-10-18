@@ -25,15 +25,15 @@ class AthenaHooks {
 	/**
 	 * Called when the edit is about to be saved
 	 *
-	 * @param $editPage EditPage
-	 * @param $text string
-	 * @param $section string
-	 * @param &$error string
-	 * @param $summary string
+	 * @param EditPage $editPage
+	 * @param string $text
+	 * @param string $section
+	 * @param string &$error
+	 * @param string $summary
 	 * @return bool
 	 */
 	static function editFilter( $editPage, $text, $section, &$error, $summary ) {
-		global $wgAthenaSpamThreshold, $wgAthenaTraining;
+		global $wgAthenaTraining;
 
 		// Check if it's a new article or not
 		if ( $editPage->getTitle()->getArticleID() === 0 ) {
@@ -77,7 +77,7 @@ class AthenaHooks {
 	 * PageContentSaveComplete hook handler
 	 *
 	 * @param WikiPage $wikiPage
-	 * @param $user User
+	 * @param User $user
 	 * @return bool
 	 */
 	static function successfulEdit(
@@ -118,14 +118,14 @@ class AthenaHooks {
 	 *
 	 * Hooks into the delete action, so we can track if Athena logged pages have been deleted
 	 *
-	 * @param &$article Article
-	 * @param &$user User
-	 * @param $reason string
-	 * @param $id int
-	 * @param null $content Content
-	 * @param $logEntry LogEntry
+	 * @param Article &$article
+	 * @param User &$user
+	 * @param string $reason
+	 * @param int $id
+	 * @param Content|null $content
+	 * @param LogEntry $logEntry
 	 */
-	static function pageDeleted( &$article, &$user, $reason, $id, $content = null, $logEntry ) {
+	static function pageDeleted( &$article, &$user, $reason, $id, $content, $logEntry ) {
 		/*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
 		//echo($pos);
 		if ( $pos !== false ) {

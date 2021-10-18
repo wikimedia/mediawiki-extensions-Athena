@@ -13,7 +13,7 @@ class AthenaFilters {
 	 * Checks type of user and their age
 	 * Returns -1 if anon, -2 if info not available, or otherwise returns the age of the account in minutes
 	 *
-	 * @param $user User
+	 * @param User $user
 	 * @return int user age / type
 	 */
 	public static function userAge( User $user ) {
@@ -43,7 +43,7 @@ class AthenaFilters {
 	/**
 	 * Gets the number of external links in an article
 	 *
-	 * @param $text string page content
+	 * @param string $text page content
 	 * @return int number of links
 	 */
 	public static function numberOfLinks( $text ) {
@@ -78,7 +78,7 @@ class AthenaFilters {
 	/**
 	 * Gets the percentage of the page that is links
 	 *
-	 * @param $text string content of the page
+	 * @param string $text content of the page
 	 * @return double percentage of page that are links
 	 */
 	public static function linkPercentage( $text ) {
@@ -120,7 +120,7 @@ class AthenaFilters {
 	 * 2 is advanced, 1 is basic, 0 is none
 	 * 3 is broken spam bot
 	 *
-	 * @param $text string
+	 * @param string $text
 	 * @return int 0|1|2|3
 	 */
 	public static function syntaxType( $text ) {
@@ -174,7 +174,7 @@ class AthenaFilters {
 	 * Compares the language of the site with the language of the edit
 	 * Returns true if different, and false if the same or null if error
 	 *
-	 * @param $text string
+	 * @param string $text
 	 * @return bool|null
 	 */
 	public static function differentLanguage( $text ) {
@@ -202,7 +202,7 @@ class AthenaFilters {
 	 * Checks for broken spambot code
 	 * Determined based off of {blah|blah|blah} syntax and occurrences of #file_links<>
 	 *
-	 * @param $text string
+	 * @param string $text
 	 * @return bool
 	 */
 	public static function brokenSpamBot( $text ) {
@@ -223,7 +223,7 @@ class AthenaFilters {
 	/**
 	 * Returns the length of the page title
 	 *
-	 * @param $title Title
+	 * @param Title $title
 	 * @return int
 	 */
 	public static function titleLength( $title ) {
@@ -233,7 +233,7 @@ class AthenaFilters {
 	/**
 	 * Returns the namespace of the article
 	 *
-	 * @param $title Title
+	 * @param Title $title
 	 * @return int
 	 */
 	public static function getNamespace( $title ) {
@@ -243,7 +243,7 @@ class AthenaFilters {
 	/**
 	 * Checks if a page is wanted
 	 *
-	 * @param $title Title
+	 * @param Title $title
 	 * @return bool
 	 */
 	public static function isWanted( $title ) {
@@ -273,7 +273,7 @@ class AthenaFilters {
 	/**
 	 * Checks if a page has been deleted and if so, how many times
 	 *
-	 * @param $title Title
+	 * @param Title $title
 	 * @return bool
 	 */
 	public static function wasDeleted( $title ) {

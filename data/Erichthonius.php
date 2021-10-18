@@ -127,7 +127,7 @@ class Erichthonius extends Maintenance {
 	/**
 	 * Takes a namespace id and returns the relevant text, including the colon.
 	 *
-	 * @param $id int
+	 * @param int $id
 	 * @return string
 	 */
 	public static function getNamespace( $id ) {
@@ -171,7 +171,7 @@ class Erichthonius extends Maintenance {
 
 	 /**
 	  * Creates a new user. Returns their session cookies
-	  * @param $age int
+	  * @param int $age
 	  * @return string
 	  */
 	public static function createUser( $age ) {
@@ -275,7 +275,7 @@ class Erichthonius extends Maintenance {
 	/**
 	 * Gets an edit token for a user
 	 *
-	 * @param $cookieString string
+	 * @param string $cookieString
 	 * @return string
 	 */
 	public static function getEditToken( $cookieString ) {
@@ -305,7 +305,7 @@ class Erichthonius extends Maintenance {
 	/**
 	 * Checks if the article exists. If so, deletes it
 	 *
-	 * @param $title string
+	 * @param string $title
 	 */
 	public static function existsCheck( $title ) {
 		global $url, $session_name;
