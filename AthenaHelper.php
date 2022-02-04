@@ -25,11 +25,7 @@ class AthenaHelper {
 		$dbw->insert( 'athena_log', $logArray );
 
 		// Get last inserted ID
-		// TODO could do with a MediaWiki method
-		$sql = 'select LAST_INSERT_ID() as id;';
-		$res = $dbw->query( $sql );
-		$row = $dbw->fetchObject( $res );
-		$id = $row->id;
+		$id = $dbw->insertId();
 
 		$detailsArray['al_id'] = $id;
 

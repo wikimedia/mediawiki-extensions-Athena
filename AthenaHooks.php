@@ -87,15 +87,14 @@ class AthenaHooks {
 		$page_id = $wikiPage->getId();
 		$rev_id = $wikiPage->getRevisionRecord()->getId();
 
-		$title = $dbw->strencode( $wikiPage->getTitle()->getText() );
-
-		$whereStatement = " apd_title='{$title}' AND apd_namespace={$wikiPage->getTitle()->getNamespace()}";
-
 		// TODO check multiple instances of the same title - maybe check user_id as well
-		$sql = "SELECT al_id FROM {$dbw->tableName( 'athena_page_details' )} WHERE {$whereStatement} ORDER BY al_id DESC;";
-
-		$res = $dbw->query( $sql, __METHOD__ );
-		$row = $dbw->fetchObject( $res );
+		$row = $dbw->selectRow(
+			'athena_page_details',
+			'al_id',
+			[ 'apd_title' => $wikiPage->getTitle()->getText(), 'apd_namespace' => $wikiPage->getTitle()->getNamespace() ],
+			__METHOD__,
+			[ 'ORDER BY' => 'al_id DESC' ]
+		);
 
 		if ( $row ) {
 
