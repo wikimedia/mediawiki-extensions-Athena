@@ -687,9 +687,9 @@ class SpecialAthena extends SpecialPage {
 
 							if ( $res->apd_user != 0 ) {
 								$user = User::newFromId( $res->apd_user );
-								$wikiPage->doEditContent( $content, $comment, 0, false, $user, null );
+								$wikiPage->doUserEditContent( $content, $user, $comment );
 							} else {
-								$wikiPage->doEditContent( $content, $comment );
+								$wikiPage->doUserEditContent( $content, $this->getUser(), $comment );
 							}
 
 							$output->addWikiTextAsInterface( '[[' . $title->getFullText() . '|' . wfMessage( 'athena-create-go-page' ) . ']]' );
