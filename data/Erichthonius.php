@@ -381,5 +381,5 @@ class Erichthonius extends Maintenance {
 	}
 }
 
-$maintClass = 'Erichthonius';
+$maintClass = Erichthonius::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

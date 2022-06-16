@@ -113,5 +113,5 @@ class fixLanguage extends Maintenance {
 	}
 }
 
-$maintClass = 'fixLanguage';
+$maintClass = fixLanguage::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

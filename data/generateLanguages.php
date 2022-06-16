@@ -64,5 +64,5 @@ class generateLanguages extends Maintenance {
 	}
 }
 
-$maintClass = 'generateLanguages';
+$maintClass = generateLanguages::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

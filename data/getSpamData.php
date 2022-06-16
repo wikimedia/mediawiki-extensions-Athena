@@ -39,5 +39,5 @@ class getSpamData extends Maintenance {
 	}
 }
 
-$maintClass = 'getSpamData';
+$maintClass = getSpamData::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

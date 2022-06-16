@@ -81,5 +81,5 @@ class PolymatheiaDeleted extends Maintenance {
 	}
 }
 
-$maintClass = 'PolymatheiaDeleted';
+$maintClass = PolymatheiaDeleted::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

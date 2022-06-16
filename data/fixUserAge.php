@@ -250,5 +250,5 @@ class fixUserAge extends Maintenance {
 	}
 }
 
-$maintClass = 'fixUserAge';
+$maintClass = fixUserAge::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -87,5 +87,5 @@ class Polymatheia extends Maintenance {
 	}
 }
 
-$maintClass = 'Polymatheia';
+$maintClass = Polymatheia::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

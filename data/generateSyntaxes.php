@@ -150,5 +150,5 @@ class generateSyntaxes extends Maintenance {
 	}
 }
 
-$maintClass = 'generateSyntaxes';
+$maintClass = generateSyntaxes::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -84,5 +84,5 @@ class Reinforce extends Maintenance {
 	}
 }
 
-$maintClass = 'Reinforce';
+$maintClass = Reinforce::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
