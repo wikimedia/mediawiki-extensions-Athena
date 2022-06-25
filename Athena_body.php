@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Page\WikiPageFactory;
+
 /**
  * Special:Athena, provides a way to monitor and review Athena activity
  *
@@ -25,11 +27,21 @@ class SpecialAthena extends SpecialPage {
 	private $namespaceInfo;
 
 	/**
-	 * @param NamespaceInfo $namespaceInfo
+	 * @var WikiPageFactory
 	 */
-	function __construct( NamespaceInfo $namespaceInfo ) {
+	private $wikiPageFactory;
+
+	/**
+	 * @param NamespaceInfo $namespaceInfo
+	 * @param WikiPageFactory $wikiPageFactory
+	 */
+	function __construct(
+		NamespaceInfo $namespaceInfo,
+		WikiPageFactory $wikiPageFactory
+	) {
 		parent::__construct( 'Athena', 'athena', true );
 		$this->namespaceInfo = $namespaceInfo;
+		$this->wikiPageFactory = $wikiPageFactory;
 	}
 
 	/**
@@ -676,7 +688,7 @@ class SpecialAthena extends SpecialPage {
 					if ( $confirmed ) {
 						// Let's reinforce and depending on the scenario, create the page
 						if ( !$title->exists() ) {
-							$wikiPage = WikiPage::factory( $title );
+							$wikiPage = $this->wikiPageFactory->newFromTitle( $title );
 
 							// Replace \n with new line, remove slashes
 							$textContent = stripslashes( str_replace( '\\n', PHP_EOL, $res->apd_content ) );

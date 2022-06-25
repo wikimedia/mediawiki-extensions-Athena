@@ -16,7 +16,8 @@
 		"Athena": {
 			"class": "SpecialAthena",
 			"services": [
-				"NamespaceInfo"
+				"NamespaceInfo",
+				"WikiPageFactory"
 			]
 		}
 	},
