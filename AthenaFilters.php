@@ -253,8 +253,7 @@ class AthenaFilters {
 			[ 'count' => 'COUNT(*)' ],
 			[ 'pl_title' => $title->getDBkey(),
 				  'pl_namespace' => $title->getNamespace() ],
-			__METHOD__,
-			null
+			__METHOD__
 		);
 
 		// hacky approach is hacky
@@ -283,9 +282,8 @@ class AthenaFilters {
 			[ 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ],
 			[ 'ar_title' => $title->getDBkey(),
 				'ar_namespace' => $title->getNamespace() ],
-			null,
 			__METHOD__,
-			null
+			[ 'GROUP BY' => [ 'ar_namespace', 'ar_title' ] ]
 		);
 
 		// hacky approach is hacky

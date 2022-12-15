@@ -143,8 +143,8 @@ class AthenaHooks {
 				$dbw->update( 'athena_log',
 					array( 'al_overridden' => 1 ),
 					array( 'al_id' => $res->al_id ),
-					__METHOD__,
-					null );
+					__METHOD__
+				);
 
 				AthenaHelper::reinforceDelete( $res->al_id );
 			}

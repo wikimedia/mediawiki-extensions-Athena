@@ -714,8 +714,8 @@ class SpecialAthena extends SpecialPage {
 						$dbw->update( 'athena_log',
 							[ 'al_overridden' => 1 ],
 							[ 'al_id' => $id ],
-							__METHOD__,
-							null );
+							__METHOD__
+						);
 					} else {
 						// Check a page with this title doesn't already exist
 						if ( $title->exists() ) {
@@ -783,8 +783,8 @@ class SpecialAthena extends SpecialPage {
 						$dbw->update( 'athena_log',
 							[ 'al_overridden' => 1, 'al_success' => $al_success ],
 							[ 'al_id' => $id ],
-							__METHOD__,
-							null );
+							__METHOD__
+						);
 
 					} else {
 						$output->addWikiMsgArray( 'athena-reinforce-error-overridden', $id );
@@ -846,8 +846,8 @@ class SpecialAthena extends SpecialPage {
 						$dbw->update( 'athena_log',
 							[ 'al_overridden' => 1 ],
 							[ 'al_id' => $id ],
-							__METHOD__,
-							null );
+							__METHOD__
+						);
 					} else {
 						$output->addWikiMsg( 'athena-delete-text', $id );
 
