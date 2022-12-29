@@ -4,6 +4,8 @@
  * Run in conjunction with fixLanguage to update the stats table
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Set the correct include path for PHP so that we can run this script from
  * $IP/extensions/Athena and we don't need to move this file to
@@ -33,6 +35,7 @@ class generateLanguages extends Maintenance {
 			[]
 		);
 
+		$languageNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
 		foreach ( $res as $row ) {
 			echo( "\n----------------------------------------------\n" );
 			echo( "al_id is $row->al_id \n" );
@@ -49,7 +52,7 @@ class generateLanguages extends Maintenance {
 			$code = AthenaHelper::convertISOCode( $code );
 
 			echo( "Language code is $code\n" );
-			$str = $dbw->strencode( Language::fetchLanguageName( $code ) );
+			$str = $dbw->strencode( $languageNameUtils->getLanguageName( $code ) );
 
 			echo( "Language name is $str \n" );
 

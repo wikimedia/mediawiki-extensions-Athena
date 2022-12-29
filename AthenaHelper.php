@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Various helper functions for Athena
  *
@@ -106,7 +108,8 @@ class AthenaHelper {
 
 		$language = self::getTextLanguage( $content );
 
-		$insertArray['apd_language'] = Language::fetchLanguageName( $language );
+		$insertArray['apd_language'] = MediaWikiServices::getInstance()->getLanguageNameUtils()
+			->getLanguageName( $language );
 
 		return $insertArray;
 	}
