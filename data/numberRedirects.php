@@ -5,8 +5,8 @@
 		$json = json_decode( $file, true );
 
 		$count = 0;
-		foreach ( $json as $page ) {
+foreach ( $json as $page ) {
 
-			echo( $page['title'] . "\n" );
-		}
+	echo( $page['title'] . "\n" );
+}
 		echo( $count );

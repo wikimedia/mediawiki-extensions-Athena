@@ -56,7 +56,7 @@ class generateLanguages extends Maintenance {
 
 			echo( "Language name is $str \n" );
 
-		   $dbw->update( 'athena_page_details',
+			$dbw->update( 'athena_page_details',
 				[ 'apd_language' => $str ],
 				[ 'al_id' => $row->al_id ],
 				__METHOD__,

@@ -425,7 +425,8 @@ class AthenaHelper {
 			} elseif ( $userAge < 60 * 60 * 24 ) {
 				$var = 'user24';
 
-			} else { $var = 'userother';
+			} else {
+				$var = 'userother';
 			}
 		} else {
 			if ( $userAge != -1 ) {
@@ -814,54 +815,54 @@ class AthenaHelper {
 		}
 
 		$userAge = $array['al_user_age'];
-		  if ( $userAge >= 0 ) {
-			  if ( $userAge < 1 * 60 ) {
-				  $sql .= " OR `as_name`='user1' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser1' ";
-				  }
-			  } elseif ( $userAge < 5 * 60 ) {
-				  $sql .= " OR `as_name`='user5' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser5' ";
-				  }
-			  } elseif ( $userAge < 30 * 60 ) {
-				  $sql .= " OR `as_name`='user30' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser30' ";
-				  }
-			  } elseif ( $userAge < 60 * 60 ) {
-				  $sql .= " OR `as_name`='user60' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser60' ";
-				  }
-			  } elseif ( $userAge < 60 * 12 * 60 ) {
+		if ( $userAge >= 0 ) {
+			if ( $userAge < 1 * 60 ) {
+				$sql .= " OR `as_name`='user1' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser1' ";
+				}
+			} elseif ( $userAge < 5 * 60 ) {
+				$sql .= " OR `as_name`='user5' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser5' ";
+				}
+			} elseif ( $userAge < 30 * 60 ) {
+				$sql .= " OR `as_name`='user30' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser30' ";
+				}
+			} elseif ( $userAge < 60 * 60 ) {
+				$sql .= " OR `as_name`='user60' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser60' ";
+				}
+			} elseif ( $userAge < 60 * 12 * 60 ) {
 				$sql .= " OR `as_name`='user12' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser12' ";
-				  }
-			  } elseif ( $userAge < 60 * 24 * 60 ) {
-				  $sql .= " OR `as_name`='user24' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduser24' ";
-				  }
-			  } else {
-				  $sql .= " OR `as_name`='userother' ";
-				  if ( $spam ) {
-					  $sql .= " OR `as_name`='spamanduserother' ";
-				  }
-			  }
-		  } elseif ( $userAge != -1 ) {
-			  $sql .= " OR `as_name`='userother' ";
-			  if ( $spam ) {
-				  $sql .= " OR `as_name`='spamanduserother' ";
-			  }
-		  } else {
-			  $sql .= " OR `as_name`='anon' ";
-			  if ( $spam ) {
-				  $sql .= " OR `as_name`='spamandanon' ";
-			  }
-		  }
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser12' ";
+				}
+			} elseif ( $userAge < 60 * 24 * 60 ) {
+				$sql .= " OR `as_name`='user24' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduser24' ";
+				}
+			} else {
+				$sql .= " OR `as_name`='userother' ";
+				if ( $spam ) {
+					$sql .= " OR `as_name`='spamanduserother' ";
+				}
+			}
+		} elseif ( $userAge != -1 ) {
+			$sql .= " OR `as_name`='userother' ";
+			if ( $spam ) {
+				$sql .= " OR `as_name`='spamanduserother' ";
+			}
+		} else {
+			$sql .= " OR `as_name`='anon' ";
+			if ( $spam ) {
+				$sql .= " OR `as_name`='spamandanon' ";
+			}
+		}
 
 		if ( strlen( $title->getText() ) > 39 ) {
 			$sql .= " OR `as_name`='titlelength' ";
@@ -1639,7 +1640,7 @@ class AthenaHelper {
 		];
 
 		if ( isset( $array[$code] ) ) {
-		   return $array[$code];
+			return $array[$code];
 		}
 		return null;
 	}

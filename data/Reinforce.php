@@ -58,11 +58,11 @@ class Reinforce extends Maintenance {
 
 			$dbr = wfGetDB( DB_REPLICA );
 			$res = $dbr->selectRow(
-				'athena_log',                                   // $table
-				'*',            // $vars (columns of the table)
+				'athena_log', // $table
+				'*', // $vars (columns of the table)
 				[ 'al_id' => $count ],
 				// $conds
-				__METHOD__,                                   // $fname = 'Database::select',
+				__METHOD__, // $fname = 'Database::select',
 				[]        // $options = array()
 			);
 			echo ( "Page created - Athena value " . $res->al_value );
@@ -78,7 +78,7 @@ class Reinforce extends Maintenance {
 			} else {
 				$stop = true;
 			}
-	sleep( 1 );
+			sleep( 1 );
 
 		}
 	}

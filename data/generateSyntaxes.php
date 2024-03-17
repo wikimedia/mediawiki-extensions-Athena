@@ -72,7 +72,7 @@ class generateSyntaxes extends Maintenance {
 				}
 			}
 
-		   $dbw->update( 'athena_log',
+			$dbw->update( 'athena_log',
 				[ 'al_syntax' => $result ],
 				[ 'al_id' => $row->al_id ],
 				__METHOD__,
