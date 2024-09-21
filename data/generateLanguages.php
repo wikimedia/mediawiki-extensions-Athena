@@ -23,7 +23,7 @@ class generateLanguages extends Maintenance {
 	}
 
 	public function execute() {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		// Get all Athena logs
 		$res = $dbw->select(

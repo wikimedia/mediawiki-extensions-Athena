@@ -22,7 +22,7 @@ class AthenaHelper {
 	 */
 	static function logAttempt( $logArray, $detailsArray, $calcArray ) {
 		global $wgAthenaTraining;
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		$dbw->insert( 'athena_log', $logArray );
 
@@ -759,7 +759,7 @@ class AthenaHelper {
 	 */
 	static function updateStats( $array, $title ) {
 		global $wgAthenaTraining;
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		// TODO not the best way but get me incrementing with the better way and I'll use it
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'pages'";
@@ -967,7 +967,7 @@ class AthenaHelper {
 	 * @return array() containing all the stats
 	 */
 	static function getStatistics() {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$res = $dbr->select(
 			[ 'athena_stats' ],
@@ -1022,7 +1022,7 @@ class AthenaHelper {
 	 * @return stdClass - database query results
 	 */
 	static function getAthenaDetails( $id ) {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		// Get data from the database
 		$res = $dbr->selectRow(
 			[ 'athena_log', 'athena_page_details' ],
@@ -1043,7 +1043,7 @@ class AthenaHelper {
 	 * @param bool $training are we in training mode?
 	 */
 	static function updateStatsDeleted( $res, $training ) {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		// Start by reducing the number of not spam
 		if ( !$training ) {
@@ -1176,7 +1176,7 @@ class AthenaHelper {
 	 * @param bool $training are we in training mode?
 	 */
 	static function updateStatsCreated( $res, $training ) {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		// Start by increasing the number of not spam
 		$sql = "UPDATE `athena_stats` SET `as_value`=`as_value`+1, `as_updated`=CURRENT_TIMESTAMP WHERE `as_name` = 'notspam';";

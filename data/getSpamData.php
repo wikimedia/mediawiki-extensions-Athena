@@ -1,4 +1,6 @@
 <?php
+use MediaWiki\MediaWikiServices;
+
 ini_set( 'include_path', __DIR__ . '/../../../maintenance' );
 
 require_once 'Maintenance.php';
@@ -11,7 +13,7 @@ class getSpamData extends Maintenance {
 	}
 
 	public function execute() {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$res = $dbr->select(
 			[ 'athena_log' ],

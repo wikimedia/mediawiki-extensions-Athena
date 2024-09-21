@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 ini_set( 'include_path', __DIR__ . '/../../../maintenance' );
 
 require_once 'Maintenance.php';
@@ -56,7 +59,7 @@ class Reinforce extends Maintenance {
 				echo( "\n\n" );
 				curl_close( $ch );
 
-			$dbr = wfGetDB( DB_REPLICA );
+			$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 			$res = $dbr->selectRow(
 				'athena_log', // $table
 				'*', // $vars (columns of the table)

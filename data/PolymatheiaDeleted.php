@@ -12,6 +12,8 @@
  * @date 28 November 2015
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Set the correct include path for PHP so that we can run this script from
  * $IP/extensions/Athena and we don't need to move this file to
@@ -31,7 +33,7 @@ class PolymatheiaDeleted extends Maintenance {
 	public function execute() {
 		global $wgLanguageCode;
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		// For users
 		$res = $dbr->select(

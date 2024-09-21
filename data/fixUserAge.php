@@ -3,6 +3,8 @@
  * A script to fix the al_language bug
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Set the correct include path for PHP so that we can run this script from
  * $IP/extensions/Athena and we don't need to move this file to
@@ -20,7 +22,7 @@ class fixUserAge extends Maintenance {
 	}
 
 	public function execute() {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		// Get all Athena logs
 		$res = $dbw->select(

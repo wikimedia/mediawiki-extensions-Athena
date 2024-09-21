@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 /**
  * Hooks Athena uses to do it's thing
  *
@@ -82,7 +85,7 @@ class AthenaHooks {
 	 */
 	static function successfulEdit(
 		WikiPage $wikiPage, $user ) {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		$page_id = $wikiPage->getId();
 		$rev_id = $wikiPage->getRevisionRecord()->getId();
@@ -128,7 +131,7 @@ class AthenaHooks {
 		/*$pos = strpos( $reason, wfMessage( 'athena-spam' )->toString() );
 		//echo($pos);
 		if ( $pos !== false ) {
-			$dbw = wfGetDB( DB_PRIMARY );
+			$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 			// Search Athena logs for the page id
 			$res = $dbw->selectRow(

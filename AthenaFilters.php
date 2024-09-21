@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 /**
  * Filters used by Athena
  *
@@ -247,7 +250,7 @@ class AthenaFilters {
 	 * @return bool
 	 */
 	public static function isWanted( $title ) {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $dbr->select(
 			'pagelinks',
 			[ 'count' => 'COUNT(*)' ],
@@ -276,7 +279,7 @@ class AthenaFilters {
 	 * @return bool
 	 */
 	public static function wasDeleted( $title ) {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $dbr->select(
 			'archive',
 			[ 'ar_namespace', 'ar_title', 'count' => 'COUNT(*)' ],

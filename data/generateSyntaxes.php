@@ -4,6 +4,8 @@
  * Run in conjunction with fixLanguage to update the stats table
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Set the correct include path for PHP so that we can run this script from
  * $IP/extensions/Athena and we don't need to move this file to
@@ -21,7 +23,7 @@ class generateSyntaxes extends Maintenance {
 	}
 
 	public function execute() {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 
 		$res = $dbw->select(
 			[ 'athena_log', 'athena_page_details' ],

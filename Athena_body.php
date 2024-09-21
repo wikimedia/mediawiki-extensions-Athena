@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\WikiPageFactory;
 
 /**
@@ -134,7 +135,7 @@ class SpecialAthena extends SpecialPage {
 			$conds = 'al_success = 2 OR al_success = 3 OR al_success = 4';
 		}
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $dbr->select(
 			[ 'athena_log', 'athena_page_details' ],
 			[ 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success', 'al_overridden' ],
@@ -241,7 +242,7 @@ class SpecialAthena extends SpecialPage {
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-viewing', $id ) );
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $dbr->selectRow(
 			[ 'athena_log', 'athena_page_details' ],
 			[ 'athena_log.al_id', 'al_value', 'apd_namespace', 'apd_title', 'apd_user', 'apd_timestamp', 'al_success',
@@ -667,7 +668,7 @@ class SpecialAthena extends SpecialPage {
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-create-title', $id ) );
 
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$res = $dbw->selectRow(
 			[ 'athena_log', 'athena_page_details' ],
 			[ 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ],
@@ -750,7 +751,7 @@ class SpecialAthena extends SpecialPage {
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-reinforce-title', $id ) );
 
 		if ( $this->getConfig()->get( 'AthenaTraining' ) ) {
-			$dbw = wfGetDB( DB_PRIMARY );
+			$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 			$res = $dbw->selectRow(
 				[ 'athena_log', 'athena_page_details' ],
 				[ 'athena_log.al_id', 'al_value', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ],
@@ -814,7 +815,7 @@ class SpecialAthena extends SpecialPage {
 
 		$output->setPageTitle( wfMessage( 'athena-title' ) . ' - ' . wfMessage( 'athena-delete-title', $id ) );
 
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$res = $dbw->selectRow(
 			[ 'athena_log', 'athena_page_details' ],
 			[ 'athena_log.al_id', 'apd_content', 'apd_comment', 'apd_namespace', 'apd_title', 'al_success', 'al_overridden', 'apd_user' ],

@@ -12,6 +12,8 @@
  * @license GPL-3.0-only
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Set the correct include path for PHP so that we can run this script from
  * $IP/extensions/Athena and we don't need to move this file to
@@ -236,7 +238,7 @@ class Erichthonius extends Maintenance {
 		$newTime = time() - $age;
 		$newTime = wfTimestamp( TS_MW, $newTime );
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$dbr->update( 'user', [ 'user_registration' => $newTime ], [ 'user_id' => $json['createaccount']['userid'] ] );
 
 		echo( "User register timestamp altered\n\n" );
