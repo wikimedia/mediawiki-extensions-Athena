@@ -17,7 +17,7 @@
 	</rule>
 	<rule ref="MediaWiki.NamingConventions.ValidGlobalName">
 		<properties>
-			<property name="ignoreList" type="array" value="$session_name,$url" />
+			<property name="ignoreList[]" value="$session_name,$url" />
 		</properties>
 	</rule>
 
