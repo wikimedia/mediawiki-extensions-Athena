@@ -10,7 +10,7 @@
 	"type": "antispam",
 	"manifest_version": 1,
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.40.0"
 	},
 	"SpecialPages": {
 		"Athena": {

@@ -2,6 +2,7 @@
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Title\Title;
 
 /**
  * Special:Athena, provides a way to monitor and review Athena activity
