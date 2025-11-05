@@ -99,7 +99,7 @@ class SpecialAthena extends SpecialPage {
 	public function showAthenaHome() {
 		$output = $this->getOutput();
 		$this->setHeaders();
-		$output->setPageTitle( wfMessage( 'athena-title' ) );
+		$output->setPageTitle( wfMessage( 'athena-title' )->escaped() );
 
 		$output->addWikiMsg( 'athena-pagetext' );
 
@@ -117,7 +117,7 @@ class SpecialAthena extends SpecialPage {
 	public function showAthenaLogs( $type ) {
 		$output = $this->getOutput();
 		$this->setHeaders();
-		$output->setPageTitle( wfMessage( 'athena-title' ) );
+		$output->setPageTitle( wfMessage( 'athena-title' )->escaped() );
 
 		$conds = '';
 		$showStatus = false;
