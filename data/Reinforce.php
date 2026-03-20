@@ -57,7 +57,6 @@ class Reinforce extends Maintenance {
 				$response = curl_exec( $ch );
 				echo( $response );
 				echo( "\n\n" );
-				curl_close( $ch );
 
 			$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 			$res = $dbr->selectRow(

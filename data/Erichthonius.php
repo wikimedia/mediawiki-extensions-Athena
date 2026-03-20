@@ -107,7 +107,6 @@ class Erichthonius extends Maintenance {
 				$response = curl_exec( $ch );
 				echo( $response );
 				echo( "\n\n" );
-				curl_close( $ch );
 
 				$count++;
 				echo( $count . " pages completed.\n ------------------------------------------------------------------------\n\n" );
@@ -269,8 +268,6 @@ class Erichthonius extends Maintenance {
 			$json['login']['cookieprefix'] . 'UserID=' . $json['login']['lguserid'] . ';' .
 			$json['login']['cookieprefix'] . 'Token=' . $json['login']['lgtoken'] . '; path=/';
 
-		curl_close( $ch );
-
 		return $cookieString;
 	}
 
@@ -300,7 +297,6 @@ class Erichthonius extends Maintenance {
 		$json = json_decode( $response, true );
 	   // print_r($json);
 
-		curl_close( $ch );
 		return $json['query']['tokens']['csrftoken'];
 	}
 
@@ -377,8 +373,6 @@ class Erichthonius extends Maintenance {
 			$response = curl_exec( $ch );
 			echo( $response );
 			echo( "\n\n" );
-
-			curl_close( $ch );
 		}
 	}
 }
