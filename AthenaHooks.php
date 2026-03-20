@@ -13,19 +13,6 @@ use MediaWiki\MediaWikiServices;
 class AthenaHooks {
 
 	/**
-	 * Register hooks depending on version
-	 */
-	public static function registerExtension() {
-		global $wgHooks;
-		if ( class_exists( MediaWiki\HookContainer\HookContainer::class ) ) {
-			// MW 1.35+
-			$wgHooks['PageSaveComplete'][] = 'AthenaHooks::successfulEdit';
-		} else {
-			$wgHooks['PageContentSaveComplete'][] = 'AthenaHooks::successfulEdit';
-		}
-	}
-
-	/**
 	 * Called when the edit is about to be saved
 	 *
 	 * @param EditPage $editPage
@@ -77,7 +64,7 @@ class AthenaHooks {
 	 * If an article successfully saves, we want to take the page_id and rev_id and update our
 	 * athena_page_details table
 	 *
-	 * PageContentSaveComplete hook handler
+	 * PageSaveComplete hook handler
 	 *
 	 * @param WikiPage $wikiPage
 	 * @param User $user
