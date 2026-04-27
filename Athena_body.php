@@ -41,9 +41,14 @@ class SpecialAthena extends SpecialPage {
 		NamespaceInfo $namespaceInfo,
 		WikiPageFactory $wikiPageFactory
 	) {
-		parent::__construct( 'Athena', 'athena' );
+		parent::__construct( 'Athena' );
 		$this->namespaceInfo = $namespaceInfo;
 		$this->wikiPageFactory = $wikiPageFactory;
+	}
+
+	/** @inheritDoc */
+	public function getRestriction(): string {
+		return 'athena';
 	}
 
 	/**
